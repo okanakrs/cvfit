@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Ödeme Başarısız - CVFit</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body { background: #0a0a0f; color: #e8e8f0; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+  .box { text-align: center; max-width: 400px; padding: 24px; }
+  .icon { font-size: 64px; margin-bottom: 24px; }
+  h1 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+  p { color: #6b6b80; font-size: 15px; margin-bottom: 32px; line-height: 1.6; }
+  .btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  a { display: inline-block; color: white; text-decoration: none; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 14px; transition: all 0.2s; }
+  .retry { background: linear-gradient(135deg, #7c6aff, #9b6aff); }
+  .retry:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(124,106,255,0.4); }
+  .home { background: transparent; border: 1px solid #2a2a3a; color: #6b6b80; }
+  .home:hover { border-color: #7c6aff; color: #7c6aff; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="icon">😔</div>
+  <h1>Ödeme Başarısız</h1>
+  <p>Ödemeniz tamamlanamadı. Kart bilgilerinizi kontrol edip tekrar deneyebilirsiniz.</p>
+  <div class="btns">
+    <a href="/" class="retry" onclick="history.back(); return false;">Tekrar Dene</a>
+    <a href="/" class="home">Ana Sayfaya Dön</a>
+  </div>
+</div>
+</body>
+</html>

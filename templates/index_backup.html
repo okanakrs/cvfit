@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CVFit</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Nunito+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#f5f0e8;--cream-d:#ede6d6;--cream-deep:#e4dbc8;
+  --paper:#faf7f2;--ink:#1c1611;--ink2:#3d3328;--ink3:#6b5d4f;--ink4:#9c8b7a;
+  --coffee:#6b3f1f;--coffee-m:#8b5230;--coffee-l:#c4894f;
+  --coffee-p:#f0e0cc;--coffee-g:#faf3ec;
+  --gold:#c8973a;--gold-p:#f7edd6;
+  --green:#2d5a27;--green-p:#eaf3e8;
+  --bd:rgba(107,63,31,.15);--bd2:rgba(107,63,31,.25);
+  --sh:0 4px 18px rgba(28,22,17,.09);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");background-size:180px}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(245,240,232,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 40px}
+.logo{font-family:'Lora',serif;font-size:22px;font-weight:700;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:8px;letter-spacing:-.3px}
+.logo-mark{width:28px;height:28px;border-radius:8px;background:var(--coffee);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--cream);font-weight:800}
+.logo em{font-style:italic;color:var(--coffee)}
+.nav-r{display:flex;align-items:center;gap:9px}
+.nbtn{display:inline-flex;align-items:center;gap:6px;border-radius:100px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;border:none;font-family:'Nunito Sans',sans-serif;white-space:nowrap}
+.nbtn-ghost{background:transparent;border:1px solid var(--bd2);color:var(--ink3)}
+.nbtn-ghost:hover{background:var(--cream-d);color:var(--ink)}
+.nbtn-fill{background:var(--coffee);color:var(--cream);box-shadow:0 2px 8px rgba(107,63,31,.28)}
+.nbtn-fill:hover{background:var(--coffee-m);transform:translateY(-1px)}
+.nav-av{width:28px;height:28px;border-radius:50%;background:var(--coffee);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;overflow:hidden;flex-shrink:0;border:1.5px solid var(--coffee-l)}
+.nav-av img{width:100%;height:100%;object-fit:cover}
+
+/* LAYOUT */
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:52px 24px 100px}
+
+/* HERO */
+.hero{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:end;margin-bottom:44px;padding-bottom:36px;border-bottom:1px solid var(--bd2);animation:rise .55s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.hero-kicker{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--coffee-l);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.hero-kicker::before{content:'';display:block;width:26px;height:1.5px;background:var(--coffee-l)}
+.hero h1{font-family:'Lora',serif;font-size:clamp(32px,5vw,52px);font-weight:700;line-height:1.12;letter-spacing:-1.5px;color:var(--ink)}
+.hero h1 em{font-style:italic;color:var(--coffee)}
+.hero-sub{font-size:15px;color:var(--ink3);line-height:1.65;margin-top:14px;max-width:400px}
+.hero-aside{flex-shrink:0;background:var(--coffee-g);border:1px solid var(--coffee-p);border-radius:16px;padding:20px 22px;text-align:center;min-width:120px}
+.aside-num{font-family:'Lora',serif;font-size:36px;font-weight:700;color:var(--coffee);line-height:1;margin-bottom:4px}
+.aside-lbl{font-size:10px;font-weight:700;color:var(--ink4);letter-spacing:.5px;text-transform:uppercase}
+
+/* PANELS */
+.panel{background:var(--paper);border:1px solid var(--bd);border-radius:20px;box-shadow:var(--sh)}
+
+/* LOGIN */
+#loginCard{display:none;padding:64px 48px;text-align:center;animation:rise .4s ease}
+.login-rule{width:38px;height:2px;background:var(--coffee-l);margin:0 auto 22px}
+.login-title{font-family:'Lora',serif;font-size:27px;font-weight:700;color:var(--ink);margin-bottom:11px;letter-spacing:-.5px}
+.login-sub{font-size:15px;color:var(--ink3);line-height:1.65;margin-bottom:30px}
+.login-note{margin-top:18px;font-size:12px;color:var(--ink4);display:flex;align-items:center;justify-content:center;gap:6px}
+.login-note::before{content:'✦';color:var(--gold)}
+
+/* FORM */
+#formCard{display:none;overflow:hidden;animation:rise .4s ease}
+.fcols{display:grid;grid-template-columns:1fr 1fr}
+.fcol{padding:28px}
+.fcol+.fcol{border-left:1px solid var(--bd)}
+.flbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.fnum{width:18px;height:18px;border-radius:50%;background:var(--coffee);color:var(--cream);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dz{border:1.5px dashed var(--bd2);border-radius:12px;padding:22px;text-align:center;cursor:pointer;margin-bottom:11px;transition:all .2s;background:var(--cream)}
+.dz:hover{border-color:var(--coffee-l);background:var(--coffee-g)}
+.dz-ico{font-size:26px;margin-bottom:7px;display:block}
+.dz p{font-size:13px;color:var(--ink4);line-height:1.5}
+.dz strong{color:var(--ink2)}
+input[type="file"]{display:none}
+textarea{width:100%;background:var(--cream);border:1px solid var(--bd2);border-radius:12px;padding:13px 15px;font-family:'Nunito Sans',sans-serif;font-size:13px;line-height:1.65;color:var(--ink);resize:none;outline:none;transition:all .2s}
+textarea:focus{border-color:var(--coffee-l);background:var(--paper);box-shadow:0 0 0 3px rgba(107,63,31,.08)}
+textarea::placeholder{color:var(--ink4)}
+.ffooter{padding:19px 28px;background:var(--cream-d);border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ctag{display:inline-flex;align-items:center;gap:6px;background:var(--coffee-g);color:var(--coffee);border:1px solid var(--coffee-p);border-radius:100px;padding:5px 13px;font-size:12.5px;font-weight:700}
+.cta{background:var(--coffee);color:var(--cream);border:none;border-radius:13px;padding:13px 30px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:'Nunito Sans',sans-serif;transition:all .2s;display:inline-flex;align-items:center;gap:9px;box-shadow:0 4px 16px rgba(107,63,31,.28)}
+.cta:hover{background:var(--coffee-m);transform:translateY(-2px);box-shadow:0 8px 24px rgba(107,63,31,.36)}
+.cta .arr{transition:transform .2s}
+.cta:hover .arr{transform:translateX(4px)}
+
+/* LOADING */
+#loading{display:none;padding:68px 40px;text-align:center}
+.cup-wrap{width:60px;height:60px;margin:0 auto 26px;position:relative}
+.cup-body{width:44px;height:38px;border:3px solid var(--coffee);border-radius:4px 4px 14px 14px;margin:0 auto;position:relative;overflow:hidden}
+.cup-fill{position:absolute;bottom:0;left:0;right:0;background:var(--coffee-l);height:0%;animation:fill 2.6s ease-in-out infinite;border-radius:0 0 11px 11px}
+@keyframes fill{0%{height:0%;opacity:.7}60%{height:82%;opacity:1}100%{height:0%;opacity:.7}}
+.cup-steam{position:absolute;top:-14px;left:50%;transform:translateX(-50%);display:flex;gap:5px}
+.steam{width:2px;height:12px;background:var(--ink4);border-radius:2px;animation:stm 1.4s ease-in-out infinite}
+.steam:nth-child(2){animation-delay:.25s;height:9px}
+.steam:nth-child(3){animation-delay:.5s}
+@keyframes stm{0%,100%{opacity:.2;transform:scaleY(.5) translateY(0)}50%{opacity:.7;transform:scaleY(1) translateY(-4px)}}
+.cup-hdl{position:absolute;right:-2px;top:6px;width:10px;height:16px;border:2.5px solid var(--coffee);border-left:none;border-radius:0 8px 8px 0}
+.ld-title{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--ink);margin-bottom:7px}
+.ld-sub{font-size:13px;color:var(--ink4);margin-bottom:30px}
+.ld-steps{max-width:290px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.ld-step{display:flex;align-items:center;gap:11px;padding:10px 15px;border-radius:11px;font-size:13px;color:var(--ink4);background:var(--cream);border:1px solid var(--bd);transition:all .35s;opacity:.4}
+.ld-step.active{opacity:1;color:var(--coffee);background:var(--coffee-g);border-color:var(--coffee-p)}
+.ld-step.done{opacity:.75;color:var(--green);background:var(--green-p);border-color:rgba(45,90,39,.15)}
+.sdot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+.ld-step.active .sdot{animation:bl 1s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* RESULT */
+#result{display:none;animation:rise .4s ease}
+.sstrip{display:grid;grid-template-columns:1fr 46px 1fr;gap:12px;align-items:center;margin-bottom:15px}
+.sbox{border-radius:18px;padding:28px 20px;text-align:center;border:1px solid var(--bd);box-shadow:0 1px 3px rgba(28,22,17,.07)}
+.sbox.before{background:var(--paper)}
+.sbox.after{background:var(--coffee);border-color:transparent;box-shadow:0 6px 24px rgba(107,63,31,.28)}
+.snum{font-family:'Lora',serif;font-size:58px;font-weight:700;line-height:1;letter-spacing:-3px;margin-bottom:8px}
+.sbox.before .snum{color:var(--ink4)}
+.sbox.after  .snum{color:var(--cream)}
+.slbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+.sbox.before .slbl{color:var(--ink4)}
+.sbox.after  .slbl{color:rgba(245,240,232,.6)}
+.smid{display:flex;flex-direction:column;align-items:center;gap:6px}
+.sarr{width:36px;height:36px;border-radius:50%;background:var(--paper);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;color:var(--coffee-l);font-size:15px;box-shadow:0 1px 3px rgba(28,22,17,.07)}
+.sdelta{font-size:12px;font-weight:800;color:var(--green);background:var(--green-p);border-radius:100px;padding:2px 9px}
+.rblock{background:var(--paper);border:1px solid var(--bd);border-radius:18px;padding:22px 24px;margin-bottom:14px;box-shadow:0 1px 3px rgba(28,22,17,.07)}
+.rbtitle{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--ink4);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.rbtitle::before{content:'';display:block;width:16px;height:1.5px;background:var(--coffee-l)}
+.tags{display:flex;flex-wrap:wrap;gap:7px}
+.tag{padding:5px 12px;border-radius:100px;font-size:12px;font-weight:700;background:var(--gold-p);color:var(--sienna, #a0522d);border:1px solid rgba(160,82,45,.18);animation:pop .25s ease both}
+@keyframes pop{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}
+
+/* CV PREVIEW */
+.cv-shell{background:var(--paper);border:1px solid var(--bd);border-radius:18px;overflow:hidden;margin-bottom:14px;box-shadow:0 1px 3px rgba(28,22,17,.07)}
+.cv-bar{padding:13px 22px;background:var(--cream-d);border-bottom:1px solid var(--bd);display:flex;align-items:center}
+.cv-bar-lbl{font-size:11.5px;font-weight:700;color:var(--ink3);letter-spacing:.3px}
+.cv-in{padding:30px}
+.cv-name{font-family:'Lora',serif;font-size:25px;font-weight:700;letter-spacing:-.5px;color:var(--ink);margin-bottom:4px}
+.cv-role{font-size:14px;color:var(--coffee-m);font-weight:600;margin-bottom:13px}
+.cv-rul{height:1.5px;background:var(--cream-deep);margin-bottom:20px}
+.cv-sec{margin-bottom:21px}
+.cv-stit{font-size:9.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--coffee);padding-bottom:7px;margin-bottom:12px;border-bottom:1.5px solid var(--coffee-p)}
+.cv-ctags{display:flex;flex-wrap:wrap;gap:6px}
+.cv-ctag{font-size:12px;color:var(--ink3);background:var(--cream);border:1px solid var(--bd2);border-radius:6px;padding:3px 10px}
+.cv-sum{font-size:13px;color:var(--ink3);line-height:1.75}
+.cv-skills{display:flex;flex-wrap:wrap;gap:6px}
+.cv-sk{padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600;background:var(--coffee-g);color:var(--coffee);border:1px solid var(--coffee-p)}
+.cv-exp{margin-bottom:15px}
+.cv-exp-hd{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px;margin-bottom:2px}
+.cv-exp-t{font-weight:700;font-size:14px;color:var(--ink)}
+.cv-exp-d{font-size:12px;color:var(--ink4)}
+.cv-exp-c{font-size:13px;color:var(--coffee-m);font-weight:600;margin-bottom:6px}
+.cv-bul{display:flex;gap:8px;font-size:13px;color:var(--ink3);margin-bottom:4px;line-height:1.55}
+.cv-bul::before{content:'·';color:var(--coffee-l);font-size:18px;line-height:1.2;flex-shrink:0}
+.cv-edu{margin-bottom:11px}
+.cv-edu-d{font-weight:700;font-size:13.5px;color:var(--ink)}
+.cv-edu-s{font-size:13px;color:var(--coffee-m)}
+.cv-edu-dt{font-size:12px;color:var(--ink4)}
+.cv-crs{margin-bottom:13px}
+.cv-crs-hd{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px}
+.cv-crs-n{font-weight:700;font-size:13.5px;color:var(--ink)}
+.cv-crs-p{font-size:13px;color:var(--coffee-m);margin-bottom:3px}
+.cv-crs-desc{font-size:12.5px;color:var(--ink3);line-height:1.55}
+
+/* ACTIONS */
+.acts{display:flex;gap:10px;flex-wrap:wrap}
+.abtn{display:inline-flex;align-items:center;gap:7px;border-radius:12px;padding:13px 22px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'Nunito Sans',sans-serif;border:none;transition:all .2s}
+.abtn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.abtn-pdf{background:var(--coffee);color:var(--cream);box-shadow:0 4px 14px rgba(107,63,31,.28)}
+.abtn-pdf:hover{background:var(--coffee-m);transform:translateY(-1px);box-shadow:0 6px 20px rgba(107,63,31,.36)}
+.abtn-docx{background:var(--paper);color:var(--coffee);border:1.5px solid var(--coffee-p);box-shadow:0 1px 3px rgba(28,22,17,.07)}
+.abtn-docx:hover{background:var(--coffee-g);border-color:var(--coffee-l);transform:translateY(-1px)}
+.abtn-reset{background:var(--cream-d);color:var(--ink3);border:1px solid var(--bd2)}
+.abtn-reset:hover{background:var(--cream-deep);color:var(--ink)}
+
+/* HISTORY */
+.hist-hd{display:flex;align-items:center;justify-content:space-between;margin-top:40px;padding-top:30px;margin-bottom:17px;border-top:1px solid var(--bd2);cursor:pointer;user-select:none}
+.hist-hd-l{display:flex;align-items:center;gap:10px;font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--ink2);letter-spacing:-.2px}
+.hcount{background:var(--coffee-p);color:var(--coffee);border-radius:100px;padding:2px 10px;font-size:11px;font-weight:800;font-family:'Nunito Sans',sans-serif}
+.hchev{color:var(--ink4);transition:transform .22s}
+.hist-hd.open .hchev{transform:rotate(180deg)}
+#histPanel{display:none}
+.hempty{text-align:center;padding:34px;color:var(--ink4);font-size:13.5px;font-style:italic}
+.hitem{background:var(--paper);border:1px solid var(--bd);border-radius:14px;padding:15px 20px;margin-bottom:9px;display:flex;align-items:center;gap:15px;cursor:pointer;transition:all .18s;flex-wrap:wrap}
+.hitem:hover{border-color:var(--coffee-l);box-shadow:var(--sh);transform:translateX(4px)}
+.hitem-l{flex:1;min-width:0}
+.hitem-job{font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hitem-date{font-size:11.5px;color:var(--ink4);font-style:italic}
+.hscores{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.hpill{min-width:48px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800}
+.hpill.b{background:var(--cream-deep);color:var(--ink4)}
+.hpill.a{background:var(--coffee-g);color:var(--coffee);border:1px solid var(--coffee-p)}
+.harr{font-size:12px;color:var(--ink4)}
+
+/* OVERLAY / MODAL */
+.overlay{position:fixed;inset:0;z-index:500;background:rgba(28,22,17,.52);backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .22s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--paper);border:1px solid var(--bd);border-radius:24px;width:100%;max-width:460px;padding:34px;position:relative;box-shadow:0 20px 60px rgba(28,22,17,.15);transform:translateY(16px) scale(.97);transition:all .22s;max-height:92vh;overflow-y:auto}
+.overlay.open .modal{transform:translateY(0) scale(1)}
+.mx{position:absolute;top:15px;right:15px;width:30px;height:30px;border-radius:50%;background:var(--cream-d);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--ink4);transition:all .15s}
+.mx:hover{background:var(--coffee-g);color:var(--coffee);border-color:var(--coffee-p)}
+.m-title{font-family:'Lora',serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:7px;letter-spacing:-.3px}
+.m-sub{font-size:13.5px;color:var(--ink3);line-height:1.65;margin-bottom:24px}
+.pcard{border:1.5px solid var(--bd);border-radius:16px;padding:22px;margin-bottom:12px;position:relative}
+.pcard.hot{border-color:var(--coffee);background:var(--coffee-g)}
+.pbadge{position:absolute;top:-10px;left:16px;background:var(--coffee);color:var(--cream);font-size:10px;font-weight:800;padding:3px 12px;border-radius:100px;letter-spacing:.8px}
+.pname{font-weight:800;font-size:15px;color:var(--ink);margin-bottom:5px}
+.pprice{font-family:'Lora',serif;font-size:35px;font-weight:700;color:var(--coffee);letter-spacing:-1px;line-height:1.1}
+.pprice span{font-size:13px;font-family:'Nunito Sans',sans-serif;font-weight:400;color:var(--ink4);letter-spacing:0}
+.pfeats{margin:13px 0}
+.pfeat{font-size:13px;color:var(--ink3);margin-bottom:7px;display:flex;gap:8px}
+.pfeat::before{content:'✓';color:var(--green);font-weight:800;flex-shrink:0}
+.pbtn{width:100%;padding:13px;border-radius:11px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'Nunito Sans',sans-serif;border:none;transition:all .18s}
+.pbtn-f{background:var(--coffee);color:var(--cream)}
+.pbtn-f:hover{background:var(--coffee-m)}
+.pbtn-o{background:var(--cream-d);color:var(--ink);border:1px solid var(--bd2)}
+.pbtn-o:hover{border-color:var(--coffee-l);color:var(--coffee)}
+.aav{width:62px;height:62px;border-radius:50%;background:var(--coffee);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;margin:0 auto 13px;overflow:hidden;border:2px solid var(--coffee-l)}
+.aav img{width:100%;height:100%;object-fit:cover}
+.aname{font-family:'Lora',serif;font-size:21px;font-weight:700;text-align:center;color:var(--ink);margin-bottom:4px}
+.aemail{font-size:12.5px;color:var(--ink4);text-align:center;margin-bottom:20px;font-style:italic}
+.arow{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--cream);border:1px solid var(--bd);border-radius:11px;margin-bottom:8px}
+.albl{font-size:13px;color:var(--ink3)}
+.aval{font-size:13px;font-weight:700;color:var(--ink)}
+.aval.coffee{color:var(--coffee)}
+.aval.green{color:var(--green)}
+.bfull{width:100%;padding:13px;border-radius:11px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'Nunito Sans',sans-serif;border:none;transition:all .18s;margin-top:9px}
+.bf-fill{background:var(--coffee);color:var(--cream)}
+.bf-fill:hover{background:var(--coffee-m)}
+.bf-ghost{background:var(--cream-d);color:var(--ink3);border:1px solid var(--bd2)}
+.bf-ghost:hover{color:var(--ink)}
+
+@media(max-width:640px){
+  nav{padding:0 16px}
+  .wrap{padding:32px 14px 72px}
+  .hero{grid-template-columns:1fr}
+  .hero-aside{display:none}
+  .hero h1{font-size:29px}
+  .fcols{grid-template-columns:1fr}
+  .fcol+.fcol{border-left:none;border-top:1px solid var(--bd)}
+  .sstrip{grid-template-columns:1fr 38px 1fr;gap:8px}
+  .snum{font-size:42px}
+  .acts{flex-direction:column}
+  .acts .abtn{width:100%;justify-content:center}
+  #loginCard{padding:44px 22px}
+  .modal{padding:26px 18px}
+  .hitem{flex-direction:column;align-items:flex-start;gap:10px}
+}
+
+/* ── SEKMELER ────────────────────────────── */
+.tab-bar{display:flex;gap:4px;margin-bottom:14px;background:var(--cream-d);border-radius:14px;padding:4px;border:1px solid var(--bd)}
+.tab{flex:1;padding:9px 12px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Nunito Sans',sans-serif;background:transparent;color:var(--ink3);transition:all .18s}
+.tab.active{background:var(--paper);color:var(--coffee);box-shadow:0 1px 4px rgba(28,22,17,.1)}
+.tab:hover:not(.active){background:rgba(107,63,31,.06);color:var(--coffee)}
+.tab-panel{}
+.cv-bar{padding:12px 22px;background:var(--cream-d);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.cv-bar-lbl{font-size:11.5px;font-weight:700;color:var(--ink3)}
+.cv-bar-theme{font-size:11px;color:var(--coffee);font-weight:700;background:var(--coffee-g);border:1px solid var(--coffee-p);border-radius:100px;padding:2px 10px}
+
+/* ── TEMA GRID ───────────────────────────── */
+.theme-hint{font-size:13px;color:var(--ink4);margin-bottom:16px;font-style:italic}
+.theme-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;max-height:600px;overflow-y:auto;padding-right:4px}
+.tcard{border:2px solid var(--bd);border-radius:16px;overflow:hidden;cursor:pointer;transition:all .18s;background:var(--paper)}
+.tcard:hover{border-color:var(--coffee-l);transform:translateY(-2px);box-shadow:var(--sh)}
+.tcard.active{border-color:var(--coffee);box-shadow:0 0 0 3px rgba(107,63,31,.15)}
+.tcard-preview{height:64px;position:relative;overflow:hidden}
+.tcard-bar{position:absolute;bottom:0;left:0;right:0;height:6px}
+.tcard-name{font-size:12px;font-weight:700;color:var(--ink);padding:8px 10px 2px}
+.tcard-desc{font-size:10.5px;color:var(--ink4);padding:0 10px 10px}
+
+/* ── EDITOR KARTI ────────────────────────── */
+.ecard{background:var(--paper);border:1px solid var(--bd);border-radius:16px;padding:20px;margin-bottom:12px}
+.ecard-title{font-size:12px;font-weight:800;color:var(--coffee);letter-spacing:.5px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.ecard-del{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:14px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ecard-del:hover{background:rgba(220,38,38,.1);color:#dc2626}
+.ed-lbl{display:block;font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink4);margin-bottom:5px}
+.ed-input{width:100%;background:var(--cream);border:1px solid var(--bd2);border-radius:9px;padding:9px 12px;font-family:'Nunito Sans',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:all .18s;margin-bottom:12px}
+.ed-input:focus{border-color:var(--coffee-l);background:var(--paper);box-shadow:0 0 0 3px rgba(107,63,31,.08)}
+.ed-ta{resize:vertical;min-height:80px;line-height:1.6}
+.ed-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ed-col{}
+.ed-bullet-row{margin-bottom:8px}
+.ed-brow{display:flex;gap:8px;align-items:center}
+.ed-brow .ed-input{margin-bottom:0;flex:1}
+.ed-del-b{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:13px;flex-shrink:0;padding:4px;border-radius:6px;transition:all .15s}
+.ed-del-b:hover{background:rgba(220,38,38,.1);color:#dc2626}
+.ecard-add-btn{background:none;border:1.5px dashed var(--bd2);border-radius:9px;padding:7px 14px;font-size:12.5px;color:var(--coffee-m);cursor:pointer;font-family:'Nunito Sans',sans-serif;transition:all .18s;margin-top:4px}
+.ecard-add-btn:hover{border-color:var(--coffee-l);background:var(--coffee-g)}
+.ecard-add{display:block;width:100%;background:none;border:1.5px dashed var(--bd2);border-radius:12px;padding:12px;font-size:13px;color:var(--coffee-m);cursor:pointer;font-family:'Nunito Sans',sans-serif;transition:all .18s;margin-bottom:10px;text-align:center}
+.ecard-add:hover{border-color:var(--coffee-l);background:var(--coffee-g);color:var(--coffee)}
+
+@media(max-width:640px){
+  .theme-grid{grid-template-columns:repeat(3,1fr)}
+  .ed-row{grid-template-columns:1fr}
+}
+@media(max-width:400px){
+  .theme-grid{grid-template-columns:repeat(2,1fr)}
+  .tab{font-size:11px;padding:8px 6px}
+}
+
+/* ── TEMA KARTI MİNİ ÖNİZLEME ───────────────────────────── */
+.tcard { min-height: 200px; }
+.tcard-preview { height: 140px; border-radius: 10px 10px 0 0; overflow: hidden; position: relative; background: #f5f5f5; }
+
+/* Klasik tema preview */
+.tp-classic { padding: 8px 8px 0; background: #fff; font-size: 0; }
+.tp-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; }
+.tp-name-block { flex:1; }
+.tp-contact { display:flex; gap:3px; align-items:center; }
+.tp-dot { width:3px; height:3px; border-radius:50%; background:#bbb; }
+.tp-divider { height:1.5px; background:#ccc; margin:4px 0; }
+.tp-divider-sm { height:1px; background:#ddd; margin:3px 0; }
+.tp-sechead { font-size:5.5px; font-weight:800; color:#333; background:#f0f0f0; padding:2px 4px; margin:4px 0 3px; letter-spacing:.3px; }
+.tp-row { display:flex; gap:4px; margin-bottom:3px; }
+.tp-date { font-size:4.5px; color:#999; white-space:nowrap; padding-top:1px; min-width:24px; }
+.tp-content { flex:1; }
+.tp-line { height:3px; background:#e0e0e0; border-radius:2px; margin-bottom:2px; }
+.tp-line.bold { background:#555; height:3.5px; }
+
+/* Modern tema (dikey çizgi) */
+.tp-modern { display:flex; gap:0; background:#fff; padding:0; }
+.tp-sidebar-thin { width:38%; border-right:1.5px solid #ddd; padding:8px 5px; }
+.tp-main-wide { flex:1; padding:8px 6px; }
+.tp-ms-head { font-size:5px; font-weight:800; color:#333; text-transform:uppercase; margin:5px 0 3px; letter-spacing:.3px; }
+
+/* Sidebar'lı temalar */
+.tp-mint, .tp-darkgray, .tp-burgundy { display:flex; height:100%; }
+.tp-sb { width:36%; padding:6px 4px; }
+.tp-sb-mint  { background:#8bb8af; }
+.tp-sb-dark  { background:#2a2a2a; }
+.tp-sb-burg  { background:#6b0000; }
+.tp-main-sb  { flex:1; background:#fff; padding:7px 6px; }
+.tp-sb-name  { font-size:6px; font-weight:800; color:#fff; text-align:center; margin:4px 0 6px; line-height:1.3; }
+.tp-sb-head  { font-size:4.5px; font-weight:800; color:rgba(255,255,255,.7); text-transform:uppercase; border-bottom:1px solid rgba(255,255,255,.3); padding-bottom:1px; margin:5px 0 3px; letter-spacing:.2px; }
+.tp-sbl      { background:rgba(255,255,255,.45) !important; height:2.5px !important; }
+.tp-mint-acc { background:#8bb8af !important; height:3px !important; }
+.tp-mint-sec { color:#2d4a45 !important; background:rgba(139,184,175,.15) !important; }
+.tp-burg-acc { background:#8b0000 !important; height:3px !important; }
+.tp-burg-sec { color:#8b0000 !important; background:rgba(139,0,0,.08) !important; }
+.tp-skill-bar { height:2.5px; background:rgba(255,255,255,.25); border-radius:2px; margin-bottom:3px; overflow:hidden; }
+.tp-skill-fill { height:100%; background:rgba(255,255,255,.75); border-radius:2px; }
+
+/* ── MODE SELECTOR ─────────────────────── */
+.mode-bar{display:flex;gap:6px;padding:18px 28px 0;background:var(--paper)}
+.mode-btn{flex:1;padding:14px 16px;border:1.5px solid var(--bd2);border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--ink3);transition:all .2s;text-align:center}
+.mode-btn:hover{border-color:var(--coffee-l);color:var(--ink2);background:var(--coffee-g)}
+.mode-btn.active{background:var(--coffee);color:var(--cream);border-color:var(--coffee);box-shadow:0 2px 10px rgba(107,63,31,.25)}
+
+/* ── STEP FORM ─────────────────────────── */
+.step-progress{padding:22px 28px 0}
+.step-indicators{display:flex;align-items:center;gap:0;margin-bottom:14px;position:relative}
+.step-dot{width:32px;height:32px;border-radius:50%;border:2px solid var(--bd2);background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--ink4);transition:all .25s;position:relative;z-index:2;flex-shrink:0}
+.step-dot.active{border-color:var(--coffee);background:var(--coffee);color:var(--cream);box-shadow:0 2px 8px rgba(107,63,31,.3)}
+.step-dot.done{border-color:var(--green);background:var(--green);color:white}
+.step-connector{flex:1;height:3px;background:var(--bd);border-radius:2px;transition:background .25s}
+.step-connector.done{background:var(--green)}
+.step-label-row{display:flex;justify-content:space-between}
+.step-label{font-size:10.5px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.5px;text-align:center;width:25%;transition:color .2s}
+.step-label.active{color:var(--coffee)}
+.form-step{display:none;padding:24px 28px;animation:rise .3s ease}
+.form-step.active{display:block}
+.fs-title{font-family:'Lora',serif;font-size:20px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.fs-sub{font-size:13px;color:var(--ink4);margin-bottom:20px}
+.fs-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:0}
+.fs-field{margin-bottom:14px}
+.fs-lbl{display:block;font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink4);margin-bottom:5px}
+.fs-input{width:100%;background:var(--cream);border:1px solid var(--bd2);border-radius:10px;padding:11px 14px;font-family:'Nunito Sans',sans-serif;font-size:13.5px;color:var(--ink);outline:none;transition:all .18s}
+.fs-input:focus{border-color:var(--coffee-l);background:var(--paper);box-shadow:0 0 0 3px rgba(107,63,31,.08)}
+.fs-input::placeholder{color:var(--ink4)}
+textarea.fs-input{resize:vertical;min-height:90px;line-height:1.6}
+.fs-dynamic-card{background:var(--cream);border:1px solid var(--bd);border-radius:14px;padding:18px;margin-bottom:12px;position:relative}
+.fs-dynamic-card .fs-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.fs-dynamic-card .fs-card-num{font-size:13px;font-weight:700;color:var(--coffee)}
+.fs-dynamic-card .fs-card-del{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:14px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.fs-dynamic-card .fs-card-del:hover{background:rgba(220,38,38,.1);color:#dc2626}
+.fs-add-btn{display:block;width:100%;background:none;border:1.5px dashed var(--bd2);border-radius:12px;padding:12px;font-size:13px;color:var(--coffee-m);cursor:pointer;font-family:'Nunito Sans',sans-serif;transition:all .18s;text-align:center;margin-top:4px}
+.fs-add-btn:hover{border-color:var(--coffee-l);background:var(--coffee-g);color:var(--coffee)}
+.fs-bullet-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.fs-bullet-row .fs-input{flex:1;margin-bottom:0}
+.fs-bullet-del{background:none;border:none;color:var(--ink4);cursor:pointer;font-size:13px;padding:4px;border-radius:6px;transition:all .15s;flex-shrink:0}
+.fs-bullet-del:hover{background:rgba(220,38,38,.1);color:#dc2626}
+.step-nav{display:flex;justify-content:space-between;padding:0 28px 20px;gap:12px}
+.step-btn{padding:11px 24px;border-radius:12px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'Nunito Sans',sans-serif;border:none;transition:all .18s;display:inline-flex;align-items:center;gap:8px}
+.step-btn-back{background:var(--cream-d);color:var(--ink3);border:1px solid var(--bd2)}
+.step-btn-back:hover{background:var(--cream-deep);color:var(--ink)}
+.step-btn-next{background:var(--coffee);color:var(--cream);box-shadow:0 2px 10px rgba(107,63,31,.25)}
+.step-btn-next:hover{background:var(--coffee-m);transform:translateY(-1px)}
+
+@media(max-width:640px){
+  .mode-bar{flex-direction:column;padding:12px 14px 0}
+  .fs-row{grid-template-columns:1fr}
+  .form-step{padding:18px 14px}
+  .step-nav{padding:0 14px 16px}
+  .step-progress{padding:16px 14px 0}
+  .step-label{font-size:9px}
+}
+
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="/" onclick="goHome(event)">
+    <span class="logo-mark">C</span>CV<em>Fit</em>
+  </a>
+  <div class="nav-r" id="navAuth">
+    <button class="nbtn nbtn-fill" onclick="loginWithGoogle()">Giriş Yap</button>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <div class="hero-kicker">AI Destekli Optimizasyon</div>
+      <h1>CV'ni <em>iş ilanına</em><br>göre uyarla</h1>
+      <p class="hero-sub">PDF yükle, iş ilanını yapıştır — yapay zeka anahtar kelimeleri ekler, uyumu artırır.</p>
+    </div>
+    <div class="hero-aside">
+      <div class="aside-num">AI</div>
+      <div class="aside-lbl">Destekli<br>Analiz</div>
+    </div>
+  </div>
+
+  <div class="panel" id="loginCard">
+    <div class="login-rule"></div>
+    <div class="login-title">Başlamak için giriş yap</div>
+    <div class="login-sub">Google hesabınla saniyeler içinde başla.<br>İlk analizin tamamen ücretsiz.</div>
+    <button class="cta" style="margin:0 auto" onclick="loginWithGoogle()">Google ile Devam Et <span class="arr">→</span></button>
+    <p class="login-note">Kredi kartı gerekmez</p>
+  </div>
+
+  <div class="panel" id="formCard">
+    <div class="mode-bar">
+      <button class="mode-btn active" id="modeUploadBtn" onclick="switchMode('upload')">📄 CV Yükle</button>
+      <button class="mode-btn" id="modeCreateBtn" onclick="switchMode('create')">✍ CV'm Yok — Sıfırdan Oluştur</button>
+    </div>
+    <div id="modeUpload">
+    <div class="fcols">
+      <div class="fcol">
+        <div class="flbl"><span class="fnum">1</span>CV'niz</div>
+        <div class="dz" id="dz" onclick="document.getElementById('cvFile').click()" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+          <span class="dz-ico">📄</span>
+          <p id="dzt"><strong>PDF yüklemek için tıklayın</strong><br>veya buraya sürükleyin</p>
+          <input type="file" id="cvFile" accept=".pdf" onchange="handleFile(this)">
+        </div>
+        <textarea id="cvText" style="height:172px" placeholder="Ya da CV metnini buraya yapıştırın..."></textarea>
+      </div>
+      <div class="fcol">
+        <div class="flbl"><span class="fnum">2</span>İş İlanı</div>
+        <textarea id="jobDesc" style="height:295px" placeholder="İş ilanı metnini buraya yapıştırın...&#10;&#10;Örnek:&#10;Frontend Developer arıyoruz!&#10;• React ve TypeScript&#10;• 2+ yıl deneyim"></textarea>
+      </div>
+    </div>
+    </div><!-- /modeUpload -->
+
+    <!-- CV'M YOK — SIFIRDAN OLUŞTUR -->
+    <div id="modeCreate" style="display:none">
+      <!-- Step Progress -->
+      <div class="step-progress">
+        <div class="step-indicators">
+          <div class="step-dot active" data-step="1">1</div>
+          <div class="step-connector" data-after="1"></div>
+          <div class="step-dot" data-step="2">2</div>
+          <div class="step-connector" data-after="2"></div>
+          <div class="step-dot" data-step="3">3</div>
+          <div class="step-connector" data-after="3"></div>
+          <div class="step-dot" data-step="4">4</div>
+        </div>
+        <div class="step-label-row">
+          <span class="step-label active">Kişisel</span>
+          <span class="step-label">Deneyim</span>
+          <span class="step-label">Eğitim</span>
+          <span class="step-label">Beceriler</span>
+        </div>
+      </div>
+
+      <!-- Step 1: Kişisel Bilgiler -->
+      <div class="form-step active" data-step="1">
+        <div class="fs-title">Kişisel Bilgiler</div>
+        <div class="fs-sub">Temel iletişim bilgilerinizi girin</div>
+        <div class="fs-row">
+          <div class="fs-field">
+            <label class="fs-lbl">Ad Soyad</label>
+            <input type="text" class="fs-input" id="cName" placeholder="Örn: Ahmet Yılmaz">
+          </div>
+          <div class="fs-field">
+            <label class="fs-lbl">Ünvan / Pozisyon</label>
+            <input type="text" class="fs-input" id="cTitle" placeholder="Örn: Frontend Developer">
+          </div>
+        </div>
+        <div class="fs-row">
+          <div class="fs-field">
+            <label class="fs-lbl">E-posta</label>
+            <input type="email" class="fs-input" id="cEmail" placeholder="ornek@email.com">
+          </div>
+          <div class="fs-field">
+            <label class="fs-lbl">Telefon</label>
+            <input type="tel" class="fs-input" id="cPhone" placeholder="+90 5XX XXX XX XX">
+          </div>
+        </div>
+        <div class="fs-row">
+          <div class="fs-field">
+            <label class="fs-lbl">Şehir / Adres</label>
+            <input type="text" class="fs-input" id="cAddress" placeholder="Örn: İstanbul, Türkiye">
+          </div>
+          <div class="fs-field">
+            <label class="fs-lbl">Website / LinkedIn</label>
+            <input type="text" class="fs-input" id="cWebsite" placeholder="linkedin.com/in/ahmet">
+          </div>
+        </div>
+        <div class="fs-field">
+          <label class="fs-lbl">Hakkımda (Opsiyonel)</label>
+          <textarea class="fs-input" id="cSummary" placeholder="Kendinizi kısaca tanıtın..."></textarea>
+        </div>
+      </div>
+
+      <!-- Step 2: Deneyim -->
+      <div class="form-step" data-step="2">
+        <div class="fs-title">İş Deneyimi</div>
+        <div class="fs-sub">Deneyimlerinizi ekleyin (en güncel işten başlayın)</div>
+        <div id="cExpList"></div>
+        <button class="fs-add-btn" onclick="addCreateExp()">+ Deneyim Ekle</button>
+      </div>
+
+      <!-- Step 3: Eğitim -->
+      <div class="form-step" data-step="3">
+        <div class="fs-title">Eğitim</div>
+        <div class="fs-sub">Eğitim bilgilerinizi ekleyin</div>
+        <div id="cEduList"></div>
+        <button class="fs-add-btn" onclick="addCreateEdu()">+ Eğitim Ekle</button>
+      </div>
+
+      <!-- Step 4: Beceriler & İş İlanı -->
+      <div class="form-step" data-step="4">
+        <div class="fs-title">Beceriler & İş İlanı</div>
+        <div class="fs-sub">Becerilerinizi ve hedef iş ilanını girin</div>
+        <div class="fs-field">
+          <label class="fs-lbl">Beceriler (virgülle ayırın)</label>
+          <input type="text" class="fs-input" id="cSkills" placeholder="Örn: React, TypeScript, Node.js, Figma">
+        </div>
+        <div class="fs-field">
+          <label class="fs-lbl">Diller (virgülle ayırın)</label>
+          <input type="text" class="fs-input" id="cLangs" placeholder="Örn: Türkçe, İngilizce, Almanca">
+        </div>
+        <div class="fs-field" style="margin-top:8px;padding-top:20px;border-top:1px solid var(--bd)">
+          <label class="fs-lbl" style="color:var(--coffee)">🎯 Hedef İş İlanı</label>
+          <textarea class="fs-input" id="jobDescCreate" style="min-height:140px" placeholder="İş ilanı metnini buraya yapıştırın...&#10;&#10;Örnek:&#10;Frontend Developer arıyoruz!&#10;• React ve TypeScript&#10;• 2+ yıl deneyim"></textarea>
+        </div>
+      </div>
+
+      <!-- Step Navigation -->
+      <div class="step-nav">
+        <button class="step-btn step-btn-back" id="stepPrev" onclick="goStep(-1)" style="visibility:hidden">← Geri</button>
+        <button class="step-btn step-btn-next" id="stepNext" onclick="goStep(1)">İleri →</button>
+      </div>
+    </div>
+
+    <div class="ffooter">
+      <span class="ctag" id="creditsBadge">⚡ yükleniyor...</span>
+      <button class="cta" onclick="analyze()">Analiz Et <span class="arr">→</span></button>
+    </div>
+  </div>
+
+  <div class="panel" id="loading">
+    <div class="cup-wrap">
+      <div class="cup-steam"><div class="steam"></div><div class="steam"></div><div class="steam"></div></div>
+      <div class="cup-body"><div class="cup-fill"></div></div>
+      <div class="cup-hdl"></div>
+    </div>
+    <div class="ld-title">CV analiz ediliyor...</div>
+    <div class="ld-sub">15–30 saniye sürebilir ☕</div>
+    <div class="ld-steps">
+      <div class="ld-step active" id="s1"><span class="sdot"></span>CV okunuyor</div>
+      <div class="ld-step" id="s2"><span class="sdot"></span>İş ilanı analiz ediliyor</div>
+      <div class="ld-step" id="s3"><span class="sdot"></span>CV optimize ediliyor</div>
+      <div class="ld-step" id="s4"><span class="sdot"></span>Skor hesaplanıyor</div>
+    </div>
+  </div>
+
+  <div id="result">
+    <!-- SKOR -->
+    <div class="sstrip">
+      <div class="sbox before"><div class="snum" id="sBefore">0%</div><div class="slbl">Önceki Eşleşme</div></div>
+      <div class="smid"><div class="sarr">→</div><div class="sdelta" id="sDelta" style="visibility:hidden">+0%</div></div>
+      <div class="sbox after"><div class="snum" id="sAfter">0%</div><div class="slbl">Yeni Eşleşme</div></div>
+    </div>
+
+    <!-- ANAHTAR KELİMELER -->
+    <div class="rblock"><div class="rbtitle">Eklenen Anahtar Kelimeler</div><div class="tags" id="kTags"></div></div>
+
+    <!-- SEKME BAŞLIKLARI -->
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchTab('preview',this)">👁 Önizleme</button>
+      <button class="tab" onclick="switchTab('edit',this)">✏️ Düzenle</button>
+      <button class="tab" onclick="switchTab('theme',this)">🎨 Tema Seç</button>
+    </div>
+
+    <!-- TAB: ÖNİZLEME -->
+    <div id="tabPreview" class="tab-panel">
+      <div class="cv-shell">
+        <div class="cv-bar">
+          <span class="cv-bar-lbl">CV Önizleme</span>
+          <span class="cv-bar-theme" id="activeThemeName">Klasik</span>
+        </div>
+        <div class="cv-in" id="cvPrev"></div>
+      </div>
+    </div>
+
+    <!-- TAB: DÜZENLE -->
+    <div id="tabEdit" class="tab-panel" style="display:none">
+      <div id="editCards"></div>
+    </div>
+
+    <!-- TAB: TEMA -->
+    <div id="tabTheme" class="tab-panel" style="display:none">
+      <p class="theme-hint">Bir tema seç, önizleme anında güncellenir</p>
+      <div class="theme-grid" id="themeGrid">
+
+        <!-- TEMA 1: KLASİK -->
+        
+        
+        <div class="tcard active" data-theme="classic_mavi" onclick="selectTheme('classic_mavi',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#1A5276"></div>
+            <div style="position:absolute;left:0;top:0;width:36%;height:32%;background:#2E86C1"></div>
+            <div style="position:absolute;left:1%;top:34%;width:34%;height:3px;background:rgba(255,255,255,.15);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:40%;width:28%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:46%;width:22%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:52%;width:26%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:60%;width:30%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:66%;width:20%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:39%;top:8px;right:5px;height:4px;background:#1A5276;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:39%;top:16px;right:10px;height:3px;background:#2E86C1;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:39%;top:24px;right:5px;height:3px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:30px;right:12px;height:3px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:38px;right:5px;height:3px;background:#2E86C1;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:44px;right:8px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:49px;right:14px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:55px;right:5px;height:3px;background:#2E86C1;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:61px;right:10px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Sol Sidebar <span style="color:#2E86C1">· Mavi</span></div>
+        </div>
+        <div class="tcard " data-theme="classic_gri" onclick="selectTheme('classic_gri',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#212121"></div>
+            <div style="position:absolute;left:0;top:0;width:36%;height:32%;background:#555555"></div>
+            <div style="position:absolute;left:1%;top:34%;width:34%;height:3px;background:rgba(255,255,255,.15);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:40%;width:28%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:46%;width:22%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:52%;width:26%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:60%;width:30%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:66%;width:20%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:39%;top:8px;right:5px;height:4px;background:#212121;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:39%;top:16px;right:10px;height:3px;background:#555555;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:39%;top:24px;right:5px;height:3px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:30px;right:12px;height:3px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:38px;right:5px;height:3px;background:#555555;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:44px;right:8px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:49px;right:14px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:55px;right:5px;height:3px;background:#555555;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:61px;right:10px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Sol Sidebar <span style="color:#555555">· Gri</span></div>
+        </div>
+        <div class="tcard " data-theme="classic_teal" onclick="selectTheme('classic_teal',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#00695C"></div>
+            <div style="position:absolute;left:0;top:0;width:36%;height:32%;background:#00897B"></div>
+            <div style="position:absolute;left:1%;top:34%;width:34%;height:3px;background:rgba(255,255,255,.15);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:40%;width:28%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:46%;width:22%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:52%;width:26%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:60%;width:30%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:66%;width:20%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:39%;top:8px;right:5px;height:4px;background:#00695C;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:39%;top:16px;right:10px;height:3px;background:#00897B;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:39%;top:24px;right:5px;height:3px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:30px;right:12px;height:3px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:38px;right:5px;height:3px;background:#00897B;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:44px;right:8px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:49px;right:14px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:55px;right:5px;height:3px;background:#00897B;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:61px;right:10px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Sol Sidebar <span style="color:#00897B">· Teal</span></div>
+        </div>
+        <div class="tcard " data-theme="classic_bordo" onclick="selectTheme('classic_bordo',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#7B1A1A"></div>
+            <div style="position:absolute;left:0;top:0;width:36%;height:32%;background:#C0392B"></div>
+            <div style="position:absolute;left:1%;top:34%;width:34%;height:3px;background:rgba(255,255,255,.15);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:40%;width:28%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:46%;width:22%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:52%;width:26%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:60%;width:30%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:66%;width:20%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:39%;top:8px;right:5px;height:4px;background:#7B1A1A;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:39%;top:16px;right:10px;height:3px;background:#C0392B;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:39%;top:24px;right:5px;height:3px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:30px;right:12px;height:3px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:38px;right:5px;height:3px;background:#C0392B;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:44px;right:8px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:49px;right:14px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:55px;right:5px;height:3px;background:#C0392B;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:61px;right:10px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Sol Sidebar <span style="color:#C0392B">· Bordo</span></div>
+        </div>
+        <div class="tcard " data-theme="classic_yesil" onclick="selectTheme('classic_yesil',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#1E6B3C"></div>
+            <div style="position:absolute;left:0;top:0;width:36%;height:32%;background:#27AE60"></div>
+            <div style="position:absolute;left:1%;top:34%;width:34%;height:3px;background:rgba(255,255,255,.15);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:40%;width:28%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:46%;width:22%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:52%;width:26%;height:2px;background:rgba(255,255,255,.3);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:60%;width:30%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:3%;top:66%;width:20%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:39%;top:8px;right:5px;height:4px;background:#1E6B3C;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:39%;top:16px;right:10px;height:3px;background:#27AE60;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:39%;top:24px;right:5px;height:3px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:30px;right:12px;height:3px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:38px;right:5px;height:3px;background:#27AE60;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:44px;right:8px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:49px;right:14px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:55px;right:5px;height:3px;background:#27AE60;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:61px;right:10px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Sol Sidebar <span style="color:#27AE60">· Yeşil</span></div>
+        </div>
+        <div class="tcard " data-theme="modern_mavi" onclick="selectTheme('modern_mavi',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;right:0;height:28%;background:#1A5276"></div>
+            <div style="position:absolute;left:0;top:28%;right:0;height:10%;background:#2E86C1"></div>
+            <div style="position:absolute;left:5%;top:8px;width:50%;height:5px;background:white;border-radius:2px;opacity:.9"></div>
+            <div style="position:absolute;left:5%;top:17px;width:35%;height:3px;background:white;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:38%;right:38%;height:3px;background:#1A5276;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;left:5%;top:46%;right:38%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:51%;right:42%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:58%;right:38%;height:3px;background:#2E86C1;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:5%;top:64%;right:40%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:69%;right:44%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:38%;width:30%;height:3px;background:#1A5276;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;right:3%;top:46%;width:28%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:52%;width:22%;height:10px;background:#AED6F1;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;right:3%;top:65%;width:25%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:70%;width:18%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:62%;top:36%;bottom:5%;width:1px;background:#e0e0e0"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Koyu Header <span style="color:#2E86C1">· Mavi</span></div>
+        </div>
+        <div class="tcard " data-theme="modern_gri" onclick="selectTheme('modern_gri',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;right:0;height:28%;background:#212121"></div>
+            <div style="position:absolute;left:0;top:28%;right:0;height:10%;background:#555555"></div>
+            <div style="position:absolute;left:5%;top:8px;width:50%;height:5px;background:white;border-radius:2px;opacity:.9"></div>
+            <div style="position:absolute;left:5%;top:17px;width:35%;height:3px;background:white;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:38%;right:38%;height:3px;background:#212121;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;left:5%;top:46%;right:38%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:51%;right:42%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:58%;right:38%;height:3px;background:#555555;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:5%;top:64%;right:40%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:69%;right:44%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:38%;width:30%;height:3px;background:#212121;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;right:3%;top:46%;width:28%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:52%;width:22%;height:10px;background:#CCCCCC;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;right:3%;top:65%;width:25%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:70%;width:18%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:62%;top:36%;bottom:5%;width:1px;background:#e0e0e0"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Koyu Header <span style="color:#555555">· Gri</span></div>
+        </div>
+        <div class="tcard " data-theme="modern_teal" onclick="selectTheme('modern_teal',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;right:0;height:28%;background:#00695C"></div>
+            <div style="position:absolute;left:0;top:28%;right:0;height:10%;background:#00897B"></div>
+            <div style="position:absolute;left:5%;top:8px;width:50%;height:5px;background:white;border-radius:2px;opacity:.9"></div>
+            <div style="position:absolute;left:5%;top:17px;width:35%;height:3px;background:white;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:38%;right:38%;height:3px;background:#00695C;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;left:5%;top:46%;right:38%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:51%;right:42%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:58%;right:38%;height:3px;background:#00897B;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:5%;top:64%;right:40%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:69%;right:44%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:38%;width:30%;height:3px;background:#00695C;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;right:3%;top:46%;width:28%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:52%;width:22%;height:10px;background:#80CBC4;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;right:3%;top:65%;width:25%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:70%;width:18%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:62%;top:36%;bottom:5%;width:1px;background:#e0e0e0"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Koyu Header <span style="color:#00897B">· Teal</span></div>
+        </div>
+        <div class="tcard " data-theme="modern_bordo" onclick="selectTheme('modern_bordo',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;right:0;height:28%;background:#7B1A1A"></div>
+            <div style="position:absolute;left:0;top:28%;right:0;height:10%;background:#C0392B"></div>
+            <div style="position:absolute;left:5%;top:8px;width:50%;height:5px;background:white;border-radius:2px;opacity:.9"></div>
+            <div style="position:absolute;left:5%;top:17px;width:35%;height:3px;background:white;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:38%;right:38%;height:3px;background:#7B1A1A;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;left:5%;top:46%;right:38%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:51%;right:42%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:58%;right:38%;height:3px;background:#C0392B;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:5%;top:64%;right:40%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:69%;right:44%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:38%;width:30%;height:3px;background:#7B1A1A;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;right:3%;top:46%;width:28%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:52%;width:22%;height:10px;background:#F1948A;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;right:3%;top:65%;width:25%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:70%;width:18%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:62%;top:36%;bottom:5%;width:1px;background:#e0e0e0"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Koyu Header <span style="color:#C0392B">· Bordo</span></div>
+        </div>
+        <div class="tcard " data-theme="modern_yesil" onclick="selectTheme('modern_yesil',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;right:0;height:28%;background:#1E6B3C"></div>
+            <div style="position:absolute;left:0;top:28%;right:0;height:10%;background:#27AE60"></div>
+            <div style="position:absolute;left:5%;top:8px;width:50%;height:5px;background:white;border-radius:2px;opacity:.9"></div>
+            <div style="position:absolute;left:5%;top:17px;width:35%;height:3px;background:white;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:38%;right:38%;height:3px;background:#1E6B3C;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;left:5%;top:46%;right:38%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:51%;right:42%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:58%;right:38%;height:3px;background:#27AE60;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:5%;top:64%;right:40%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:69%;right:44%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:38%;width:30%;height:3px;background:#1E6B3C;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;right:3%;top:46%;width:28%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:52%;width:22%;height:10px;background:#A9DFBF;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;right:3%;top:65%;width:25%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;right:3%;top:70%;width:18%;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:62%;top:36%;bottom:5%;width:1px;background:#e0e0e0"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Koyu Header <span style="color:#27AE60">· Yeşil</span></div>
+        </div>
+        <div class="tcard " data-theme="minimal_mavi" onclick="selectTheme('minimal_mavi',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;right:0;height:36%;background:#AED6F1;opacity:.9"></div>
+            <div style="position:absolute;left:0;top:0;bottom:0;width:34%;background:#1A5276"></div>
+            <div style="position:absolute;left:36%;top:6px;right:5px;height:5px;background:#1A5276;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:14px;right:12px;height:3px;background:#2E86C1;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:36%;top:20px;right:8px;height:2px;background:#2E86C1;border-radius:2px;opacity:.4"></div>
+            <div style="position:absolute;left:2%;top:40%;width:30%;height:3px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:2%;top:46%;width:24%;height:8px;background:#2E86C1;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:2%;top:57%;width:26%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:2%;top:62%;width:20%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:36%;top:40%;right:5px;height:3px;background:#AED6F1;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:48%;right:8px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:36%;top:53%;right:14px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:36%;top:60%;right:5px;height:3px;background:#AED6F1;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:67%;right:10px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Renkli Header <span style="color:#2E86C1">· Mavi</span></div>
+        </div>
+        <div class="tcard " data-theme="minimal_gri" onclick="selectTheme('minimal_gri',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;right:0;height:36%;background:#CCCCCC;opacity:.9"></div>
+            <div style="position:absolute;left:0;top:0;bottom:0;width:34%;background:#212121"></div>
+            <div style="position:absolute;left:36%;top:6px;right:5px;height:5px;background:#212121;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:14px;right:12px;height:3px;background:#555555;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:36%;top:20px;right:8px;height:2px;background:#555555;border-radius:2px;opacity:.4"></div>
+            <div style="position:absolute;left:2%;top:40%;width:30%;height:3px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:2%;top:46%;width:24%;height:8px;background:#555555;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:2%;top:57%;width:26%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:2%;top:62%;width:20%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:36%;top:40%;right:5px;height:3px;background:#CCCCCC;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:48%;right:8px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:36%;top:53%;right:14px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:36%;top:60%;right:5px;height:3px;background:#CCCCCC;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:67%;right:10px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Renkli Header <span style="color:#555555">· Gri</span></div>
+        </div>
+        <div class="tcard " data-theme="minimal_teal" onclick="selectTheme('minimal_teal',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;right:0;height:36%;background:#80CBC4;opacity:.9"></div>
+            <div style="position:absolute;left:0;top:0;bottom:0;width:34%;background:#00695C"></div>
+            <div style="position:absolute;left:36%;top:6px;right:5px;height:5px;background:#00695C;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:14px;right:12px;height:3px;background:#00897B;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:36%;top:20px;right:8px;height:2px;background:#00897B;border-radius:2px;opacity:.4"></div>
+            <div style="position:absolute;left:2%;top:40%;width:30%;height:3px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:2%;top:46%;width:24%;height:8px;background:#00897B;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:2%;top:57%;width:26%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:2%;top:62%;width:20%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:36%;top:40%;right:5px;height:3px;background:#80CBC4;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:48%;right:8px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:36%;top:53%;right:14px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:36%;top:60%;right:5px;height:3px;background:#80CBC4;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:67%;right:10px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Renkli Header <span style="color:#00897B">· Teal</span></div>
+        </div>
+        <div class="tcard " data-theme="minimal_bordo" onclick="selectTheme('minimal_bordo',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;right:0;height:36%;background:#F1948A;opacity:.9"></div>
+            <div style="position:absolute;left:0;top:0;bottom:0;width:34%;background:#7B1A1A"></div>
+            <div style="position:absolute;left:36%;top:6px;right:5px;height:5px;background:#7B1A1A;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:14px;right:12px;height:3px;background:#C0392B;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:36%;top:20px;right:8px;height:2px;background:#C0392B;border-radius:2px;opacity:.4"></div>
+            <div style="position:absolute;left:2%;top:40%;width:30%;height:3px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:2%;top:46%;width:24%;height:8px;background:#C0392B;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:2%;top:57%;width:26%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:2%;top:62%;width:20%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:36%;top:40%;right:5px;height:3px;background:#F1948A;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:48%;right:8px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:36%;top:53%;right:14px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:36%;top:60%;right:5px;height:3px;background:#F1948A;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:67%;right:10px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Renkli Header <span style="color:#C0392B">· Bordo</span></div>
+        </div>
+        <div class="tcard " data-theme="minimal_yesil" onclick="selectTheme('minimal_yesil',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;right:0;height:36%;background:#A9DFBF;opacity:.9"></div>
+            <div style="position:absolute;left:0;top:0;bottom:0;width:34%;background:#1E6B3C"></div>
+            <div style="position:absolute;left:36%;top:6px;right:5px;height:5px;background:#1E6B3C;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:14px;right:12px;height:3px;background:#27AE60;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:36%;top:20px;right:8px;height:2px;background:#27AE60;border-radius:2px;opacity:.4"></div>
+            <div style="position:absolute;left:2%;top:40%;width:30%;height:3px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:2%;top:46%;width:24%;height:8px;background:#27AE60;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:2%;top:57%;width:26%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:2%;top:62%;width:20%;height:2px;background:rgba(255,255,255,.2);border-radius:1px"></div>
+            <div style="position:absolute;left:36%;top:40%;right:5px;height:3px;background:#A9DFBF;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:48%;right:8px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:36%;top:53%;right:14px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="position:absolute;left:36%;top:60%;right:5px;height:3px;background:#A9DFBF;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:36%;top:67%;right:10px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Renkli Header <span style="color:#27AE60">· Yeşil</span></div>
+        </div>
+        <div class="tcard " data-theme="coffee_mavi" onclick="selectTheme('coffee_mavi',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#f0f0f0"></div>
+            <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#2E86C1"></div>
+            <div style="position:absolute;left:5%;top:10px;right:65%;height:4px;background:#1A5276;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;left:5%;top:18px;right:68%;height:2px;background:#2E86C1;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:28px;right:65%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:33px;right:70%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:42px;right:65%;height:2px;background:#2E86C1;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:48px;right:67%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:53px;right:72%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:8px;right:4px;height:5px;background:#1A5276;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:39%;top:17px;right:8px;height:3px;background:#2E86C1;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:39%;top:25px;right:4px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:31px;right:12px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:39px;right:4px;height:3px;background:#1A5276;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:45px;right:8px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:50px;right:16px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:56px;height:2px;right:10px;background:#ddd;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Sade Sidebar <span style="color:#2E86C1">· Mavi</span></div>
+        </div>
+        <div class="tcard " data-theme="coffee_gri" onclick="selectTheme('coffee_gri',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#f0f0f0"></div>
+            <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#555555"></div>
+            <div style="position:absolute;left:5%;top:10px;right:65%;height:4px;background:#212121;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;left:5%;top:18px;right:68%;height:2px;background:#555555;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:28px;right:65%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:33px;right:70%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:42px;right:65%;height:2px;background:#555555;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:48px;right:67%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:53px;right:72%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:8px;right:4px;height:5px;background:#212121;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:39%;top:17px;right:8px;height:3px;background:#555555;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:39%;top:25px;right:4px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:31px;right:12px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:39px;right:4px;height:3px;background:#212121;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:45px;right:8px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:50px;right:16px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:56px;height:2px;right:10px;background:#ddd;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Sade Sidebar <span style="color:#555555">· Gri</span></div>
+        </div>
+        <div class="tcard " data-theme="coffee_teal" onclick="selectTheme('coffee_teal',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#f0f0f0"></div>
+            <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#00897B"></div>
+            <div style="position:absolute;left:5%;top:10px;right:65%;height:4px;background:#00695C;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;left:5%;top:18px;right:68%;height:2px;background:#00897B;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:28px;right:65%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:33px;right:70%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:42px;right:65%;height:2px;background:#00897B;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:48px;right:67%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:53px;right:72%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:8px;right:4px;height:5px;background:#00695C;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:39%;top:17px;right:8px;height:3px;background:#00897B;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:39%;top:25px;right:4px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:31px;right:12px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:39px;right:4px;height:3px;background:#00695C;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:45px;right:8px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:50px;right:16px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:56px;height:2px;right:10px;background:#ddd;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Sade Sidebar <span style="color:#00897B">· Teal</span></div>
+        </div>
+        <div class="tcard " data-theme="coffee_bordo" onclick="selectTheme('coffee_bordo',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#f0f0f0"></div>
+            <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#C0392B"></div>
+            <div style="position:absolute;left:5%;top:10px;right:65%;height:4px;background:#7B1A1A;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;left:5%;top:18px;right:68%;height:2px;background:#C0392B;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:28px;right:65%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:33px;right:70%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:42px;right:65%;height:2px;background:#C0392B;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:48px;right:67%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:53px;right:72%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:8px;right:4px;height:5px;background:#7B1A1A;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:39%;top:17px;right:8px;height:3px;background:#C0392B;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:39%;top:25px;right:4px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:31px;right:12px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:39px;right:4px;height:3px;background:#7B1A1A;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:45px;right:8px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:50px;right:16px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:56px;height:2px;right:10px;background:#ddd;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Sade Sidebar <span style="color:#C0392B">· Bordo</span></div>
+        </div>
+        <div class="tcard " data-theme="coffee_yesil" onclick="selectTheme('coffee_yesil',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#f0f0f0"></div>
+            <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#27AE60"></div>
+            <div style="position:absolute;left:5%;top:10px;right:65%;height:4px;background:#1E6B3C;border-radius:2px;opacity:.7"></div>
+            <div style="position:absolute;left:5%;top:18px;right:68%;height:2px;background:#27AE60;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:28px;right:65%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:33px;right:70%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:42px;right:65%;height:2px;background:#27AE60;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:48px;right:67%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:5%;top:53px;right:72%;height:2px;background:#ccc;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:8px;right:4px;height:5px;background:#1E6B3C;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:39%;top:17px;right:8px;height:3px;background:#27AE60;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:39%;top:25px;right:4px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:31px;right:12px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:39px;right:4px;height:3px;background:#1E6B3C;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:39%;top:45px;right:8px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:50px;right:16px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:39%;top:56px;height:2px;right:10px;background:#ddd;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Sade Sidebar <span style="color:#27AE60">· Yeşil</span></div>
+        </div>
+        <div class="tcard " data-theme="bold_mavi" onclick="selectTheme('bold_mavi',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#f8f8f8"></div>
+            <div style="position:absolute;left:36%;top:0;right:0;bottom:0;background:white"></div>
+            <div style="position:absolute;left:36%;top:0;bottom:0;width:3px;background:#2E86C1"></div>
+            <div style="position:absolute;left:3%;top:6px;right:66%;height:12px;border:1.5px solid #2E86C1;border-radius:3px"></div>
+            <div style="position:absolute;left:5%;top:22px;right:67%;height:2px;background:#ccc;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:27px;right:70%;height:2px;background:#ccc;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:35px;right:67%;height:2px;background:#2E86C1;border-radius:1px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:41px;right:68%;height:6px;background:#AED6F1;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:50px;right:67%;height:2px;background:#2E86C1;border-radius:1px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:56px;right:70%;height:6px;background:#AED6F1;border-radius:1px"></div>
+            <div style="position:absolute;left:40%;top:8px;right:4px;height:5px;background:#1A5276;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:40%;top:17px;right:10px;height:3px;background:#2E86C1;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:40%;top:26px;right:4px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:32px;right:14px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:40px;right:4px;height:3px;background:#1A5276;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:40%;top:46px;right:8px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:52px;right:16px;height:2px;background:#ddd;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Accent Çizgi <span style="color:#2E86C1">· Mavi</span></div>
+        </div>
+        <div class="tcard " data-theme="bold_gri" onclick="selectTheme('bold_gri',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#f8f8f8"></div>
+            <div style="position:absolute;left:36%;top:0;right:0;bottom:0;background:white"></div>
+            <div style="position:absolute;left:36%;top:0;bottom:0;width:3px;background:#555555"></div>
+            <div style="position:absolute;left:3%;top:6px;right:66%;height:12px;border:1.5px solid #555555;border-radius:3px"></div>
+            <div style="position:absolute;left:5%;top:22px;right:67%;height:2px;background:#ccc;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:27px;right:70%;height:2px;background:#ccc;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:35px;right:67%;height:2px;background:#555555;border-radius:1px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:41px;right:68%;height:6px;background:#CCCCCC;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:50px;right:67%;height:2px;background:#555555;border-radius:1px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:56px;right:70%;height:6px;background:#CCCCCC;border-radius:1px"></div>
+            <div style="position:absolute;left:40%;top:8px;right:4px;height:5px;background:#212121;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:40%;top:17px;right:10px;height:3px;background:#555555;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:40%;top:26px;right:4px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:32px;right:14px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:40px;right:4px;height:3px;background:#212121;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:40%;top:46px;right:8px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:52px;right:16px;height:2px;background:#ddd;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Accent Çizgi <span style="color:#555555">· Gri</span></div>
+        </div>
+        <div class="tcard " data-theme="bold_teal" onclick="selectTheme('bold_teal',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#f8f8f8"></div>
+            <div style="position:absolute;left:36%;top:0;right:0;bottom:0;background:white"></div>
+            <div style="position:absolute;left:36%;top:0;bottom:0;width:3px;background:#00897B"></div>
+            <div style="position:absolute;left:3%;top:6px;right:66%;height:12px;border:1.5px solid #00897B;border-radius:3px"></div>
+            <div style="position:absolute;left:5%;top:22px;right:67%;height:2px;background:#ccc;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:27px;right:70%;height:2px;background:#ccc;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:35px;right:67%;height:2px;background:#00897B;border-radius:1px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:41px;right:68%;height:6px;background:#80CBC4;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:50px;right:67%;height:2px;background:#00897B;border-radius:1px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:56px;right:70%;height:6px;background:#80CBC4;border-radius:1px"></div>
+            <div style="position:absolute;left:40%;top:8px;right:4px;height:5px;background:#00695C;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:40%;top:17px;right:10px;height:3px;background:#00897B;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:40%;top:26px;right:4px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:32px;right:14px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:40px;right:4px;height:3px;background:#00695C;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:40%;top:46px;right:8px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:52px;right:16px;height:2px;background:#ddd;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Accent Çizgi <span style="color:#00897B">· Teal</span></div>
+        </div>
+        <div class="tcard " data-theme="bold_bordo" onclick="selectTheme('bold_bordo',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#f8f8f8"></div>
+            <div style="position:absolute;left:36%;top:0;right:0;bottom:0;background:white"></div>
+            <div style="position:absolute;left:36%;top:0;bottom:0;width:3px;background:#C0392B"></div>
+            <div style="position:absolute;left:3%;top:6px;right:66%;height:12px;border:1.5px solid #C0392B;border-radius:3px"></div>
+            <div style="position:absolute;left:5%;top:22px;right:67%;height:2px;background:#ccc;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:27px;right:70%;height:2px;background:#ccc;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:35px;right:67%;height:2px;background:#C0392B;border-radius:1px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:41px;right:68%;height:6px;background:#F1948A;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:50px;right:67%;height:2px;background:#C0392B;border-radius:1px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:56px;right:70%;height:6px;background:#F1948A;border-radius:1px"></div>
+            <div style="position:absolute;left:40%;top:8px;right:4px;height:5px;background:#7B1A1A;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:40%;top:17px;right:10px;height:3px;background:#C0392B;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:40%;top:26px;right:4px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:32px;right:14px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:40px;right:4px;height:3px;background:#7B1A1A;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:40%;top:46px;right:8px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:52px;right:16px;height:2px;background:#ddd;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Accent Çizgi <span style="color:#C0392B">· Bordo</span></div>
+        </div>
+        <div class="tcard " data-theme="bold_yesil" onclick="selectTheme('bold_yesil',this)">
+          <div class="tcard-preview" style="background:white;position:relative;overflow:hidden">
+            <div style="position:absolute;left:0;top:0;bottom:0;width:36%;background:#f8f8f8"></div>
+            <div style="position:absolute;left:36%;top:0;right:0;bottom:0;background:white"></div>
+            <div style="position:absolute;left:36%;top:0;bottom:0;width:3px;background:#27AE60"></div>
+            <div style="position:absolute;left:3%;top:6px;right:66%;height:12px;border:1.5px solid #27AE60;border-radius:3px"></div>
+            <div style="position:absolute;left:5%;top:22px;right:67%;height:2px;background:#ccc;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:27px;right:70%;height:2px;background:#ccc;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:35px;right:67%;height:2px;background:#27AE60;border-radius:1px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:41px;right:68%;height:6px;background:#A9DFBF;border-radius:1px"></div>
+            <div style="position:absolute;left:5%;top:50px;right:67%;height:2px;background:#27AE60;border-radius:1px;opacity:.5"></div>
+            <div style="position:absolute;left:5%;top:56px;right:70%;height:6px;background:#A9DFBF;border-radius:1px"></div>
+            <div style="position:absolute;left:40%;top:8px;right:4px;height:5px;background:#1E6B3C;border-radius:2px;opacity:.8"></div>
+            <div style="position:absolute;left:40%;top:17px;right:10px;height:3px;background:#27AE60;border-radius:2px;opacity:.5"></div>
+            <div style="position:absolute;left:40%;top:26px;right:4px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:32px;right:14px;height:3px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:40px;right:4px;height:3px;background:#1E6B3C;border-radius:2px;opacity:.6"></div>
+            <div style="position:absolute;left:40%;top:46px;right:8px;height:2px;background:#ddd;border-radius:2px"></div>
+            <div style="position:absolute;left:40%;top:52px;right:16px;height:2px;background:#ddd;border-radius:2px"></div>
+          </div>
+          <div class="tcard-name" style="font-size:10px;padding:5px 8px 1px">Accent Çizgi <span style="color:#27AE60">· Yeşil</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- BUTONLAR -->
+    <div class="acts">
+      <button class="abtn abtn-pdf"  id="pdfBtn"  onclick="dlPDF()">⬇ PDF İndir</button>
+      <button class="abtn abtn-docx" id="docxBtn" onclick="dlDOCX()">⬇ DOCX İndir</button>
+      <button class="abtn abtn-reset" onclick="resetForm()">← Yeni Analiz</button>
+    </div>
+  </div>
+
+  <div id="histSec" style="display:none">
+    <div class="hist-hd" onclick="toggleHist(this)">
+      <div class="hist-hd-l">
+        <svg class="hchev" width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        Analiz Geçmişi
+        <span class="hcount" id="hcount">0</span>
+      </div>
+    </div>
+    <div id="histPanel"></div>
+  </div>
+</div>
+
+<!-- PREMIUM MODAL -->
+<div class="overlay" id="premModal" onclick="closeBg(event,'premModal')">
+  <div class="modal">
+    <div class="mx" onclick="closeModal('premModal')">✕</div>
+    <div class="m-title">Pro'ya Geç</div>
+    <div class="m-sub">Ücretsiz hakkın doldu. Sınırsız analiz için plan seç.</div>
+    <div class="pcard">
+      <div class="pname">Tekil Analiz</div>
+      <div class="pprice">39₺ <span>/ analiz</span></div>
+      <div class="pfeats"><div class="pfeat">1 CV analizi hakkı</div><div class="pfeat">PDF & DOCX indirme</div><div class="pfeat">Anahtar kelime optimizasyonu</div></div>
+      <button class="pbtn pbtn-o" onclick="buyPlan('single')">Tek Seferlik Satın Al</button>
+    </div>
+    <div class="pcard hot">
+      <div class="pbadge">EN POPÜLER</div>
+      <div class="pname">Pro Plan</div>
+      <div class="pprice">149₺ <span>/ ay</span></div>
+      <div class="pfeats"><div class="pfeat">Sınırsız CV analizi</div><div class="pfeat">PDF & DOCX indirme</div><div class="pfeat">Analiz geçmişi</div><div class="pfeat">Öncelikli destek</div></div>
+      <button class="pbtn pbtn-f" onclick="buyPlan('pro')">Pro'ya Geç</button>
+    </div>
+  </div>
+</div>
+
+<!-- HESABIM MODAL -->
+<div class="overlay" id="accModal" onclick="closeBg(event,'accModal')">
+  <div class="modal">
+    <div class="mx" onclick="closeModal('accModal')">✕</div>
+    <div class="m-title">Hesabım</div>
+    <div class="aav" id="aAv">?</div>
+    <div class="aname" id="aName">—</div>
+    <div class="aemail" id="aEmail">—</div>
+    <div class="arow"><span class="albl">Plan</span><span class="aval coffee" id="aPlan">—</span></div>
+    <div class="arow"><span class="albl">Analiz Hakkı</span><span class="aval green" id="aCredits">—</span></div>
+    <div class="arow"><span class="albl">Üye Tarihi</span><span class="aval" id="aDate">—</span></div>
+    <button class="bfull bf-fill"  onclick="closeModal('accModal');openModal('premModal')">⭐ Pro'ya Geç</button>
+    <button class="bfull bf-ghost" onclick="logout()">Çıkış Yap</button>
+  </div>
+</div>
+
+<!-- GEÇMİŞ DETAY -->
+<div class="overlay" id="hdModal" onclick="closeBg(event,'hdModal')">
+  <div class="modal" style="max-width:700px">
+    <div class="mx" onclick="closeModal('hdModal')">✕</div>
+    <div class="m-title">Analiz Detayı</div>
+    <div id="hdContent"></div>
+  </div>
+</div>
+
+<script>
+let uFile=null,cvData=null,cUser=null,cProf=null,curTheme='classic_mavi',currentMode='upload',currentStep=1;
+const createExps=[],createEdus=[];
+const THEME_NAMES={
+  "classic_mavi":"Sol Sidebar · Mavi","classic_gri":"Sol Sidebar · Gri","classic_teal":"Sol Sidebar · Teal","classic_bordo":"Sol Sidebar · Bordo","classic_yesil":"Sol Sidebar · Yeşil",
+  "modern_mavi":"Koyu Header · Mavi","modern_gri":"Koyu Header · Gri","modern_teal":"Koyu Header · Teal","modern_bordo":"Koyu Header · Bordo","modern_yesil":"Koyu Header · Yeşil",
+  "minimal_mavi":"Renkli Header · Mavi","minimal_gri":"Renkli Header · Gri","minimal_teal":"Renkli Header · Teal","minimal_bordo":"Renkli Header · Bordo","minimal_yesil":"Renkli Header · Yeşil",
+  "coffee_mavi":"Sade Sidebar · Mavi","coffee_gri":"Sade Sidebar · Gri","coffee_teal":"Sade Sidebar · Teal","coffee_bordo":"Sade Sidebar · Bordo","coffee_yesil":"Sade Sidebar · Yeşil",
+  "bold_mavi":"Accent Çizgi · Mavi","bold_gri":"Accent Çizgi · Gri","bold_teal":"Accent Çizgi · Teal","bold_bordo":"Accent Çizgi · Bordo","bold_yesil":"Accent Çizgi · Yeşil",
+};
+
+// Tema renkleri (önizleme için) - 25 kombinasyon
+const PAL={
+  mavi: {sb:"#154360",ac:"#2E86C1",bg:"#EBF5FB"},
+  gri:  {sb:"#111111",ac:"#555555",bg:"#F5F5F5"},
+  teal: {sb:"#004D40",ac:"#00897B",bg:"#E0F2F1"},
+  bordo:{sb:"#5B0E0E",ac:"#C0392B",bg:"#FDEDEC"},
+  yesil:{sb:"#145A32",ac:"#27AE60",bg:"#EAFAF1"},
+};
+const THEME_CSS={};
+["classic","modern","minimal","coffee","bold"].forEach(t=>{
+  ["mavi","gri","teal","bordo","yesil"].forEach(r=>{
+    THEME_CSS[t+"_"+r]={sb:PAL[r].sb, ac:PAL[r].ac, bg:PAL[r].bg, text:"#222222"};
+  });
+});
+// geriye dönük uyumluluk
+["classic","modern","minimal","coffee","bold"].forEach(t=>{THEME_CSS[t]=THEME_CSS[t+"_mavi"];});
+
+const openModal=id=>document.getElementById(id).classList.add("open");
+const closeModal=id=>document.getElementById(id).classList.remove("open");
+function closeBg(e,id){if(e.target.id===id)closeModal(id)}
+
+function showState(s){
+  ["loginCard","formCard","loading","result"].forEach(id=>{document.getElementById(id).style.display="none"});
+  const map={login:"loginCard",form:"formCard",loading:"loading",result:"result"};
+  if(map[s])document.getElementById(map[s]).style.display="block";
+  const hs=document.getElementById("histSec");
+  if(hs)hs.style.display=(s==="form"||s==="result")?"block":"none";
+}
+
+function goHome(e){e.preventDefault();resetForm();window.scrollTo({top:0,behavior:"smooth"})}
+
+function renderNav(u,p){
+  const name=u.full_name||u.email?.split("@")[0]||"Kullanıcı";
+  const credits=p?.free_credits??0;
+  const plan=p?.plan??"free";
+  const av=u.avatar_url?`<img src="${u.avatar_url}" alt="">`:name.charAt(0).toUpperCase();
+  const cp=plan==="pro"
+    ?`<button class="nbtn nbtn-ghost" onclick="openModal('premModal')">⭐ Pro</button>`
+    :`<button class="nbtn nbtn-ghost" onclick="openModal('premModal')">${credits===0?"0 hak":"⚡ "+credits+" hak"}</button>`;
+  document.getElementById("navAuth").innerHTML=`${cp}
+    <button class="nbtn nbtn-ghost" onclick="openAccModal()" style="gap:7px"><span class="nav-av">${av}</span>${name}</button>
+    <button class="nbtn nbtn-ghost" onclick="logout()">Çıkış</button>`;
+  const cb=document.getElementById("creditsBadge");
+  if(cb)cb.textContent=plan==="pro"?"⭐ Pro Plan":`⚡ ${credits} analiz hakkı`;
+}
+
+const loginWithGoogle=()=>window.location.href="/auth/google";
+function logout(){localStorage.removeItem("cvfit_access_token");localStorage.removeItem("cvfit_refresh_token");cUser=null;cProf=null;closeModal("accModal");showState("login")}
+
+async function checkAuth(){
+  const t=localStorage.getItem("cvfit_access_token");
+  if(!t){showState("login");return}
+  try{
+    const r=await fetch("/auth/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({access_token:t})});
+    if(!r.ok){logout();return}
+    const d=await r.json();cUser=d.user;cProf=d.profile;renderNav(d.user,d.profile);showState("form");loadHist();
+  }catch(e){showState("login")}
+}
+
+function handleFile(i){if(!i.files[0])return;uFile=i.files[0];document.getElementById("dzt").innerHTML=`<strong style="color:var(--coffee)">✓ ${uFile.name}</strong>`}
+function handleDrop(e){e.preventDefault();const f=e.dataTransfer.files[0];if(f?.type==="application/pdf"){uFile=f;document.getElementById("dzt").innerHTML=`<strong style="color:var(--coffee)">✓ ${f.name}</strong>`}}
+
+function countUp(el,to,delay,dur=950){setTimeout(()=>{const t0=performance.now();const tick=n=>{const p=Math.min((n-t0)/dur,1);const e=1-Math.pow(1-p,3);el.textContent=Math.round(to*e)+"%";if(p<1)requestAnimationFrame(tick)};requestAnimationFrame(tick)},delay||0)}
+function animSteps(){["s1","s2","s3","s4"].forEach((id,i)=>{const el=document.getElementById(id);if(!el)return;el.classList.remove("active","done");setTimeout(()=>{if(i>0)document.getElementById(["s1","s2","s3","s4"][i-1])?.classList.replace("active","done");el.classList.add("active")},i*4500)})}
+
+// ── SEKME YÖNETİMİ ────────────────────────────────────────────────────────────
+function switchTab(name, btn){
+  document.querySelectorAll(".tab-panel").forEach(p=>p.style.display="none");
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab"+name.charAt(0).toUpperCase()+name.slice(1)).style.display="block";
+  btn.classList.add("active");
+}
+
+// ── TEMA SEÇİMİ ───────────────────────────────────────────────────────────────
+function selectTheme(theme, card){
+  curTheme=theme;
+  document.querySelectorAll(".tcard").forEach(c=>c.classList.remove("active"));
+  card.classList.add("active");
+  const tn=document.getElementById("activeThemeName");
+  if(tn)tn.textContent=THEME_NAMES[theme]||theme;
+  // Önizlemeyi tema rengine göre güncelle
+  applyThemeToPreview(theme);
+}
+
+function applyThemeToPreview(theme){
+  const t=THEME_CSS[theme]||THEME_CSS.classic;
+  const prev=document.getElementById("cvPrev");
+  if(!prev)return;
+  // Accent rengi ile başlık altı çizgilerini güncelle
+  prev.querySelectorAll(".cv-stit").forEach(el=>{
+    el.style.color=t.ac;
+    el.style.borderBottomColor=t.ac+"44";
+  });
+  prev.querySelectorAll(".cv-role, .cv-edu-s, .cv-exp-c, .cv-crs-p").forEach(el=>{
+    el.style.color=t.ac;
+  });
+  prev.querySelectorAll(".cv-sk").forEach(el=>{
+    el.style.background=t.ac+"18";
+    el.style.color=t.ac;
+    el.style.borderColor=t.ac+"33";
+  });
+}
+
+// ── CV ÖNIZLEME RENDER ────────────────────────────────────────────────────────
+function renderCV(cv){
+  let h="";
+  h+=`<div class="cv-name">${cv.name||""}</div>`;
+  if(cv.title)h+=`<div class="cv-role">${cv.title}</div>`;
+  h+=`<div class="cv-rul"></div>`;
+  if(cv.contact?.length)h+=`<div class="cv-sec"><div class="cv-stit">İletişim</div><div class="cv-ctags">${cv.contact.map(c=>`<span class="cv-ctag">${c}</span>`).join("")}</div></div>`;
+  if(cv.summary)h+=`<div class="cv-sec"><div class="cv-stit">Hakkımda</div><div class="cv-sum">${cv.summary}</div></div>`;
+  if(cv.skills?.length)h+=`<div class="cv-sec"><div class="cv-stit">Beceriler</div><div class="cv-skills">${cv.skills.map(s=>`<span class="cv-sk">${s}</span>`).join("")}</div></div>`;
+  if(cv.experience?.length){h+=`<div class="cv-sec"><div class="cv-stit">İş Deneyimi</div>`;cv.experience.forEach(e=>{h+=`<div class="cv-exp"><div class="cv-exp-hd"><span class="cv-exp-t">${e.title||""}</span><span class="cv-exp-d">${e.date||""}</span></div><div class="cv-exp-c">${e.company||""}</div>${(e.bullets||[]).map(b=>`<div class="cv-bul">${b}</div>`).join("")}</div>`});h+=`</div>`}
+  if(cv.education?.length){h+=`<div class="cv-sec"><div class="cv-stit">Eğitim</div>`;cv.education.forEach(e=>{h+=`<div class="cv-edu"><div class="cv-edu-d">${e.degree||""}</div><div class="cv-edu-s">${e.school||""}</div><div class="cv-edu-dt">${e.date||""}</div></div>`});h+=`</div>`}
+  if(cv.languages?.length)h+=`<div class="cv-sec"><div class="cv-stit">Diller</div><div class="cv-skills">${cv.languages.map(l=>`<span class="cv-sk">${l}</span>`).join("")}</div></div>`;
+  if(cv.courses?.length){h+=`<div class="cv-sec"><div class="cv-stit">Kurslar & Sertifikalar</div>`;cv.courses.forEach(c=>{h+=`<div class="cv-crs"><div class="cv-crs-hd"><span class="cv-crs-n">${c.name||""}</span><span class="cv-exp-d">${c.date||""}</span></div><div class="cv-crs-p">${c.provider||""}</div><div class="cv-crs-desc">${c.description||""}</div></div>`});h+=`</div>`}
+  return h;
+}
+
+// ── KART EDİTÖRÜ ──────────────────────────────────────────────────────────────
+function buildEditCards(cv){
+  const cont=document.getElementById("editCards");
+  if(!cont)return;
+  cont.innerHTML="";
+
+  // Yardımcı: input alanı
+  function inp(val,key,label,multiline=false){
+    const id=`ed_${key}_${Math.random().toString(36).slice(2,7)}`;
+    const tag=multiline?"textarea":"input";
+    const base=`id="${id}" data-key="${key}" class="ed-input${multiline?" ed-ta":""}" oninput="liveUpdate()"`;
+    if(multiline)return `<label class="ed-lbl">${label}</label><textarea ${base}>${escHtml(val||"")}</textarea>`;
+    return `<label class="ed-lbl">${label}</label><input type="text" ${base} value="${escHtml(val||"")}">`;
+  }
+  function escHtml(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+
+  // ── Kişisel bilgiler kartı ──
+  let c1=`<div class="ecard"><div class="ecard-title">👤 Kişisel Bilgiler</div>`;
+  c1+=inp(cv.name,"name","Ad Soyad");
+  c1+=inp(cv.title,"title","Ünvan / Pozisyon");
+  c1+=inp((cv.contact||[]).join(", "),"contact","İletişim (virgülle ayır)");
+  c1+=inp(cv.summary,"summary","Hakkımda",true);
+  c1+=`</div>`;
+  cont.innerHTML+=c1;
+
+  // ── Beceriler kartı ──
+  let c2=`<div class="ecard"><div class="ecard-title">🛠 Beceriler & Diller</div>`;
+  c2+=inp((cv.skills||[]).join(", "),"skills","Beceriler (virgülle ayır)");
+  c2+=inp((cv.languages||[]).join(", "),"languages","Diller (virgülle ayır)");
+  c2+=`</div>`;
+  cont.innerHTML+=c2;
+
+  // ── Deneyim kartları ──
+  (cv.experience||[]).forEach((exp,i)=>{
+    let ce=`<div class="ecard" data-section="experience" data-index="${i}">`;
+    ce+=`<div class="ecard-title">💼 Deneyim ${i+1} <button class="ecard-del" onclick="deleteSection('experience',${i})">✕</button></div>`;
+    ce+=`<div class="ed-row">`;
+    ce+=`<div class="ed-col">${inp(exp.title,`experience.${i}.title`,"Pozisyon")}</div>`;
+    ce+=`<div class="ed-col">${inp(exp.company,`experience.${i}.company`,"Şirket")}</div>`;
+    ce+=`</div>`;
+    ce+=inp(exp.date,`experience.${i}.date`,"Tarih");
+    (exp.bullets||[]).forEach((b,j)=>{
+      ce+=`<div class="ed-bullet-row"><label class="ed-lbl">Madde ${j+1}</label><div class="ed-brow"><input type="text" data-key="experience.${i}.bullets.${j}" class="ed-input" value="${escHtml(b)}" oninput="liveUpdate()"><button class="ed-del-b" onclick="deleteBullet(${i},${j})">✕</button></div></div>`;
+    });
+    ce+=`<button class="ecard-add-btn" onclick="addBullet(${i})">+ Madde Ekle</button>`;
+    ce+=`</div>`;
+    cont.innerHTML+=ce;
+  });
+  let addExp=`<button class="ecard-add" onclick="addSection('experience')">+ Deneyim Ekle</button>`;
+  cont.innerHTML+=addExp;
+
+  // ── Eğitim kartları ──
+  (cv.education||[]).forEach((edu,i)=>{
+    let ce=`<div class="ecard" data-section="education" data-index="${i}">`;
+    ce+=`<div class="ecard-title">🎓 Eğitim ${i+1} <button class="ecard-del" onclick="deleteSection('education',${i})">✕</button></div>`;
+    ce+=`<div class="ed-row">`;
+    ce+=`<div class="ed-col">${inp(edu.degree,`education.${i}.degree`,"Bölüm")}</div>`;
+    ce+=`<div class="ed-col">${inp(edu.school,`education.${i}.school`,"Okul")}</div>`;
+    ce+=`</div>`;
+    ce+=inp(edu.date,`education.${i}.date`,"Tarih");
+    ce+=`</div>`;
+    cont.innerHTML+=ce;
+  });
+  cont.innerHTML+=`<button class="ecard-add" onclick="addSection('education')">+ Eğitim Ekle</button>`;
+
+  // ── Kurslar kartları ──
+  (cv.courses||[]).forEach((crs,i)=>{
+    let cc=`<div class="ecard" data-section="courses" data-index="${i}">`;
+    cc+=`<div class="ecard-title">📜 Kurs ${i+1} <button class="ecard-del" onclick="deleteSection('courses',${i})">✕</button></div>`;
+    cc+=`<div class="ed-row">`;
+    cc+=`<div class="ed-col">${inp(crs.name,`courses.${i}.name`,"Kurs Adı")}</div>`;
+    cc+=`<div class="ed-col">${inp(crs.provider,`courses.${i}.provider`,"Sağlayıcı")}</div>`;
+    cc+=`</div>`;
+    cc+=inp(crs.date,`courses.${i}.date`,"Tarih");
+    cc+=inp(crs.description,`courses.${i}.description`,"Açıklama",true);
+    cc+=`</div>`;
+    cont.innerHTML+=cc;
+  });
+  cont.innerHTML+=`<button class="ecard-add" onclick="addSection('courses')">+ Kurs Ekle</button>`;
+}
+
+// Editörden CV objesini oku
+function readEditorData(){
+  const cv=JSON.parse(JSON.stringify(cvData)); // deep copy
+  document.querySelectorAll(".ed-input").forEach(el=>{
+    const key=el.dataset.key;
+    if(!key)return;
+    const val=el.value;
+    const parts=key.split(".");
+    if(parts.length===1){
+      const k=parts[0];
+      if(k==="contact"||k==="skills"||k==="languages"){
+        cv[k]=val.split(",").map(s=>s.trim()).filter(Boolean);
+      }else{
+        cv[k]=val;
+      }
+    }else if(parts.length===3){
+      const [sec,idx,field]=parts;
+      if(!cv[sec])cv[sec]=[];
+      if(!cv[sec][idx])cv[sec][idx]={};
+      cv[sec][idx][field]=val;
+    }else if(parts.length===4){
+      const [sec,idx,arr,bidx]=parts;
+      if(!cv[sec])cv[sec]=[];
+      if(!cv[sec][idx])cv[sec][idx]={};
+      if(!cv[sec][idx][arr])cv[sec][idx][arr]=[];
+      cv[sec][idx][arr][bidx]=val;
+    }
+  });
+  return cv;
+}
+
+function liveUpdate(){
+  const updated=readEditorData();
+  cvData=updated;
+  document.getElementById("cvPrev").innerHTML=renderCV(cvData);
+  applyThemeToPreview(curTheme);
+}
+
+function addBullet(expIdx){
+  if(!cvData.experience[expIdx].bullets)cvData.experience[expIdx].bullets=[];
+  cvData.experience[expIdx].bullets.push("");
+  buildEditCards(cvData);
+}
+function deleteBullet(expIdx,bulletIdx){
+  cvData.experience[expIdx].bullets.splice(bulletIdx,1);
+  buildEditCards(cvData);liveUpdate();
+}
+function deleteSection(section,idx){
+  cvData[section].splice(idx,1);
+  buildEditCards(cvData);liveUpdate();
+}
+function addSection(section){
+  if(!cvData[section])cvData[section]=[];
+  const templates={
+    experience:{title:"",company:"",date:"",bullets:[""]},
+    education:{degree:"",school:"",date:""},
+    courses:{name:"",provider:"",date:"",description:""}
+  };
+  cvData[section].push({...templates[section]});
+  buildEditCards(cvData);
+}
+
+// ── ANALİZ ────────────────────────────────────────────────────────────────────
+async function analyze(){
+  const t=localStorage.getItem("cvfit_access_token");
+  if(!t){showState("login");return}
+  if(cProf?.plan==="free"&&cProf?.free_credits<=0){openModal("premModal");return}
+  let jd,ct;
+  if(currentMode==='create'){
+    jd=(document.getElementById("jobDescCreate")?.value||'').trim();
+    ct=collectCreateFormText();
+    if(!jd){alert("Lütfen iş ilanını girin!");return}
+    if(!ct){alert("Lütfen bilgilerinizi girin!");return}
+  }else{
+    jd=document.getElementById("jobDesc").value.trim();
+    ct=document.getElementById("cvText").value.trim();
+    if(!jd){alert("Lütfen iş ilanını girin!");return}
+    if(!ct&&!uFile){alert("CV metni girin veya PDF yükleyin!");return}
+  }
+  showState("loading");animSteps();
+  const fd=new FormData();fd.append("job_description",jd);
+  if(currentMode==='upload'&&uFile)fd.append("cv_file",uFile);else fd.append("cv_text",ct);
+  try{
+    const r=await fetch("/analyze",{method:"POST",headers:{"Authorization":`Bearer ${t}`},body:fd});
+    if(r.status===402){openModal("premModal");showState("form");return}
+    if(!r.ok)throw new Error("Sunucu hatası: "+r.status);
+    const d=await r.json();
+    document.getElementById("sBefore").textContent="0%";
+    document.getElementById("sAfter").textContent="0%";
+    document.getElementById("sDelta").style.visibility="hidden";
+    showState("result");
+    // ilk tab: preview
+    switchTab("preview",document.querySelector(".tab"));
+    window.scrollTo({top:0,behavior:"smooth"});
+    countUp(document.getElementById("sBefore"),d.original_score,150);
+    countUp(document.getElementById("sAfter"),d.new_score,550,1100);
+    setTimeout(()=>{const delta=d.new_score-d.original_score;const el=document.getElementById("sDelta");el.textContent=(delta>0?"+":"")+delta+"%";el.style.visibility="visible"},1750);
+    const tEl=document.getElementById("kTags");tEl.innerHTML="";
+    (d.keywords||[]).forEach((k,i)=>{if(!k)return;const s=document.createElement("span");s.className="tag";s.textContent="+ "+k;s.style.animationDelay=(i*.055)+"s";tEl.appendChild(s)});
+    cvData=d.cv_data;
+    document.getElementById("cvPrev").innerHTML=renderCV(cvData);
+    applyThemeToPreview(curTheme);
+    buildEditCards(cvData);
+    await checkAuth();loadHist();
+  }catch(e){alert("Hata: "+e.message);showState("form")}
+}
+
+// ── İNDİRME ──────────────────────────────────────────────────────────────────
+async function dlFile(ep,fn,bid){
+  if(!cvData){alert("Önce analiz yapın!");return}
+  const btn=document.getElementById(bid);const orig=btn.innerHTML;btn.innerHTML="⏳...";btn.disabled=true;
+  try{
+    const fd=new FormData();
+    fd.append("cv_text",JSON.stringify(cvData));
+    fd.append("theme",curTheme);
+    const r=await fetch(ep,{method:"POST",body:fd});
+    if(!r.ok)throw new Error(await r.text());
+    const blob=await r.blob();const url=URL.createObjectURL(blob);
+    const a=Object.assign(document.createElement("a"),{href:url,download:fn});
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+    btn.innerHTML="✓ İndirildi!";setTimeout(()=>{btn.innerHTML=orig;btn.disabled=false},2000);
+  }catch(e){alert("Hata: "+e.message);btn.innerHTML=orig;btn.disabled=false}
+}
+const dlPDF=()=>dlFile("/download-pdf","uyarlanmis_cv.pdf","pdfBtn");
+const dlDOCX=()=>dlFile("/download-docx","uyarlanmis_cv.docx","docxBtn");
+
+function resetForm(){uFile=null;cvData=null;currentStep=1;document.getElementById("dzt").innerHTML="<strong>PDF yüklemek için tıklayın</strong><br>veya buraya sürükleyin";switchMode('upload');showState("form")}
+
+function openAccModal(){
+  if(!cUser)return;
+  const plan=cProf?.plan||"free";const credits=cProf?.free_credits??0;
+  const name=cUser.full_name||cUser.email?.split("@")[0]||"—";
+  const date=cProf?.created_at?new Date(cProf.created_at).toLocaleDateString("tr-TR"):"—";
+  document.getElementById("aName").textContent=name;
+  document.getElementById("aEmail").textContent=cUser.email||"—";
+  document.getElementById("aPlan").textContent=plan==="pro"?"⭐ Pro":"Ücretsiz";
+  document.getElementById("aCredits").textContent=plan==="pro"?"Sınırsız":`${credits} analiz`;
+  document.getElementById("aDate").textContent=date;
+  document.getElementById("aAv").innerHTML=cUser.avatar_url?`<img src="${cUser.avatar_url}" alt="">`:name.charAt(0).toUpperCase();
+  openModal("accModal");
+}
+function buyPlan(type){if(!localStorage.getItem("cvfit_access_token")){loginWithGoogle();return}window.location.href={single:"https://sandbox.iyzi.link/AAJuwA",pro:"https://sandbox.iyzi.link/AAJuwQ"}[type]}
+
+async function loadHist(){
+  const t=localStorage.getItem("cvfit_access_token");if(!t)return;
+  try{const r=await fetch("/api/history",{headers:{"Authorization":`Bearer ${t}`}});if(!r.ok)return;const d=await r.json();renderHist(d.history||[])}catch(e){}
+}
+function renderHist(items){
+  document.getElementById("hcount").textContent=items.length;
+  const p=document.getElementById("histPanel");
+  if(!items.length){p.innerHTML="<div class=\"hempty\">Henüz bir analiz yok.</div>";return}
+  p.innerHTML=items.map(item=>{
+    const d=new Date(item.created_at).toLocaleDateString("tr-TR",{day:"numeric",month:"long",year:"numeric"});
+    const job=(item.job_description||"İş ilanı").substring(0,72);
+    const enc=JSON.stringify(item).replace(/"/g,"&quot;");
+    return `<div class="hitem" onclick='openHD(${enc})'><div class="hitem-l"><div class="hitem-job">${job}${job.length>=72?"…":""}</div><div class="hitem-date">${d}</div></div><div class="hscores"><div class="hpill b">${item.original_score}%</div><span class="harr">→</span><div class="hpill a">${item.new_score}%</div></div></div>`;
+  }).join("");
+}
+function toggleHist(el){el.classList.toggle("open");document.getElementById("histPanel").style.display=el.classList.contains("open")?"block":"none"}
+function openHD(item){
+  const cv=item.cv_data||{};const kws=item.keywords||[];
+  const d=new Date(item.created_at).toLocaleDateString("tr-TR",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  document.getElementById("hdContent").innerHTML=`
+    <p style="font-size:12px;color:var(--ink4);margin-bottom:15px;font-style:italic">${d}</p>
+    <div class="sstrip" style="margin-bottom:13px">
+      <div class="sbox before"><div class="snum" style="font-size:40px">${item.original_score}%</div><div class="slbl">Önceki</div></div>
+      <div class="smid"><div class="sarr">→</div><div class="sdelta">+${item.new_score-item.original_score}%</div></div>
+      <div class="sbox after"><div class="snum" style="font-size:40px">${item.new_score}%</div><div class="slbl">Sonraki</div></div>
+    </div>
+    ${kws.length?`<div class="rblock" style="margin-bottom:12px"><div class="rbtitle">Anahtar Kelimeler</div><div class="tags">${kws.map(k=>`<span class="tag">+ ${k}</span>`).join("")}</div></div>`:""}
+    <div class="cv-shell"><div class="cv-bar"><span class="cv-bar-lbl">CV Önizleme</span></div><div class="cv-in">${renderCV(cv)}</div></div>
+    <div style="margin-top:13px"><button class="abtn abtn-pdf" style="width:100%;justify-content:center" onclick="reloadCV(${JSON.stringify(item).replace(/"/g,"&quot;")})">Bu CV'yi Yükle</button></div>`;
+  openModal("hdModal");
+}
+function reloadCV(item){
+  cvData=item.cv_data||{};
+  document.getElementById("sBefore").textContent=item.original_score+"%";
+  document.getElementById("sAfter").textContent=item.new_score+"%";
+  const d=item.new_score-item.original_score;
+  const el=document.getElementById("sDelta");el.textContent=(d>0?"+":"")+d+"%";el.style.visibility="visible";
+  document.getElementById("kTags").innerHTML=(item.keywords||[]).map(k=>`<span class="tag">+ ${k}</span>`).join("");
+  document.getElementById("cvPrev").innerHTML=renderCV(cvData);
+  applyThemeToPreview(curTheme);
+  buildEditCards(cvData);
+  closeModal("hdModal");showState("result");window.scrollTo({top:0,behavior:"smooth"});
+}
+// ── MODE & STEP FONKSİYONLARI ──────────────────────────────────────────────────
+function switchMode(mode){
+  currentMode=mode;
+  document.getElementById('modeUpload').style.display=mode==='upload'?'block':'none';
+  document.getElementById('modeCreate').style.display=mode==='create'?'block':'none';
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(mode==='upload'?'modeUploadBtn':'modeCreateBtn').classList.add('active');
+  if(mode==='create'){
+    if(createExps.length===0)addCreateExp();
+    if(createEdus.length===0)addCreateEdu();
+  }
+}
+
+function goStep(dir){
+  const next=currentStep+dir;
+  if(next<1||next>4)return;
+  currentStep=next;
+  renderStep();
+}
+
+function renderStep(){
+  document.querySelectorAll('#modeCreate .form-step').forEach(s=>s.classList.remove('active'));
+  const step=document.querySelector('#modeCreate .form-step[data-step="'+currentStep+'"]');
+  if(step)step.classList.add('active');
+  document.querySelectorAll('.step-dot').forEach(d=>{
+    const s=+d.dataset.step;
+    d.classList.remove('active','done');
+    if(s===currentStep)d.classList.add('active');
+    else if(s<currentStep)d.classList.add('done');
+  });
+  document.querySelectorAll('.step-connector').forEach(c=>{
+    const a=+c.dataset.after;
+    c.classList.toggle('done',a<currentStep);
+  });
+  document.querySelectorAll('.step-label').forEach((l,i)=>{
+    l.classList.toggle('active',i+1===currentStep);
+  });
+  document.getElementById('stepPrev').style.visibility=currentStep===1?'hidden':'visible';
+  const nb=document.getElementById('stepNext');
+  if(currentStep===4){nb.innerHTML='Analiz Et <span class="arr">→</span>';nb.onclick=()=>analyze();}
+  else{nb.textContent='İleri →';nb.onclick=()=>goStep(1);}
+}
+
+// ── DİNAMİK DENEYİM GİRİŞİ ────────────────────────────────────────────────────
+function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function addCreateExp(){
+  createExps.push({title:'',company:'',date:'',bullets:['']});
+  renderCreateExps();
+}
+function removeCreateExp(idx){
+  createExps.splice(idx,1);
+  renderCreateExps();
+}
+function addCreateExpBullet(idx){
+  createExps[idx].bullets.push('');
+  renderCreateExps();
+}
+function removeCreateExpBullet(ei,bi){
+  createExps[ei].bullets.splice(bi,1);
+  renderCreateExps();
+}
+function renderCreateExps(){
+  const list=document.getElementById('cExpList');
+  if(!list)return;
+  list.innerHTML=createExps.map((exp,i)=>{
+    let h='<div class="fs-dynamic-card"><div class="fs-card-head"><span class="fs-card-num">Deneyim '+(i+1)+'</span>'+(createExps.length>1?'<button class="fs-card-del" onclick="removeCreateExp('+i+')">✕</button>':'')+'</div>';
+    h+='<div class="fs-row"><div class="fs-field"><label class="fs-lbl">Pozisyon</label><input type="text" class="fs-input" data-exp="'+i+'" data-field="title" value="'+escH(exp.title)+'" oninput="syncCreateExp(this)" placeholder="Örn: Frontend Developer"></div>';
+    h+='<div class="fs-field"><label class="fs-lbl">Şirket</label><input type="text" class="fs-input" data-exp="'+i+'" data-field="company" value="'+escH(exp.company)+'" oninput="syncCreateExp(this)" placeholder="Örn: ABC Teknoloji"></div></div>';
+    h+='<div class="fs-field"><label class="fs-lbl">Tarih</label><input type="text" class="fs-input" data-exp="'+i+'" data-field="date" value="'+escH(exp.date)+'" oninput="syncCreateExp(this)" placeholder="Örn: 2022 - Günümüz"></div>';
+    h+='<label class="fs-lbl">İş Maddeleri</label>';
+    exp.bullets.forEach((b,j)=>{
+      h+='<div class="fs-bullet-row"><input type="text" class="fs-input" data-exp="'+i+'" data-bullet="'+j+'" value="'+escH(b)+'" oninput="syncCreateBullet(this)" placeholder="Yaptığınız işi kısaca tanımlayın">'+(exp.bullets.length>1?'<button class="fs-bullet-del" onclick="removeCreateExpBullet('+i+','+j+')">✕</button>':'')+'</div>';
+    });
+    h+='<button class="fs-add-btn" onclick="addCreateExpBullet('+i+')" style="margin-top:2px;font-size:12px;padding:8px">+ Madde Ekle</button>';
+    h+='</div>';
+    return h;
+  }).join('');
+}
+function syncCreateExp(el){createExps[+el.dataset.exp][el.dataset.field]=el.value;}
+function syncCreateBullet(el){createExps[+el.dataset.exp].bullets[+el.dataset.bullet]=el.value;}
+
+// ── DİNAMİK EĞİTİM GİRİŞİ ─────────────────────────────────────────────────────
+function addCreateEdu(){
+  createEdus.push({degree:'',school:'',date:''});
+  renderCreateEdus();
+}
+function removeCreateEdu(idx){
+  createEdus.splice(idx,1);
+  renderCreateEdus();
+}
+function renderCreateEdus(){
+  const list=document.getElementById('cEduList');
+  if(!list)return;
+  list.innerHTML=createEdus.map((edu,i)=>{
+    let h='<div class="fs-dynamic-card"><div class="fs-card-head"><span class="fs-card-num">Eğitim '+(i+1)+'</span>'+(createEdus.length>1?'<button class="fs-card-del" onclick="removeCreateEdu('+i+')">✕</button>':'')+'</div>';
+    h+='<div class="fs-row"><div class="fs-field"><label class="fs-lbl">Bölüm</label><input type="text" class="fs-input" data-edu="'+i+'" data-field="degree" value="'+escH(edu.degree)+'" oninput="syncCreateEdu(this)" placeholder="Örn: Bilgisayar Mühendisliği"></div>';
+    h+='<div class="fs-field"><label class="fs-lbl">Okul</label><input type="text" class="fs-input" data-edu="'+i+'" data-field="school" value="'+escH(edu.school)+'" oninput="syncCreateEdu(this)" placeholder="Örn: İstanbul Üniversitesi"></div></div>';
+    h+='<div class="fs-field"><label class="fs-lbl">Tarih</label><input type="text" class="fs-input" data-edu="'+i+'" data-field="date" value="'+escH(edu.date)+'" oninput="syncCreateEdu(this)" placeholder="Örn: 2018 - 2022"></div>';
+    h+='</div>';
+    return h;
+  }).join('');
+}
+function syncCreateEdu(el){createEdus[+el.dataset.edu][el.dataset.field]=el.value;}
+
+// ── FORM VERİSİNİ METİN CV'YE ÇEVİR ───────────────────────────────────────────
+function collectCreateFormText(){
+  const name=document.getElementById('cName')?.value||'';
+  const title=document.getElementById('cTitle')?.value||'';
+  const email=document.getElementById('cEmail')?.value||'';
+  const phone=document.getElementById('cPhone')?.value||'';
+  const address=document.getElementById('cAddress')?.value||'';
+  const website=document.getElementById('cWebsite')?.value||'';
+  const summary=document.getElementById('cSummary')?.value||'';
+  const skills=document.getElementById('cSkills')?.value||'';
+  const langs=document.getElementById('cLangs')?.value||'';
+  let cv=name+'\n'+title+'\n\n';
+  cv+='İletişim: '+[email,phone,address,website].filter(Boolean).join(' | ')+'\n\n';
+  if(summary)cv+='Hakkımda:\n'+summary+'\n\n';
+  if(createExps.some(e=>e.title||e.company)){
+    cv+='İş Deneyimi:\n';
+    createExps.forEach(e=>{
+      if(!e.title&&!e.company)return;
+      cv+=e.title+(e.company?' - '+e.company:'')+(e.date?' ('+e.date+')':'')+'\n';
+      (e.bullets||[]).forEach(b=>{if(b.trim())cv+='• '+b.trim()+'\n';});
+      cv+='\n';
+    });
+  }
+  if(createEdus.some(e=>e.degree||e.school)){
+    cv+='Eğitim:\n';
+    createEdus.forEach(e=>{
+      if(!e.degree&&!e.school)return;
+      cv+=e.degree+(e.school?' - '+e.school:'')+(e.date?' ('+e.date+')':'')+'\n';
+    });
+    cv+='\n';
+  }
+  if(skills)cv+='Beceriler: '+skills+'\n';
+  if(langs)cv+='Diller: '+langs+'\n';
+  return cv.trim();
+}
+
+checkAuth();
+</script>
+</body>
+</html>
