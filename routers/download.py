@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Form, HTTPException
 from fastapi.responses import FileResponse
-import os, json, tempfile, subprocess, shutil, platform, io
+import os, json, tempfile, subprocess, shutil, platform
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas as rl_canvas
-from xhtml2pdf import pisa
 
 from services.pdf_themes import tema1_classic, tema2_modern, tema3_mint, tema4_dark, tema5_bold
 
@@ -63,29 +62,6 @@ async def download_pdf(cv_text: str = Form(...), theme: str = Form("classic_mavi
     tema_modul = TEMA_MODUL[tema_adi]
     tema_modul.render(c, cv, page_w, page_h, renk)
     c.save()
-
-    return FileResponse(tmp.name, media_type="application/pdf", filename="uyarlanmis_cv.pdf")
-
-
-@router.post("/download-pdf-html")
-async def download_pdf_html(html_content: str = Form(...)):
-    full_html = f"""<!DOCTYPE html>
-<html><head><meta charset="utf-8">
-<style>
-@page {{ size: A4; margin: 0; }}
-* {{ margin: 0; padding: 0; box-sizing: border-box; }}
-html, body {{ font-family: 'Helvetica', 'Arial', sans-serif; background: white; color: #222; line-height: 1.5; width: 794px; }}
-</style></head><body>{html_content}</body></html>"""
-
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
-    tmp.close()
-
-    with open(tmp.name, "wb") as f:
-        pisa_status = pisa.CreatePDF(io.StringIO(full_html), dest=f)
-
-    if pisa_status.err:
-        os.unlink(tmp.name)
-        raise HTTPException(status_code=500, detail="PDF oluşturulamadı")
 
     return FileResponse(tmp.name, media_type="application/pdf", filename="uyarlanmis_cv.pdf")
 
