@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
@@ -48,6 +48,14 @@ async def payment_success(request: Request):
 @app.get("/payment/fail", response_class=HTMLResponse)
 def payment_fail(request: Request):
     return templates.TemplateResponse("payment_fail.html", {"request": request})
+
+@app.get("/robots.txt", include_in_schema=False)
+async def robots():
+    return FileResponse("static/robots.txt", media_type="text/plain")
+
+@app.get("/sitemap.xml", include_in_schema=False)
+async def sitemap():
+    return FileResponse("static/sitemap.xml", media_type="application/xml")
 
 if __name__ == "__main__":
     import uvicorn

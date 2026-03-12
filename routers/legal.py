@@ -501,6 +501,7 @@ def _render_legal_preview(
     *,
     title: str | None = None,
     title_tr: str | None = None,
+    slug: str = "",
 ) -> HTMLResponse:
     relative_path = file_path.relative_to(legal_dir).as_posix()
     raw_url = _raw_legal_url(relative_path)
@@ -554,6 +555,12 @@ function switchLang(lang){
   <link rel="icon" type="image/png" sizes="192x192" href="/medias/cvfit-icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/medias/cvfit-apple-touch-icon.png">
   <meta name="theme-color" content="#3730a3">
+  <meta name="description" content="CVFit - {html.escape(title_tr or title or file_path.stem.replace('_', ' '))}">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="CVFit - {html.escape(title_tr or title or file_path.stem.replace('_', ' '))}">
+  <meta property="og:url" content="https://www.cvfit.com.tr/{html.escape(slug)}">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="CVFit">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   {_LEGAL_PAGE_STYLE}
 </head>
@@ -607,9 +614,10 @@ def _render_by_keywords(
     *,
     title: str | None = None,
     title_tr: str | None = None,
+    slug: str = "",
 ) -> HTMLResponse:
     legal_dir, selected = _select_by_keywords(keywords, not_found_detail)
-    return _render_legal_preview(selected, legal_dir, title=title, title_tr=title_tr)
+    return _render_legal_preview(selected, legal_dir, title=title, title_tr=title_tr, slug=slug)
 
 
 _LEGAL_INDEX_LINKS = [
@@ -641,6 +649,12 @@ def legal_documents_index() -> HTMLResponse:
   <link rel="icon" type="image/png" sizes="192x192" href="/medias/cvfit-icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/medias/cvfit-apple-touch-icon.png">
   <meta name="theme-color" content="#3730a3">
+  <meta name="description" content="CVFit - Hukuki Belgeler / Legal Documents">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="CVFit - Legal Documents">
+  <meta property="og:url" content="https://www.cvfit.com.tr/legal">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="CVFit">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   {_LEGAL_PAGE_STYLE}
 </head>
@@ -680,6 +694,7 @@ def privacy_policy() -> HTMLResponse:
         "No privacy policy document found.",
         title="Privacy Policy",
         title_tr="Gizlilik Politikası",
+        slug="privacy",
     )
 
 
@@ -690,6 +705,7 @@ def terms_of_service() -> HTMLResponse:
         "No terms document found.",
         title="Terms of Service",
         title_tr="Kullanım Koşulları",
+        slug="terms",
     )
 
 
@@ -700,6 +716,7 @@ def kvkk_notice() -> HTMLResponse:
         "No KVKK disclosure document found.",
         title="KVKK Disclosure",
         title_tr="KVKK Aydınlatma Metni",
+        slug="kvkk",
     )
 
 
@@ -712,6 +729,7 @@ def cookie_policy() -> HTMLResponse:
         "No cookie policy document found.",
         title="Cookie Policy",
         title_tr="Çerez Politikası",
+        slug="cerez-politikasi",
     )
 
 
@@ -723,6 +741,7 @@ def distance_sales_agreement() -> HTMLResponse:
         "No distance sales agreement document found.",
         title="Distance Sales Agreement",
         title_tr="Mesafeli Satış Sözleşmesi",
+        slug="mesafeli-satis-sozlesmesi",
     )
 
 
