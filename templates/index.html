@@ -1425,7 +1425,9 @@ async function analyze(){
     buildEditCards(cvData);
     buildCompactThemeSelector();
     setTimeout(fitPreview,100);
-    await checkAuth();loadHist();
+    // Refresh nav credits without changing state (checkAuth would call showState("form"))
+    try{const vr=await fetch("/auth/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({access_token:t})});if(vr.ok){const vd=await vr.json();cUser=vd.user;cProf=vd.profile;renderNav(vd.user,vd.profile)}}catch(e){}
+    loadHist();
   }catch(e){alert("Hata: "+e.message);showState("form")}
 }
 
