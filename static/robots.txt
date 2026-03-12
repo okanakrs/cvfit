@@ -1,6 +1,14 @@
 User-agent: *
 Allow: /
-Disallow: /auth/
 Disallow: /api/
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
 
 Sitemap: https://www.cvfit.com.tr/sitemap.xml
