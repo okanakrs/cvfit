@@ -36,6 +36,16 @@ ALLOWED_SUFFIXES = {
 }
 
 ARCHIVE_SUFFIXES = {".zip"}
+LEGAL_FILE_SUFFIXES = ALLOWED_SUFFIXES | ARCHIVE_SUFFIXES
+
+LEGAL_FOLDER_HINTS = (
+    "privacy",
+    "gizlilik",
+    "policy",
+    "legal",
+    "hukuki",
+    "kvkk",
+)
 
 PRIVACY_KEYWORDS = {
     "privacy": 8,
@@ -78,11 +88,63 @@ DISTANCE_SALES_KEYWORDS = {
 }
 
 
+def _normalize_name(value: str) -> str:
+    return value.strip().lower().replace("_", " ").replace("-", " ")
+
+
+def _resolve_case_insensitive_path(base: Path, relative_path: str) -> Path | None:
+    current = base
+    parts = [part for part in relative_path.replace("\\", "/").split("/") if part]
+
+    for part in parts:
+        direct = current / part
+        if direct.exists() and direct.is_dir():
+            current = direct
+            continue
+
+        normalized_part = _normalize_name(part)
+        matches = [
+            child
+            for child in current.iterdir()
+            if child.is_dir() and _normalize_name(child.name) == normalized_part
+        ]
+        if not matches:
+            return None
+        current = matches[0]
+
+    return current if current.exists() and current.is_dir() else None
+
+
+def _contains_legal_files(directory: Path) -> bool:
+    for file_path in directory.rglob("*"):
+        if file_path.is_file() and file_path.suffix.lower() in LEGAL_FILE_SUFFIXES:
+            return True
+    return False
+
+
+def _looks_like_legal_dir(directory: Path) -> bool:
+    normalized_name = _normalize_name(directory.name)
+    if not any(hint in normalized_name for hint in LEGAL_FOLDER_HINTS):
+        return False
+    return _contains_legal_files(directory)
+
+
 def _get_legal_dir() -> Path | None:
     for candidate in LEGAL_DIR_CANDIDATES:
-        directory = PROJECT_ROOT / candidate
-        if directory.exists() and directory.is_dir():
+        directory = _resolve_case_insensitive_path(PROJECT_ROOT, candidate)
+        if directory is not None:
             return directory
+
+    for directory in PROJECT_ROOT.iterdir():
+        if directory.is_dir() and _looks_like_legal_dir(directory):
+            return directory
+
+    static_root = PROJECT_ROOT / "static"
+    if static_root.exists() and static_root.is_dir():
+        for directory in static_root.iterdir():
+            if directory.is_dir() and _looks_like_legal_dir(directory):
+                return directory
+
     return None
 
 
