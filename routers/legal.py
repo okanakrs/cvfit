@@ -110,8 +110,8 @@ _LEGAL_NAV = """
     <img class="logo-wordmark logo-wordmark-light" src="/medias/cvfit-logo-light.svg" alt="CVFit">
   </a>
   <div class="nav-r">
-    <button class="theme-toggle" onclick="toggleThemeMode()" title="Tema Degistir"><span class="ico-sun">☀️</span><span class="ico-moon">🌙</span></button>
-    <a class="nbtn nbtn-ghost" href="/">Ana Sayfa</a>
+    <button class="theme-toggle" onclick="toggleThemeMode()" title="Toggle Theme"><span class="ico-sun">☀️</span><span class="ico-moon">🌙</span></button>
+    <a class="nbtn nbtn-ghost" href="/">Home</a>
   </div>
 </nav>
 """
@@ -124,13 +124,13 @@ _LEGAL_FOOTER = """
       <img class="logo-wordmark logo-wordmark-light" src="/medias/cvfit-logo-light.svg" alt="CVFit">
     </a>
     <div class="legal-footer-links">
-      <a href="/privacy">Gizlilik Politikasi</a>
-      <a href="/terms">Kullanim Kosullari</a>
-      <a href="/kvkk">KVKK Aydinlatma</a>
-      <a href="/cerez-politikasi">Cerez Politikasi</a>
-      <a href="/mesafeli-satis-sozlesmesi">Mesafeli Satis Sozlesmesi</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Service</a>
+      <a href="/kvkk">KVKK Disclosure</a>
+      <a href="/cerez-politikasi">Cookie Policy</a>
+      <a href="/mesafeli-satis-sozlesmesi">Distance Sales Agreement</a>
     </div>
-    <div class="legal-footer-copy">&copy; 2026 CVFit. Tum haklari saklidir.</div>
+    <div class="legal-footer-copy">&copy; 2026 CVFit. All rights reserved.</div>
   </div>
 </footer>
 """
@@ -402,11 +402,11 @@ def _raw_legal_url(relative_path: str, *, download: bool = False) -> str:
 def _text_to_html_paragraphs(text: str) -> str:
     normalized = text.replace("\r\n", "\n").strip()
     if not normalized:
-        return "<p>Icerik bulunamadi.</p>"
+        return "<p>No content found.</p>"
 
     blocks = [block.strip() for block in normalized.split("\n\n") if block.strip()]
     if not blocks:
-        return "<p>Icerik bulunamadi.</p>"
+        return "<p>No content found.</p>"
 
     return "".join(f"<p>{html.escape(block).replace(chr(10), '<br/>')}</p>" for block in blocks)
 
@@ -442,7 +442,7 @@ def _render_legal_preview(file_path: Path, legal_dir: Path) -> HTMLResponse:
 
     content_html: str
     if suffix in {".pdf", ".html", ".htm"}:
-        content_html = f'<iframe class="doc-frame" src="{raw_url}" title="Yasal Dokuman"></iframe>'
+        content_html = f'<iframe class="doc-frame" src="{raw_url}" title="Legal Document"></iframe>'
     elif suffix in {".txt", ".md"}:
         text = file_path.read_text(encoding="utf-8", errors="ignore")
         content_html = f'<div class="doc-content">{_text_to_html_paragraphs(text)}</div>'
@@ -451,11 +451,11 @@ def _render_legal_preview(file_path: Path, legal_dir: Path) -> HTMLResponse:
         content_html = f'<div class="doc-content">{_text_to_html_paragraphs(text)}</div>'
     elif suffix == ".doc":
         content_html = (
-            "<div class=\"doc-content\"><p>Bu DOC dosyasi tarayicida onizlenemiyor. "
-            "Asagidaki baglanti ile indirebilirsiniz.</p></div>"
+            "<div class=\"doc-content\"><p>This DOC file cannot be previewed in the browser. "
+            "You can download it using the link above.</p></div>"
         )
     else:
-        content_html = "<div class=\"doc-content\"><p>Bu dosya tipi desteklenmiyor.</p></div>"
+        content_html = "<div class=\"doc-content\"><p>This file type is not supported.</p></div>"
 
     html_doc = f"""
 <!DOCTYPE html>
@@ -480,11 +480,11 @@ def _render_legal_preview(file_path: Path, legal_dir: Path) -> HTMLResponse:
       <div class="legal-actions">
         <a class="legal-btn legal-btn-outline" href="{download_url}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Indir
+          Download
         </a>
         <a class="legal-btn legal-btn-ghost" href="{raw_url}" target="_blank" rel="noopener">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Yeni sekmede ac
+          Open in new tab
         </a>
       </div>
 
@@ -547,7 +547,7 @@ def legal_documents_index() -> HTMLResponse:
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CVFit | Yasal Dokumanlar</title>
+  <title>CVFit | Legal Documents</title>
   <link rel="icon" type="image/x-icon" href="/medias/favicon.ico">
   <link rel="icon" type="image/png" sizes="192x192" href="/medias/cvfit-icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/medias/cvfit-apple-touch-icon.png">
@@ -559,8 +559,8 @@ def legal_documents_index() -> HTMLResponse:
   {_LEGAL_NAV}
   <main class="legal-wrap">
     <div class="legal-card">
-      <h1 class="legal-title">Yasal Dokumanlar</h1>
-      <p class="legal-subtitle">Asagidaki belgeleri goruntuleyebilirsiniz:</p>
+      <h1 class="legal-title">Legal Documents</h1>
+      <p class="legal-subtitle">You can view the documents below:</p>
       <ul class="legal-list">{links}</ul>
     </div>
   </main>
