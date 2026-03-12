@@ -1017,7 +1017,7 @@ function renderNav(u,p){
 }
 
 const loginWithGoogle=()=>window.location.href="/auth/google";
-function logout(){localStorage.removeItem("cvfit_access_token");localStorage.removeItem("cvfit_refresh_token");cUser=null;cProf=null;closeModal("accModal");showState("login")}
+function logout(){fetch("/auth/logout",{method:"POST"}).catch(()=>{});localStorage.removeItem("cvfit_access_token");localStorage.removeItem("cvfit_refresh_token");cUser=null;cProf=null;closeModal("accModal");document.getElementById("navAuth").innerHTML=`<button class="theme-toggle" onclick="toggleThemeMode()" title="Tema Değiştir"><span class="ico-sun">☀️</span><span class="ico-moon">🌙</span></button><button class="nbtn nbtn-fill" onclick="loginWithGoogle()">Giriş Yap</button>`;showState("login")}
 
 async function checkAuth(){
   const t=localStorage.getItem("cvfit_access_token");
