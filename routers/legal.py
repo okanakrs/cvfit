@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import html
 import mimetypes
 import shutil
 import zipfile
 from pathlib import Path
+from urllib.parse import quote
+from xml.etree import ElementTree as ET
 
-from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 
 router = APIRouter()
 
@@ -245,12 +248,134 @@ def _safe_resolve_file(directory: Path, requested_path: str) -> Path:
     return resolved
 
 
-def _file_response(file_path: Path) -> FileResponse:
+def _file_response(file_path: Path, *, as_attachment: bool = False) -> FileResponse:
     media_type, _ = mimetypes.guess_type(file_path.name)
-    return FileResponse(path=str(file_path), media_type=media_type or "application/octet-stream")
+    disposition = "attachment" if as_attachment else "inline"
+    return FileResponse(
+        path=str(file_path),
+        media_type=media_type or "application/octet-stream",
+        filename=file_path.name,
+        content_disposition_type=disposition,
+    )
 
 
-def _serve_by_keywords(keywords: dict[str, int], not_found_detail: str) -> FileResponse:
+def _encode_path(relative_path: str) -> str:
+    return "/".join(quote(part) for part in relative_path.split("/"))
+
+
+def _raw_legal_url(relative_path: str, *, download: bool = False) -> str:
+    base = f"/legal/raw/{_encode_path(relative_path)}"
+    if download:
+        return f"{base}?download=1"
+    return base
+
+
+def _text_to_html_paragraphs(text: str) -> str:
+    normalized = text.replace("\r\n", "\n").strip()
+    if not normalized:
+        return "<p>Icerik bulunamadi.</p>"
+
+    blocks = [block.strip() for block in normalized.split("\n\n") if block.strip()]
+    if not blocks:
+        return "<p>Icerik bulunamadi.</p>"
+
+    return "".join(f"<p>{html.escape(block).replace(chr(10), '<br/>')}</p>" for block in blocks)
+
+
+def _extract_docx_text(file_path: Path) -> str:
+    try:
+        with zipfile.ZipFile(file_path, "r") as archive:
+            xml_bytes = archive.read("word/document.xml")
+    except Exception:
+        return ""
+
+    try:
+        root = ET.fromstring(xml_bytes)
+    except ET.ParseError:
+        return ""
+
+    ns = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+    paragraphs: list[str] = []
+    for paragraph in root.findall(".//w:p", ns):
+        parts = [node.text for node in paragraph.findall(".//w:t", ns) if node.text]
+        line = "".join(parts).strip()
+        if line:
+            paragraphs.append(line)
+
+    return "\n\n".join(paragraphs)
+
+
+def _render_legal_preview(file_path: Path, legal_dir: Path) -> HTMLResponse:
+    relative_path = file_path.relative_to(legal_dir).as_posix()
+    raw_url = _raw_legal_url(relative_path)
+    download_url = _raw_legal_url(relative_path, download=True)
+    suffix = file_path.suffix.lower()
+
+    content_html: str
+    if suffix in {".pdf", ".html", ".htm"}:
+        content_html = f'<iframe class="doc-frame" src="{raw_url}" title="Yasal Dokuman"></iframe>'
+    elif suffix in {".txt", ".md"}:
+        text = file_path.read_text(encoding="utf-8", errors="ignore")
+        content_html = f'<div class="doc-content">{_text_to_html_paragraphs(text)}</div>'
+    elif suffix == ".docx":
+        text = _extract_docx_text(file_path)
+        content_html = f'<div class="doc-content">{_text_to_html_paragraphs(text)}</div>'
+    elif suffix == ".doc":
+        content_html = (
+            "<div class=\"doc-content\"><p>Bu DOC dosyasi tarayicida onizlenemiyor. "
+            "Asagidaki baglanti ile indirebilirsiniz.</p></div>"
+        )
+    else:
+        content_html = "<div class=\"doc-content\"><p>Bu dosya tipi desteklenmiyor.</p></div>"
+
+    html_doc = f"""
+<!DOCTYPE html>
+<html lang=\"tr\">
+<head>
+  <meta charset=\"UTF-8\" />
+  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
+  <title>CVFit | {html.escape(file_path.stem)}</title>
+  <style>
+    body {{ font-family: Arial, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }}
+    .wrap {{ max-width: 1000px; margin: 28px auto; padding: 0 20px; }}
+    .card {{ background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; }}
+    h1 {{ margin: 0 0 8px; font-size: 24px; }}
+    .meta {{ margin: 0 0 16px; color: #64748b; font-size: 13px; }}
+    .actions {{ display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }}
+    .btn {{ text-decoration: none; color: #1d4ed8; font-weight: 600; font-size: 14px; }}
+    .btn:hover {{ text-decoration: underline; }}
+    .doc-frame {{ width: 100%; min-height: 72vh; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; }}
+    .doc-content {{ border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; padding: 20px; line-height: 1.65; }}
+    .doc-content p {{ margin: 0 0 12px; }}
+    .nav {{ margin-top: 16px; display: flex; gap: 14px; flex-wrap: wrap; }}
+  </style>
+</head>
+<body>
+  <div class=\"wrap\">
+    <div class=\"card\">
+      <h1>{html.escape(file_path.stem)}</h1>
+      <p class=\"meta\">Dosya: {html.escape(relative_path)}</p>
+
+      <div class=\"actions\">
+        <a class=\"btn\" href=\"{raw_url}\" target=\"_blank\" rel=\"noopener\">Yeni sekmede ac</a>
+        <a class=\"btn\" href=\"{download_url}\">Indir</a>
+      </div>
+
+      {content_html}
+
+      <div class=\"nav\">
+        <a class=\"btn\" href=\"/legal\">Tum yasal dokumanlar</a>
+        <a class=\"btn\" href=\"/\">Ana sayfa</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+"""
+    return HTMLResponse(html_doc)
+
+
+def _select_by_keywords(keywords: dict[str, int], not_found_detail: str) -> tuple[Path, Path]:
     legal_dir = _get_legal_dir()
     if legal_dir is None:
         raise HTTPException(status_code=404, detail="Legal documents folder not found.")
@@ -260,7 +385,13 @@ def _serve_by_keywords(keywords: dict[str, int], not_found_detail: str) -> FileR
     if selected is None:
         raise HTTPException(status_code=404, detail=not_found_detail)
 
-    return _file_response(selected)
+    return legal_dir, selected
+
+
+def _redirect_by_keywords(keywords: dict[str, int], not_found_detail: str) -> RedirectResponse:
+    legal_dir, selected = _select_by_keywords(keywords, not_found_detail)
+    relative_path = selected.relative_to(legal_dir).as_posix()
+    return RedirectResponse(url=f"/legal/{_encode_path(relative_path)}", status_code=307)
 
 
 @router.get("/legal", response_class=HTMLResponse)
@@ -278,15 +409,15 @@ def legal_documents_index() -> HTMLResponse:
     if not files:
         return HTMLResponse("<h1>No legal documents found in folder.</h1>", status_code=404)
 
-    links = "".join(
-        (
-            f'<li><a href="/legal/{file_path.relative_to(legal_dir).as_posix()}">'
-            f"{file_path.relative_to(legal_dir).as_posix()}</a></li>"
-        )
-        for file_path in files
-    )
+    links_parts: list[str] = []
+    for file_path in files:
+        relative = file_path.relative_to(legal_dir).as_posix()
+        href = f"/legal/{_encode_path(relative)}"
+        links_parts.append(f'<li><a href="{href}">{html.escape(relative)}</a></li>')
 
-    html = f"""
+    links = "".join(links_parts)
+
+    page_html = f"""
 <!DOCTYPE html>
 <html lang=\"tr\">
 <head>
@@ -309,42 +440,52 @@ def legal_documents_index() -> HTMLResponse:
 </body>
 </html>
 """
-    return HTMLResponse(html)
+    return HTMLResponse(page_html)
 
 
-@router.get("/legal/{file_path:path}")
-def legal_document(file_path: str) -> FileResponse:
+@router.get("/legal/raw/{file_path:path}")
+def legal_document_raw(file_path: str, download: bool = Query(False)) -> FileResponse:
     legal_dir = _get_legal_dir()
     if legal_dir is None:
         raise HTTPException(status_code=404, detail="Legal documents folder not found.")
 
     resolved = _safe_resolve_file(legal_dir, file_path)
-    return _file_response(resolved)
+    return _file_response(resolved, as_attachment=download)
+
+
+@router.get("/legal/{file_path:path}")
+def legal_document(file_path: str) -> HTMLResponse:
+    legal_dir = _get_legal_dir()
+    if legal_dir is None:
+        raise HTTPException(status_code=404, detail="Legal documents folder not found.")
+
+    resolved = _safe_resolve_file(legal_dir, file_path)
+    return _render_legal_preview(resolved, legal_dir)
 
 
 @router.get("/privacy")
-def privacy_policy() -> FileResponse:
-    return _serve_by_keywords(PRIVACY_KEYWORDS, "No privacy policy document found.")
+def privacy_policy() -> RedirectResponse:
+    return _redirect_by_keywords(PRIVACY_KEYWORDS, "No privacy policy document found.")
 
 
 @router.get("/terms")
-def terms_of_service() -> FileResponse:
-    return _serve_by_keywords(TERMS_KEYWORDS, "No terms document found.")
+def terms_of_service() -> RedirectResponse:
+    return _redirect_by_keywords(TERMS_KEYWORDS, "No terms document found.")
 
 
 @router.get("/kvkk")
-def kvkk_notice() -> FileResponse:
-    return _serve_by_keywords(KVKK_KEYWORDS, "No KVKK disclosure document found.")
+def kvkk_notice() -> RedirectResponse:
+    return _redirect_by_keywords(KVKK_KEYWORDS, "No KVKK disclosure document found.")
 
 
 @router.get("/cookies")
 @router.get("/cookie-policy")
 @router.get("/cerez-politikasi")
-def cookie_policy() -> FileResponse:
-    return _serve_by_keywords(COOKIE_KEYWORDS, "No cookie policy document found.")
+def cookie_policy() -> RedirectResponse:
+    return _redirect_by_keywords(COOKIE_KEYWORDS, "No cookie policy document found.")
 
 
 @router.get("/distance-sales-agreement")
 @router.get("/mesafeli-satis-sozlesmesi")
-def distance_sales_agreement() -> FileResponse:
-    return _serve_by_keywords(DISTANCE_SALES_KEYWORDS, "No distance sales agreement document found.")
+def distance_sales_agreement() -> RedirectResponse:
+    return _redirect_by_keywords(DISTANCE_SALES_KEYWORDS, "No distance sales agreement document found.")
