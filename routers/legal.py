@@ -15,6 +15,135 @@ router = APIRouter()
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+# ── Shared HTML fragments for legal pages (matches site dark/light theme) ─────
+
+_LEGAL_PAGE_STYLE = """
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --pri:#818CF8;--pri-d:#6366F1;--pri-dd:#4F46E5;--pri-l:rgba(99,102,241,.12);--pri-ll:rgba(99,102,241,.2);
+    --bg:#0a0a0a;--surface:#141414;--surface2:#1a1a1a;--surface3:#222;
+    --ink:#F1F5F9;--ink2:#CBD5E1;--ink3:#94A3B8;--ink4:#64748B;--ink5:#475569;
+    --bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.12);
+    --grad:linear-gradient(135deg,#818CF8 0%,#A78BFA 50%,#C4B5FD 100%);
+    --nav-bg:rgba(10,10,10,.8);--nav-bd:rgba(255,255,255,.06);
+    --sh:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);
+    --sh-lg:0 10px 15px -3px rgba(0,0,0,.4),0 4px 6px -2px rgba(0,0,0,.3);
+    --r:12px;--r-lg:16px;
+  }
+  html[data-theme="light"]{
+    --bg:#F5F4F0;--surface:#FFFFFF;--surface2:#EDECE6;--surface3:#E2E1DB;
+    --ink:#1A1A2E;--ink2:#2D2D44;--ink3:#555570;--ink4:#8888A0;--ink5:#AAAABC;
+    --bd:rgba(0,0,0,.08);--bd2:rgba(0,0,0,.12);
+    --pri-l:rgba(99,102,241,.08);--pri-ll:rgba(99,102,241,.15);
+    --sh:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+    --sh-lg:0 10px 15px -3px rgba(0,0,0,.08),0 4px 6px -2px rgba(0,0,0,.04);
+    --nav-bg:rgba(245,244,240,.85);--nav-bd:rgba(0,0,0,.06);
+  }
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
+
+  /* NAV */
+  .legal-nav{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:var(--nav-bg);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid var(--nav-bd);transition:background .3s,border-color .3s}
+  .legal-nav .logo{font-size:22px;font-weight:800;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:10px}
+  .legal-nav .logo img{height:32px;width:auto}
+  .legal-nav .logo-wordmark-light{display:none}
+  html[data-theme="light"] .legal-nav .logo-wordmark-dark{display:none}
+  html[data-theme="light"] .legal-nav .logo-wordmark-light{display:block}
+  .nav-r{display:flex;align-items:center;gap:8px}
+  .nbtn{display:inline-flex;align-items:center;gap:6px;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:none;font-family:'Inter',sans-serif;white-space:nowrap;text-decoration:none}
+  .nbtn-ghost{background:transparent;border:1px solid var(--bd2);color:var(--ink4)}
+  .nbtn-ghost:hover{background:var(--pri-l);color:var(--ink);border-color:var(--pri-ll)}
+  .theme-toggle{width:38px;height:38px;border-radius:10px;border:1px solid var(--bd2);background:transparent;color:var(--ink3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all .2s;flex-shrink:0}
+  .theme-toggle:hover{background:var(--pri-l);color:var(--pri);border-color:var(--pri-ll)}
+  .theme-toggle .ico-sun,.theme-toggle .ico-moon{transition:opacity .2s,transform .3s}
+  html[data-theme="light"] .theme-toggle .ico-moon{display:none}
+  html:not([data-theme="light"]) .theme-toggle .ico-sun{display:none}
+
+  /* CONTENT */
+  .legal-wrap{max-width:860px;margin:0 auto;padding:88px 24px 60px}
+  .legal-card{background:var(--surface);border:1px solid var(--bd);border-radius:var(--r-lg);padding:36px 32px;box-shadow:var(--sh-lg);transition:background .3s,border-color .3s}
+  .legal-title{font-size:26px;font-weight:700;color:var(--ink);margin-bottom:6px;letter-spacing:-.5px}
+  .legal-subtitle{font-size:14px;color:var(--ink4);margin-bottom:20px}
+  .legal-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+  .legal-btn{display:inline-flex;align-items:center;gap:6px;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;text-decoration:none;font-family:'Inter',sans-serif}
+  .legal-btn-outline{background:var(--pri-l);color:var(--pri);border:1px solid var(--pri-ll)}
+  .legal-btn-outline:hover{background:var(--pri-ll);border-color:var(--pri)}
+  .legal-btn-ghost{background:transparent;color:var(--ink4);border:1px solid var(--bd2)}
+  .legal-btn-ghost:hover{color:var(--ink);background:var(--pri-l);border-color:var(--pri-ll)}
+  .doc-frame{width:100%;min-height:72vh;border:1px solid var(--bd);border-radius:var(--r);background:var(--surface2)}
+  .doc-content{border:1px solid var(--bd);border-radius:var(--r);background:var(--surface2);padding:28px 24px;line-height:1.75;color:var(--ink2);font-size:14.5px;transition:background .3s,border-color .3s}
+  .doc-content p{margin:0 0 14px}
+  .legal-list{list-style:none;padding:0}
+  .legal-list li{border-bottom:1px solid var(--bd);transition:border-color .3s}
+  .legal-list li:last-child{border-bottom:none}
+  .legal-list a{display:flex;align-items:center;gap:10px;padding:14px 8px;color:var(--ink2);text-decoration:none;font-size:14px;font-weight:500;transition:all .15s;border-radius:8px}
+  .legal-list a:hover{color:var(--pri);background:var(--pri-l)}
+  .legal-list a::before{content:'';display:block;width:8px;height:8px;border-radius:50%;background:var(--pri);flex-shrink:0;opacity:.5}
+
+  /* FOOTER */
+  .legal-footer{padding:32px 24px 24px;text-align:center;border-top:1px solid var(--bd);margin-top:40px;transition:border-color .3s}
+  .legal-footer-inner{max-width:860px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:12px}
+  .legal-footer-brand{display:flex;align-items:center;gap:8px;text-decoration:none}
+  .legal-footer-brand img{height:22px}
+  .legal-footer-brand .logo-wordmark-light{display:none}
+  html[data-theme="light"] .legal-footer-brand .logo-wordmark-dark{display:none}
+  html[data-theme="light"] .legal-footer-brand .logo-wordmark-light{display:block}
+  .legal-footer-links{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+  .legal-footer-links a{font-size:12px;color:var(--ink4);text-decoration:none;font-weight:500;transition:color .15s}
+  .legal-footer-links a:hover{color:var(--pri)}
+  .legal-footer-copy{font-size:11px;color:var(--ink5)}
+
+  @media(max-width:600px){
+    .legal-nav{padding:0 16px}
+    .legal-wrap{padding:80px 14px 40px}
+    .legal-card{padding:24px 18px}
+    .legal-title{font-size:22px}
+  }
+</style>
+"""
+
+_LEGAL_NAV = """
+<nav class="legal-nav">
+  <a class="logo" href="/" aria-label="CVFit Ana Sayfa">
+    <img class="logo-wordmark logo-wordmark-dark" src="/medias/cvfit-logo-dark.svg" alt="CVFit">
+    <img class="logo-wordmark logo-wordmark-light" src="/medias/cvfit-logo-light.svg" alt="CVFit">
+  </a>
+  <div class="nav-r">
+    <button class="theme-toggle" onclick="toggleThemeMode()" title="Tema Degistir"><span class="ico-sun">☀️</span><span class="ico-moon">🌙</span></button>
+    <a class="nbtn nbtn-ghost" href="/">Ana Sayfa</a>
+  </div>
+</nav>
+"""
+
+_LEGAL_FOOTER = """
+<footer class="legal-footer">
+  <div class="legal-footer-inner">
+    <a class="legal-footer-brand" href="/" aria-label="CVFit">
+      <img class="logo-wordmark logo-wordmark-dark" src="/medias/cvfit-logo-dark.svg" alt="CVFit">
+      <img class="logo-wordmark logo-wordmark-light" src="/medias/cvfit-logo-light.svg" alt="CVFit">
+    </a>
+    <div class="legal-footer-links">
+      <a href="/privacy">Gizlilik Politikasi</a>
+      <a href="/terms">Kullanim Kosullari</a>
+      <a href="/kvkk">KVKK Aydinlatma</a>
+      <a href="/cerez-politikasi">Cerez Politikasi</a>
+      <a href="/mesafeli-satis-sozlesmesi">Mesafeli Satis Sozlesmesi</a>
+    </div>
+    <div class="legal-footer-copy">&copy; 2026 CVFit. Tum haklari saklidir.</div>
+  </div>
+</footer>
+"""
+
+_LEGAL_THEME_SCRIPT = """
+<script>
+  function getThemeMode(){return localStorage.getItem('cvfit_theme')||'dark'}
+  function applyThemeMode(m){if(m==='light')document.documentElement.setAttribute('data-theme','light');else document.documentElement.removeAttribute('data-theme')}
+  function toggleThemeMode(){var c=getThemeMode(),n=c==='dark'?'light':'dark';localStorage.setItem('cvfit_theme',n);applyThemeMode(n)}
+  applyThemeMode(getThemeMode());
+</script>
+"""
+
 # Supports different folder naming styles for legal docs.
 LEGAL_DIR_CANDIDATES = [
     "privacy policy",
@@ -330,45 +459,40 @@ def _render_legal_preview(file_path: Path, legal_dir: Path) -> HTMLResponse:
 
     html_doc = f"""
 <!DOCTYPE html>
-<html lang=\"tr\">
+<html lang="tr">
 <head>
-  <meta charset=\"UTF-8\" />
-  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CVFit | {html.escape(file_path.stem)}</title>
-  <style>
-    body {{ font-family: Arial, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }}
-    .wrap {{ max-width: 1000px; margin: 28px auto; padding: 0 20px; }}
-    .card {{ background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; }}
-    h1 {{ margin: 0 0 8px; font-size: 24px; }}
-    .meta {{ margin: 0 0 16px; color: #64748b; font-size: 13px; }}
-    .actions {{ display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }}
-    .btn {{ text-decoration: none; color: #1d4ed8; font-weight: 600; font-size: 14px; }}
-    .btn:hover {{ text-decoration: underline; }}
-    .doc-frame {{ width: 100%; min-height: 72vh; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; }}
-    .doc-content {{ border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; padding: 20px; line-height: 1.65; }}
-    .doc-content p {{ margin: 0 0 12px; }}
-    .nav {{ margin-top: 16px; display: flex; gap: 14px; flex-wrap: wrap; }}
-  </style>
+  <link rel="icon" type="image/x-icon" href="/medias/favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="/medias/cvfit-icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/medias/cvfit-apple-touch-icon.png">
+  <meta name="theme-color" content="#3730a3">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  {_LEGAL_PAGE_STYLE}
 </head>
 <body>
-  <div class=\"wrap\">
-    <div class=\"card\">
-      <h1>{html.escape(file_path.stem)}</h1>
-      <p class=\"meta\">Dosya: {html.escape(relative_path)}</p>
+  {_LEGAL_NAV}
+  <main class="legal-wrap">
+    <div class="legal-card">
+      <h1 class="legal-title">{html.escape(file_path.stem.replace('_', ' '))}</h1>
 
-      <div class=\"actions\">
-        <a class=\"btn\" href=\"{raw_url}\" target=\"_blank\" rel=\"noopener\">Yeni sekmede ac</a>
-        <a class=\"btn\" href=\"{download_url}\">Indir</a>
+      <div class="legal-actions">
+        <a class="legal-btn legal-btn-outline" href="{download_url}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Indir
+        </a>
+        <a class="legal-btn legal-btn-ghost" href="{raw_url}" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Yeni sekmede ac
+        </a>
       </div>
 
       {content_html}
-
-      <div class=\"nav\">
-        <a class=\"btn\" href=\"/legal\">Tum yasal dokumanlar</a>
-        <a class=\"btn\" href=\"/\">Ana sayfa</a>
-      </div>
     </div>
-  </div>
+  </main>
+  {_LEGAL_FOOTER}
+  {_LEGAL_THEME_SCRIPT}
 </body>
 </html>
 """
@@ -419,24 +543,29 @@ def legal_documents_index() -> HTMLResponse:
 
     page_html = f"""
 <!DOCTYPE html>
-<html lang=\"tr\">
+<html lang="tr">
 <head>
-  <meta charset=\"UTF-8\" />
-  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CVFit | Yasal Dokumanlar</title>
-  <style>
-    body {{ font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }}
-    h1 {{ margin-bottom: 8px; }}
-    ul {{ padding-left: 18px; }}
-    a {{ color: #4F46E5; text-decoration: none; }}
-    a:hover {{ text-decoration: underline; }}
-  </style>
+  <link rel="icon" type="image/x-icon" href="/medias/favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="/medias/cvfit-icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/medias/cvfit-apple-touch-icon.png">
+  <meta name="theme-color" content="#3730a3">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  {_LEGAL_PAGE_STYLE}
 </head>
 <body>
-  <h1>Yasal Dokumanlar</h1>
-  <p>Asagidaki belgeleri goruntuleyebilirsiniz:</p>
-  <ul>{links}</ul>
-  <p><a href=\"/\">Ana sayfaya don</a></p>
+  {_LEGAL_NAV}
+  <main class="legal-wrap">
+    <div class="legal-card">
+      <h1 class="legal-title">Yasal Dokumanlar</h1>
+      <p class="legal-subtitle">Asagidaki belgeleri goruntuleyebilirsiniz:</p>
+      <ul class="legal-list">{links}</ul>
+    </div>
+  </main>
+  {_LEGAL_FOOTER}
+  {_LEGAL_THEME_SCRIPT}
 </body>
 </html>
 """

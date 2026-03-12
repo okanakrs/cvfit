@@ -1,0 +1,30 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="100%" style="stop-color:#3730a3"/>
+    </linearGradient>
+    <linearGradient id="doc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a78bfa"/>
+      <stop offset="100%" style="stop-color:#4338ca"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#c4b5fd"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- Back document -->
+  <rect x="168" y="68" width="240" height="320" rx="32" fill="#fff" opacity="0.15"/>
+  <!-- Front document -->
+  <rect x="108" y="120" width="240" height="320" rx="32" fill="#fff" opacity="0.25"/>
+  <!-- Document lines -->
+  <rect x="148" y="188" width="160" height="16" rx="8" fill="#fff" opacity="0.85"/>
+  <rect x="148" y="228" width="120" height="16" rx="8" fill="#fff" opacity="0.5"/>
+  <rect x="148" y="268" width="136" height="16" rx="8" fill="#fff" opacity="0.5"/>
+  <rect x="148" y="308" width="104" height="16" rx="8" fill="#fff" opacity="0.5"/>
+  <!-- AI sparkle badge -->
+  <circle cx="368" cy="148" r="72" fill="url(#badge)"/>
+  <path d="M352 112 L364 140 L392 124 L375 152 L404 164 L372 160 L364 192 L356 160 L324 168 L348 144 L332 120 L356 128 Z" fill="#fff"/>
+</svg>

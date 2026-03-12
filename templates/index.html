@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CVFit — AI ile CV Optimizasyonu</title>
+<link rel="icon" type="image/x-icon" href="/medias/favicon.ico">
+<link rel="icon" type="image/png" sizes="192x192" href="/medias/cvfit-icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/medias/cvfit-icon-512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/medias/cvfit-apple-touch-icon.png">
+<meta name="theme-color" content="#3730a3">
+<meta property="og:image" content="/medias/cvfit-og-image.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -55,8 +61,10 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 /* ─── NAV ────────────────────────────────────────────────── */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:var(--nav-bg);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid var(--nav-bd);transition:background .3s,border-color .3s}
 .logo{font-size:22px;font-weight:800;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:10px;letter-spacing:-.5px}
-.logo-mark{width:32px;height:32px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:15px;color:white;font-weight:900;box-shadow:0 2px 8px rgba(99,102,241,.35)}
-.logo em{font-style:normal;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-wordmark{display:block;height:32px;width:auto}
+.logo-wordmark-light{display:none}
+html[data-theme="light"] .logo-wordmark-dark{display:none}
+html[data-theme="light"] .logo-wordmark-light{display:block}
 .nav-r{display:flex;align-items:center;gap:8px}
 .nbtn{display:inline-flex;align-items:center;gap:6px;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:none;font-family:'Inter',sans-serif;white-space:nowrap}
 .nbtn-ghost{background:transparent;border:1px solid var(--bd2);color:var(--ink4)}
@@ -502,7 +510,7 @@ textarea.fs-input{resize:vertical;min-height:90px;line-height:1.6}
 .footer-inner{max-width:920px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:14px}
 .footer-brand{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;color:var(--ink3);text-decoration:none}
 .footer-brand em{font-style:normal;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.footer-brand .logo-mark{width:24px;height:24px;border-radius:7px;font-size:11px}
+.footer-brand .logo-wordmark{height:24px}
 .footer-links{display:flex;gap:24px;flex-wrap:wrap;justify-content:center}
 .footer-links a{font-size:12.5px;color:var(--ink4);text-decoration:none;font-weight:500;transition:color .15s}
 .footer-links a:hover{color:var(--pri)}
@@ -516,8 +524,9 @@ textarea.fs-input{resize:vertical;min-height:90px;line-height:1.6}
 
 <!-- ═══ NAV ═══ -->
 <nav id="mainNav">
-  <a class="logo" href="/" onclick="goHome(event)">
-    <span class="logo-mark">C</span>CV<em>Fit</em>
+  <a class="logo" href="/" onclick="goHome(event)" aria-label="CVFit Ana Sayfa">
+    <img class="logo-wordmark logo-wordmark-dark" src="/medias/cvfit-logo-dark.svg" alt="CVFit">
+    <img class="logo-wordmark logo-wordmark-light" src="/medias/cvfit-logo-light.svg" alt="CVFit">
   </a>
   <div class="nav-r" id="navAuth">
     <button class="theme-toggle" onclick="toggleThemeMode()" title="Tema Değiştir"><span class="ico-sun">☀️</span><span class="ico-moon">🌙</span></button>
@@ -761,8 +770,9 @@ textarea.fs-input{resize:vertical;min-height:90px;line-height:1.6}
 <!-- ═══ FOOTER ═══ -->
 <footer class="site-footer">
   <div class="footer-inner">
-    <a class="footer-brand" href="/" onclick="goHome(event)">
-      <span class="logo-mark">C</span>CV<em>Fit</em>
+    <a class="footer-brand" href="/" onclick="goHome(event)" aria-label="CVFit Ana Sayfa">
+      <img class="logo-wordmark logo-wordmark-dark" src="/medias/cvfit-logo-dark.svg" alt="CVFit">
+      <img class="logo-wordmark logo-wordmark-light" src="/medias/cvfit-logo-light.svg" alt="CVFit">
     </a>
     <div class="footer-links">
       <a href="/privacy">Gizlilik Politikası</a>

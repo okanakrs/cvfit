@@ -9,9 +9,15 @@ templates = Jinja2Templates(directory="templates")
 
 SUPABASE_URL      = os.getenv("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
-BASE_URL          = os.getenv("BASE_URL", "http://localhost:8000")
+BASE_URL          = os.getenv("BASE_URL", "")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+
+def _get_base_url(request: Request) -> str:
+    if BASE_URL:
+        return BASE_URL.rstrip("/")
+    return str(request.base_url).rstrip("/")
 
 
 def get_user_from_token(token: str):
@@ -29,11 +35,12 @@ def get_user_profile(user_id: str):
 
 
 @router.get("/auth/google")
-async def auth_google():
+async def auth_google(request: Request):
+    base = _get_base_url(request)
     result = supabase.auth.sign_in_with_oauth({
         "provider": "google",
         "options": {
-            "redirect_to": f"{BASE_URL}/auth/callback",
+            "redirect_to": f"{base}/auth/callback",
             "flow_type": "pkce"
         }
     })

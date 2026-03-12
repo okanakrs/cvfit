@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,6 +21,8 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+if os.path.isdir("medias"):
+    app.mount("/medias", StaticFiles(directory="medias"), name="medias")
 templates = Jinja2Templates(directory="templates")
 
 # ── Router'ları bağla ─────────────────────────────────────────────────────────
@@ -34,6 +36,10 @@ app.include_router(legal.router,    tags=["legal"])
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return RedirectResponse(url="/medias/favicon.ico", status_code=307)
 
 @app.get("/payment/success", response_class=HTMLResponse)
 async def payment_success(request: Request):
