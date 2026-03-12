@@ -71,6 +71,13 @@ _LEGAL_PAGE_STYLE = """
   .legal-btn-outline:hover{background:var(--pri-ll);border-color:var(--pri)}
   .legal-btn-ghost{background:transparent;color:var(--ink4);border:1px solid var(--bd2)}
   .legal-btn-ghost:hover{color:var(--ink);background:var(--pri-l);border-color:var(--pri-ll)}
+
+  /* LANGUAGE TOGGLE */
+  .lang-toggle-wrap{display:flex;gap:6px;margin-bottom:20px}
+  .lang-btn{display:inline-flex;align-items:center;gap:6px;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;border:1px solid var(--bd2);background:transparent;color:var(--ink4)}
+  .lang-btn:hover{background:var(--pri-l);color:var(--ink);border-color:var(--pri-ll)}
+  .lang-btn.active{background:var(--pri);color:white;border-color:var(--pri)}
+
   .doc-frame{width:100%;min-height:72vh;border:1px solid var(--bd);border-radius:var(--r);background:var(--surface2)}
   .doc-content{border:1px solid var(--bd);border-radius:var(--r);background:var(--surface2);padding:28px 24px;line-height:1.75;color:var(--ink2);font-size:14.5px;transition:background .3s,border-color .3s}
   .doc-content p{margin:0 0 14px}
@@ -219,6 +226,17 @@ DISTANCE_SALES_KEYWORDS = {
     "agreement": 2,
 }
 
+# ── Turkish ↔ English document pairs (normalized stems) ──────────────────────
+_TR_EN_PAIRS = {
+    "cvfit gizlilik politikasi": "cvfit privacy policy",
+    "cvfit kullanim kosullari": "cvfit terms of service",
+    "cvfit cerez politikasi": "cvfit cookie policy",
+    "cvfit kvkk aydinlatma metni": "cvfit data protection notice",
+    "cvfit mesafeli satis sozlesmesi": "cvfit subscription agreement",
+}
+
+ENGLISH_ARCHIVE_STEMS = {"files_english"}
+
 
 def _normalize_name(value: str) -> str:
     return value.strip().lower().replace("_", " ").replace("-", " ")
@@ -281,7 +299,9 @@ def _get_legal_dir() -> Path | None:
 
 
 def _iter_legal_files(directory: Path) -> list[Path]:
+    """Return Turkish legal documents (excludes English counterparts)."""
     extracted_root = directory / "_extracted"
+    english_extracted = {extracted_root / stem for stem in ENGLISH_ARCHIVE_STEMS}
     files: list[Path] = []
     archives: list[Path] = []
 
@@ -298,7 +318,11 @@ def _iter_legal_files(directory: Path) -> list[Path]:
             archives.append(file_path)
 
     for archive_path in archives:
-        files.extend(_extract_zip_documents(directory, archive_path))
+        extracted = _extract_zip_documents(directory, archive_path)
+        # Skip files from English archives for the main listing
+        if archive_path.stem.lower() in ENGLISH_ARCHIVE_STEMS:
+            continue
+        files.extend(extracted)
 
     return sorted(files)
 
@@ -434,28 +458,84 @@ def _extract_docx_text(file_path: Path) -> str:
     return "\n\n".join(paragraphs)
 
 
+def _render_content_html(file_path: Path, raw_url: str) -> str:
+    """Extract displayable HTML from a legal document file."""
+    suffix = file_path.suffix.lower()
+    if suffix in {".pdf", ".html", ".htm"}:
+        return f'<iframe class="doc-frame" src="{raw_url}" title="Legal Document"></iframe>'
+    elif suffix in {".txt", ".md"}:
+        text = file_path.read_text(encoding="utf-8", errors="ignore")
+        return f'<div class="doc-content">{_text_to_html_paragraphs(text)}</div>'
+    elif suffix == ".docx":
+        text = _extract_docx_text(file_path)
+        return f'<div class="doc-content">{_text_to_html_paragraphs(text)}</div>'
+    elif suffix == ".doc":
+        return (
+            '<div class="doc-content"><p>This DOC file cannot be previewed in the browser. '
+            'You can download it using the link above.</p></div>'
+        )
+    return '<div class="doc-content"><p>This file type is not supported.</p></div>'
+
+
+def _find_english_counterpart(file_path: Path, legal_dir: Path) -> Path | None:
+    """Find the English version of a Turkish legal document."""
+    norm = _normalize_name(file_path.stem)
+    en_stem = _TR_EN_PAIRS.get(norm)
+    if not en_stem:
+        return None
+
+    # Search in English extracted folders
+    for stem in ENGLISH_ARCHIVE_STEMS:
+        en_dir = legal_dir / "_extracted" / stem
+        if not en_dir.exists():
+            continue
+        for candidate in en_dir.rglob("*"):
+            if candidate.is_file() and _normalize_name(candidate.stem) == en_stem:
+                return candidate
+    return None
+
+
 def _render_legal_preview(file_path: Path, legal_dir: Path) -> HTMLResponse:
     relative_path = file_path.relative_to(legal_dir).as_posix()
     raw_url = _raw_legal_url(relative_path)
     download_url = _raw_legal_url(relative_path, download=True)
-    suffix = file_path.suffix.lower()
 
-    content_html: str
-    if suffix in {".pdf", ".html", ".htm"}:
-        content_html = f'<iframe class="doc-frame" src="{raw_url}" title="Legal Document"></iframe>'
-    elif suffix in {".txt", ".md"}:
-        text = file_path.read_text(encoding="utf-8", errors="ignore")
-        content_html = f'<div class="doc-content">{_text_to_html_paragraphs(text)}</div>'
-    elif suffix == ".docx":
-        text = _extract_docx_text(file_path)
-        content_html = f'<div class="doc-content">{_text_to_html_paragraphs(text)}</div>'
-    elif suffix == ".doc":
-        content_html = (
-            "<div class=\"doc-content\"><p>This DOC file cannot be previewed in the browser. "
-            "You can download it using the link above.</p></div>"
-        )
+    tr_content = _render_content_html(file_path, raw_url)
+
+    # Try to find English counterpart
+    en_file = _find_english_counterpart(file_path, legal_dir)
+    en_content = ""
+    if en_file:
+        en_rel = en_file.relative_to(legal_dir).as_posix()
+        en_raw = _raw_legal_url(en_rel)
+        en_content = _render_content_html(en_file, en_raw)
+
+    # Language toggle button + dual content sections
+    if en_content:
+        lang_toggle = """
+        <div class="lang-toggle-wrap">
+          <button class="lang-btn active" id="btnTR" onclick="switchLang('tr')">🇹🇷 Türkçe</button>
+          <button class="lang-btn" id="btnEN" onclick="switchLang('en')">🇬🇧 English</button>
+        </div>
+        """
+        content_block = f"""
+        <div id="contentTR" class="lang-content">{tr_content}</div>
+        <div id="contentEN" class="lang-content" style="display:none">{en_content}</div>
+        """
+        lang_script = """
+<script>
+function switchLang(lang){
+  document.getElementById('contentTR').style.display = lang==='tr' ? '' : 'none';
+  document.getElementById('contentEN').style.display = lang==='en' ? '' : 'none';
+  document.getElementById('btnTR').className = 'lang-btn' + (lang==='tr' ? ' active' : '');
+  document.getElementById('btnEN').className = 'lang-btn' + (lang==='en' ? ' active' : '');
+}
+</script>
+"""
     else:
-        content_html = "<div class=\"doc-content\"><p>This file type is not supported.</p></div>"
+        lang_toggle = ""
+        content_block = tr_content
+        lang_script = ""
 
     html_doc = f"""
 <!DOCTYPE html>
@@ -488,11 +568,13 @@ def _render_legal_preview(file_path: Path, legal_dir: Path) -> HTMLResponse:
         </a>
       </div>
 
-      {content_html}
+      {lang_toggle}
+      {content_block}
     </div>
   </main>
   {_LEGAL_FOOTER}
   {_LEGAL_THEME_SCRIPT}
+  {lang_script}
 </body>
 </html>
 """
