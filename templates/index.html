@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CVFit — AI ile CV Optimizasyonu</title>
+<title>AI ile CV Optimizasyonu & ATS Analizi | CVFit</title>
 <link rel="icon" type="image/x-icon" href="/medias/favicon.ico">
 <link rel="icon" type="image/png" sizes="192x192" href="/medias/cvfit-icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/medias/cvfit-icon-512.png">
@@ -11,14 +11,14 @@
 <meta name="theme-color" content="#3730a3">
 
 <!-- SEO Meta -->
-<meta name="description" content="CVFit - Yapay zeka ile CV'nizi iş ilanlarına göre optimize edin. PDF yükleyin, anahtar kelime eşleştirmesi yapın, profesyonel CV indirin.">
-<meta name="keywords" content="CV optimizasyonu, yapay zeka CV, CV analizi, özgeçmiş hazırlama, ATS uyumlu CV, CV düzenleme, iş başvurusu">
+<meta name="description" content="CV'nizi yapay zeka ile iş ilanına göre optimize edin. ATS uyumlu özgeçmiş analizi, anahtar kelime eşleştirme ve profesyonel CV oluşturma — ücretsiz deneyin.">
+<meta name="keywords" content="CV optimizasyonu, ATS uyumlu CV, yapay zeka CV düzenleme, iş ilanına göre CV hazırlama, CV analizi ücretsiz, özgeçmiş iyileştirme">
 <meta name="author" content="CVFit">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.cvfit.com.tr/">
 
 <!-- Open Graph (Facebook, LinkedIn, WhatsApp) -->
-<meta property="og:title" content="CVFit - AI ile CV Optimizasyonu">
+<meta property="og:title" content="AI ile CV Optimizasyonu & ATS Analizi | CVFit">
 <meta property="og:description" content="PDF yükle veya sıfırdan oluştur, iş ilanını yapıştır — yapay zeka anahtar kelimeleri ekler, eşleşme skorunu artırır.">
 <meta property="og:image" content="https://www.cvfit.com.tr/medias/cvfit-og-image.png">
 <meta property="og:url" content="https://www.cvfit.com.tr">
@@ -28,9 +28,68 @@
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="CVFit - AI ile CV Optimizasyonu">
+<meta name="twitter:title" content="AI ile CV Optimizasyonu & ATS Analizi | CVFit">
 <meta name="twitter:description" content="Yapay zeka ile CV'nizi iş ilanlarına göre optimize edin. PDF yükle, iş ilanını yapıştır, profesyonel CV indir.">
 <meta name="twitter:image" content="https://www.cvfit.com.tr/medias/cvfit-og-image.png">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "CVFit",
+  "applicationCategory": "BusinessApplication",
+  "description": "Yapay zeka ile CV'nizi iş ilanlarına göre optimize edin. ATS uyumlu özgeçmiş analizi ve anahtar kelime eşleştirme.",
+  "url": "https://www.cvfit.com.tr",
+  "operatingSystem": "Web",
+  "inLanguage": "tr",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TRY"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "CVFit ücretsiz mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CVFit'in temel özellikleri ücretsiz kullanılabilir. Gelişmiş özellikler için Pro plan mevcuttur."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "ATS nedir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ATS (Applicant Tracking System), şirketlerin iş başvurularını otomatik filtreleyen yazılımlardır. CVFit, CV'nizi ATS sistemlerine uyumlu hale getirir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "CV'mi nasıl optimize edebilirim?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CV'nizi yükleyin, iş ilanını yapıştırın — CVFit yapay zeka ile eşleşme skorunuzu analiz eder ve eksik anahtar kelimeleri ekler."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Hangi CV formatları destekleniyor?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CVFit, PDF formatındaki CV'leri destekler. Ayrıca sıfırdan CV oluşturma özelliği de mevcuttur."
+      }
+    }
+  ]
+}
+</script>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -540,6 +599,29 @@ textarea.fs-input{resize:vertical;min-height:90px;line-height:1.6}
 .feat-desc{font-size:12.5px;color:var(--ink4);line-height:1.55}
 @media(max-width:640px){.features{grid-template-columns:1fr;gap:10px}.features-dark{grid-template-columns:1fr;gap:10px}}
 
+/* ─── SEO CONTENT SECTIONS ────────────────────────────────── */
+.seo-section{padding:64px 24px;max-width:860px;margin:0 auto}
+.seo-section h2{font-size:26px;font-weight:800;color:var(--ink);text-align:center;margin-bottom:12px}
+.seo-section .seo-sub{text-align:center;color:var(--ink4);font-size:15px;margin-bottom:40px;line-height:1.6}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.step-card{background:var(--surface);border:1px solid var(--bd);border-radius:var(--r-lg);padding:28px 22px;text-align:center;transition:all .15s}
+.step-card:hover{border-color:var(--pri-ll);box-shadow:var(--sh-md);transform:translateY(-2px)}
+.step-num{width:36px;height:36px;border-radius:50%;background:var(--grad);color:#fff;font-weight:700;font-size:15px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px}
+.step-card h3{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.step-card p{font-size:13px;color:var(--ink4);line-height:1.55}
+.ats-info{background:var(--surface);border:1px solid var(--bd);border-radius:var(--r-lg);padding:32px;line-height:1.7}
+.ats-info p{color:var(--ink3);font-size:14.5px;margin-bottom:14px}
+.ats-info p:last-child{margin-bottom:0}
+.faq-list{display:flex;flex-direction:column;gap:10px}
+.faq-item{background:var(--surface);border:1px solid var(--bd);border-radius:var(--r-lg);overflow:hidden;transition:border-color .15s}
+.faq-item:hover{border-color:var(--pri-ll)}
+.faq-q{width:100%;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;background:none;border:none;cursor:pointer;font-size:14.5px;font-weight:600;color:var(--ink);text-align:left;font-family:inherit}
+.faq-q .faq-arrow{transition:transform .2s;font-size:12px;color:var(--ink4)}
+.faq-q[aria-expanded="true"] .faq-arrow{transform:rotate(180deg)}
+.faq-a{padding:0 22px 18px;font-size:13.5px;color:var(--ink4);line-height:1.6;display:none}
+.faq-a.open{display:block}
+@media(max-width:640px){.steps-grid{grid-template-columns:1fr}.seo-section{padding:48px 18px}.seo-section h2{font-size:22px}}
+
 /* ─── FOOTER ─────────────────────────────────────────────── */
 .site-footer{padding:40px 24px 28px;text-align:center;border-top:1px solid var(--bd);margin-top:0}
 .footer-inner{max-width:920px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:14px}
@@ -576,7 +658,7 @@ textarea.fs-input{resize:vertical;min-height:90px;line-height:1.6}
   <div class="hero-orb hero-orb-2"></div>
 
   <div class="hero-content">
-    <div class="hero-badge"><span class="dot"></span> Yeni: AI destekli beceri haritası <a href="#" onclick="event.preventDefault();document.getElementById('heroSection').style.display='none';loginWithGoogle()">Dene →</a></div>
+    <div class="hero-badge"><span class="dot"></span> Yeni: AI destekli beceri haritası <a href="#" onclick="event.preventDefault();document.getElementById('heroSection').style.display='none';['howItWorks','atsInfo','faqSection'].forEach(id=>document.getElementById(id).style.display='none');loginWithGoogle()">Dene →</a></div>
     <h1>CV'ni iş ilanına göre<br><span>AI ile optimize et</span></h1>
     <p class="hero-sub">PDF yükle veya sıfırdan oluştur, iş ilanını yapıştır — yapay zeka anahtar kelimeleri ekler, eşleşme skorunu artırır.</p>
     <div class="hero-ctas">
@@ -605,6 +687,62 @@ textarea.fs-input{resize:vertical;min-height:90px;line-height:1.6}
       <div class="feat-ico-d amber">⬇</div>
       <div class="feat-title-d">PDF & DOCX İndirme</div>
       <div class="feat-desc-d">25 farklı tema ile profesyonel CV'ni anında indir.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SEO CONTENT: Nasıl Çalışır ═══ -->
+<section class="seo-section" id="howItWorks" style="display:none">
+  <h2>Nasıl Çalışır?</h2>
+  <p class="seo-sub">3 basit adımda CV'nizi iş ilanına göre optimize edin.</p>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h3>CV'nizi Yükleyin</h3>
+      <p>Mevcut PDF CV'nizi yükleyin ya da sıfırdan form ile oluşturun.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h3>İş İlanını Yapıştırın</h3>
+      <p>Hedeflediğiniz iş ilanını yapıştırın — AI anahtar kelimeleri analiz etsin.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h3>Optimize CV'nizi İndirin</h3>
+      <p>Eşleşme skorunuzu görün, 25+ temadan seçin, PDF veya DOCX olarak indirin.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SEO CONTENT: ATS Bilgi ═══ -->
+<section class="seo-section" id="atsInfo" style="display:none">
+  <h2>ATS Uyumlu CV Neden Önemli?</h2>
+  <div class="ats-info">
+    <p>Büyük şirketlerin %98'i başvuruları değerlendirmek için ATS (Applicant Tracking System) kullanır. Bu sistemler, CV'nizdeki anahtar kelimeleri iş ilanıyla otomatik eşleştirir ve düşük eşleşme skorlu başvuruları eler.</p>
+    <p>CVFit, yapay zeka ile iş ilanındaki kritik anahtar kelimeleri tespit eder ve bunları CV'nize doğal bir dille ekler. Böylece ATS filtrelerinden geçme şansınızı önemli ölçüde artırır.</p>
+    <p>Doğru formatlama, anahtar kelime yoğunluğu ve bölüm başlıkları gibi ATS kriterlerini de otomatik kontrol ederek CV'nizin hem insan gözüne hem de yazılıma hitap etmesini sağlar.</p>
+  </div>
+</section>
+
+<!-- ═══ SEO CONTENT: SSS ═══ -->
+<section class="seo-section" id="faqSection" style="display:none">
+  <h2>Sık Sorulan Sorular</h2>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">CVFit ücretsiz mi? <span class="faq-arrow">▼</span></button>
+      <div class="faq-a">CVFit'in temel özellikleri ücretsiz kullanılabilir. Gelişmiş özellikler için Pro plan mevcuttur.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">ATS nedir? <span class="faq-arrow">▼</span></button>
+      <div class="faq-a">ATS (Applicant Tracking System), şirketlerin iş başvurularını otomatik filtreleyen yazılımlardır. CVFit, CV'nizi ATS sistemlerine uyumlu hale getirir.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">CV'mi nasıl optimize edebilirim? <span class="faq-arrow">▼</span></button>
+      <div class="faq-a">CV'nizi yükleyin, iş ilanını yapıştırın — CVFit yapay zeka ile eşleşme skorunuzu analiz eder ve eksik anahtar kelimeleri ekler.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">Hangi CV formatları destekleniyor? <span class="faq-arrow">▼</span></button>
+      <div class="faq-a">CVFit, PDF formatındaki CV'leri destekler. Ayrıca sıfırdan CV oluşturma özelliği de mevcuttur.</div>
     </div>
   </div>
 </section>
@@ -994,6 +1132,8 @@ function showState(s){
   // hero dark section
   const hero=document.getElementById("heroSection");
   if(hero)hero.style.display=(s==="login")?"flex":"none";
+  // SEO content sections (visible only on landing)
+  ["howItWorks","atsInfo","faqSection"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=(s==="login")?"block":"none"});
   // wrap padding
   const wrap=document.querySelector(".wrap");
   if(wrap){wrap.style.maxWidth=(s==="result")?"1600px":"920px";wrap.style.margin="0 auto";wrap.style.padding=(s==="login")?"0 24px 100px":(s==="result")?"112px 48px 40px":"112px 24px 100px"}
@@ -1005,7 +1145,7 @@ function renderNav(u,p){
   const name=u.full_name||u.email?.split("@")[0]||"Kullanıcı";
   const credits=p?.free_credits??0;
   const plan=p?.plan??"free";
-  const av=u.avatar_url?`<img src="${u.avatar_url}" alt="">`:name.charAt(0).toUpperCase();
+  const av=u.avatar_url?`<img src="${u.avatar_url}" alt="${name} profil fotoğrafı">`:name.charAt(0).toUpperCase();
   const cp=plan==="pro"
     ?`<button class="nbtn nbtn-ghost" onclick="openModal('premModal')">⭐ Pro</button>`
     :`<button class="nbtn nbtn-ghost" onclick="openModal('premModal')">${credits===0?"0 hak":"⚡ "+credits+" hak"}</button>`;
@@ -1335,7 +1475,7 @@ function openAccModal(){
   document.getElementById("aPlan").textContent=plan==="pro"?"⭐ Pro":"Ücretsiz";
   document.getElementById("aCredits").textContent=plan==="pro"?"Sınırsız":`${credits} analiz`;
   document.getElementById("aDate").textContent=date;
-  document.getElementById("aAv").innerHTML=cUser.avatar_url?`<img src="${cUser.avatar_url}" alt="">`:name.charAt(0).toUpperCase();
+  document.getElementById("aAv").innerHTML=cUser.avatar_url?`<img src="${cUser.avatar_url}" alt="${name} profil fotoğrafı">`:name.charAt(0).toUpperCase();
   openModal("accModal");
 }
 function buyPlan(type){if(!localStorage.getItem("cvfit_access_token")){loginWithGoogle();return}window.location.href={single:"https://sandbox.iyzi.link/AAJuwA",pro:"https://sandbox.iyzi.link/AAJuwQ"}[type]}
@@ -1531,7 +1671,15 @@ applyThemeMode(getThemeMode());
 // Sync pre-check: show hero immediately if no token (no flash)
 if(!localStorage.getItem("cvfit_access_token")){
   document.getElementById("heroSection").style.display="flex";
+  ["howItWorks","atsInfo","faqSection"].forEach(id=>{document.getElementById(id).style.display="block"});
 }
+
+function toggleFaq(btn){
+  const expanded=btn.getAttribute("aria-expanded")==="true";
+  btn.setAttribute("aria-expanded",!expanded);
+  btn.nextElementSibling.classList.toggle("open");
+}
+
 checkAuth();
 </script>
 </body>
