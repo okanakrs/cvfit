@@ -63,6 +63,37 @@ def get_user_profile(user_id: str):
         return None
 
 
+def cv_data_to_text(data: dict) -> str:
+    """Convert structured CV data back to readable text for scoring."""
+    parts = []
+    if data.get("name"):
+        parts.append(data["name"])
+    if data.get("title"):
+        parts.append(data["title"])
+    if data.get("summary"):
+        parts.append(data["summary"])
+    if data.get("contact"):
+        parts.append(" | ".join(data["contact"]))
+    if data.get("skills"):
+        parts.append("Beceriler: " + ", ".join(s["name"] if isinstance(s, dict) else str(s) for s in data["skills"]))
+    if data.get("languages"):
+        parts.append("Diller: " + ", ".join(l["name"] if isinstance(l, dict) else str(l) for l in data["languages"]))
+    for exp in data.get("experience", []):
+        line = f"{exp.get('title','')} - {exp.get('company','')} ({exp.get('date','')})"
+        parts.append(line)
+        for b in exp.get("bullets", []):
+            parts.append(f"  - {b}")
+    for edu in data.get("education", []):
+        parts.append(f"{edu.get('degree','')} - {edu.get('school','')} ({edu.get('date','')})")
+    for c in data.get("courses", []):
+        parts.append(f"{c.get('name','')} - {c.get('provider','')} ({c.get('date','')})")
+        if c.get("description"):
+            parts.append(f"  {c['description']}")
+    if data.get("added_keywords"):
+        parts.append("Ek Beceriler: " + ", ".join(data["added_keywords"]))
+    return "\n".join(parts)
+
+
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.post("/analyze")
@@ -164,7 +195,11 @@ JSON formatı:
     except Exception:
         return JSONResponse({"error": "AI yanıtı parse edilemedi", "raw": raw[:500]}, status_code=500)
 
-    new_score = get_match_score(str(cv_data), job_description)
+    new_score = get_match_score(cv_data_to_text(cv_data), job_description)
+
+    # Ensure new score is never lower than original (keywords were added)
+    if new_score < original_score:
+        new_score = original_score
 
     # Kredi düş (pro değilse)
     if plan != "pro":
