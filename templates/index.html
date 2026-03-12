@@ -1465,7 +1465,7 @@ async function dlPDF(){
 }
 const dlDOCX=()=>dlFile("/download-docx","uyarlanmis_cv.docx","docxBtn");
 
-function resetForm(){uFile=null;cvData=null;currentStep=1;document.getElementById("dzt").innerHTML="<strong>PDF yüklemek için tıklayın</strong><br>veya buraya sürükleyin";switchMode('upload');showState("form")}
+function resetForm(){uFile=null;cvData=null;currentStep=1;document.getElementById("dzt").innerHTML="<strong>PDF yüklemek için tıklayın</strong><br>veya buraya sürükleyin";const fi=document.getElementById("cvFile");if(fi)fi.value="";const jd=document.getElementById("jobDesc");if(jd)jd.value="";const ct=document.getElementById("cvText");if(ct)ct.value="";const jdc=document.getElementById("jobDescCreate");if(jdc)jdc.value="";switchMode('upload');showState("form")}
 
 function openAccModal(){
   if(!cUser)return;
