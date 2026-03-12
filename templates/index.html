@@ -186,14 +186,15 @@ textarea::placeholder{color:var(--ink4)}
 @keyframes pop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
 
 /* ─── CV PREVIEW ─────────────────────────────────────────── */
-.cv-shell{background:white;border-radius:0 0 4px 4px;overflow-y:auto;overflow-x:hidden;box-shadow:0 4px 32px rgba(0,0,0,.4);min-height:0;display:flex;flex-direction:column;width:100%;max-width:560px;aspect-ratio:210/297;max-height:85vh}
-.cv-shell::-webkit-scrollbar{width:4px}
-.cv-shell::-webkit-scrollbar-track{background:transparent}
-.cv-shell::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
+.cv-shell{background:white;border-radius:0 0 4px 4px;overflow-y:auto;overflow-x:hidden;box-shadow:0 4px 32px rgba(0,0,0,.4);min-height:0;width:100%;max-width:700px;max-height:85vh}
+.cv-shell::-webkit-scrollbar{width:6px}
+.cv-shell::-webkit-scrollbar-track{background:#f0f0f0;border-radius:3px}
+.cv-shell::-webkit-scrollbar-thumb{background:#999;border-radius:3px}
+.cv-shell::-webkit-scrollbar-thumb:hover{background:#666}
 .cv-bar{padding:12px 22px;background:var(--surface2);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
 .cv-bar-lbl{font-size:12px;font-weight:700;color:var(--ink3)}
 .cv-bar-theme{font-size:11px;color:var(--pri);font-weight:700;background:var(--pri-l);border:1px solid var(--pri-ll);border-radius:100px;padding:3px 12px}
-.cv-in{padding:0;background:white;overflow:hidden;position:relative;font-size:11px}
+.cv-in{padding:0;background:white;position:relative;font-size:11px}
 .cv-name{font-size:24px;font-weight:800;letter-spacing:-.5px;color:var(--ink);margin-bottom:4px}
 .cv-role{font-size:14px;color:var(--pri);font-weight:600;margin-bottom:14px}
 .cv-rul{height:1px;background:var(--bd);margin-bottom:20px}
@@ -298,7 +299,7 @@ textarea::placeholder{color:var(--ink4)}
 .tab-panel{}
 
 /* ─── SPLIT VIEW ─────────────────────────────────────────── */
-.split-view{display:grid;grid-template-columns:2fr 3fr;gap:32px;align-items:start;margin-bottom:14px}
+.split-view{display:grid;grid-template-columns:1fr 1.8fr;gap:32px;align-items:start;margin-bottom:14px}
 .split-left{display:flex;flex-direction:column;gap:0;min-width:0}
 .split-right{position:sticky;top:20px;display:flex;flex-direction:column;align-items:center;min-width:0;max-height:calc(100vh - 40px);overflow:visible}
 .split-header{background:var(--surface);border:1px solid var(--bd);border-radius:var(--r-lg);padding:18px 22px;margin-bottom:14px;box-shadow:var(--sh)}
@@ -306,7 +307,7 @@ textarea::placeholder{color:var(--ink4)}
 .split-sub{font-size:12.5px;color:var(--ink4);line-height:1.5}
 
 /* ─── CV TOOLBAR ─────────────────────────────────────────── */
-.cv-toolbar{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--surface);border:1px solid var(--bd);border-radius:var(--r) var(--r) 0 0;border-bottom:none;flex-shrink:0;width:100%;max-width:560px;box-sizing:border-box}
+.cv-toolbar{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--surface);border:1px solid var(--bd);border-radius:var(--r) var(--r) 0 0;border-bottom:none;flex-shrink:0;width:100%;max-width:700px;box-sizing:border-box}
 .cv-tb-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--bd);background:var(--surface2);color:var(--ink3);font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
 .cv-tb-btn:hover{border-color:var(--pri-ll);color:var(--pri);background:var(--pri-l)}
 .cv-tb-primary{background:var(--pri);color:white;border-color:var(--pri)}
