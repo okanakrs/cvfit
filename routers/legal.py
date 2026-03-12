@@ -495,7 +495,13 @@ def _find_english_counterpart(file_path: Path, legal_dir: Path) -> Path | None:
     return None
 
 
-def _render_legal_preview(file_path: Path, legal_dir: Path) -> HTMLResponse:
+def _render_legal_preview(
+    file_path: Path,
+    legal_dir: Path,
+    *,
+    title: str | None = None,
+    title_tr: str | None = None,
+) -> HTMLResponse:
     relative_path = file_path.relative_to(legal_dir).as_posix()
     raw_url = _raw_legal_url(relative_path)
     download_url = _raw_legal_url(relative_path, download=True)
@@ -543,7 +549,7 @@ function switchLang(lang){
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CVFit | {html.escape(file_path.stem)}</title>
+  <title>CVFit | {html.escape(title or file_path.stem.replace('_', ' '))}</title>
   <link rel="icon" type="image/x-icon" href="/medias/favicon.ico">
   <link rel="icon" type="image/png" sizes="192x192" href="/medias/cvfit-icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/medias/cvfit-apple-touch-icon.png">
@@ -555,7 +561,8 @@ function switchLang(lang){
   {_LEGAL_NAV}
   <main class="legal-wrap">
     <div class="legal-card">
-      <h1 class="legal-title">{html.escape(file_path.stem.replace('_', ' '))}</h1>
+      <h1 class="legal-title">{html.escape(title or file_path.stem.replace('_', ' '))}</h1>
+      {('<p class="legal-subtitle">' + html.escape(title_tr) + '</p>') if title_tr and title else ''}
 
       <div class="legal-actions">
         <a class="legal-btn legal-btn-outline" href="{download_url}">
@@ -594,33 +601,33 @@ def _select_by_keywords(keywords: dict[str, int], not_found_detail: str) -> tupl
     return legal_dir, selected
 
 
-def _redirect_by_keywords(keywords: dict[str, int], not_found_detail: str) -> RedirectResponse:
+def _render_by_keywords(
+    keywords: dict[str, int],
+    not_found_detail: str,
+    *,
+    title: str | None = None,
+    title_tr: str | None = None,
+) -> HTMLResponse:
     legal_dir, selected = _select_by_keywords(keywords, not_found_detail)
-    relative_path = selected.relative_to(legal_dir).as_posix()
-    return RedirectResponse(url=f"/legal/{_encode_path(relative_path)}", status_code=307)
+    return _render_legal_preview(selected, legal_dir, title=title, title_tr=title_tr)
+
+
+_LEGAL_INDEX_LINKS = [
+    {"href": "/privacy", "title": "Privacy Policy", "title_tr": "Gizlilik Politikası"},
+    {"href": "/terms", "title": "Terms of Service", "title_tr": "Kullanım Koşulları"},
+    {"href": "/kvkk", "title": "KVKK Disclosure", "title_tr": "KVKK Aydınlatma Metni"},
+    {"href": "/cerez-politikasi", "title": "Cookie Policy", "title_tr": "Çerez Politikası"},
+    {"href": "/mesafeli-satis-sozlesmesi", "title": "Distance Sales Agreement", "title_tr": "Mesafeli Satış Sözleşmesi"},
+]
 
 
 @router.get("/legal", response_class=HTMLResponse)
 def legal_documents_index() -> HTMLResponse:
-    legal_dir = _get_legal_dir()
-    if legal_dir is None:
-        return HTMLResponse(
-            "<h1>Legal documents folder not found.</h1><p>Create one of: "
-            + ", ".join(LEGAL_DIR_CANDIDATES)
-            + "</p>",
-            status_code=404,
-        )
-
-    files = _iter_legal_files(legal_dir)
-    if not files:
-        return HTMLResponse("<h1>No legal documents found in folder.</h1>", status_code=404)
-
     links_parts: list[str] = []
-    for file_path in files:
-        relative = file_path.relative_to(legal_dir).as_posix()
-        href = f"/legal/{_encode_path(relative)}"
-        links_parts.append(f'<li><a href="{href}">{html.escape(relative)}</a></li>')
-
+    for page in _LEGAL_INDEX_LINKS:
+        links_parts.append(
+            f'<li><a href="{page["href"]}">{html.escape(page["title"])} — {html.escape(page["title_tr"])}</a></li>'
+        )
     links = "".join(links_parts)
 
     page_html = f"""
@@ -664,6 +671,86 @@ def legal_document_raw(file_path: str, download: bool = Query(False)) -> FileRes
     return _file_response(resolved, as_attachment=download)
 
 
+# ── Clean URL routes (direct render, no redirect) ────────────────────────────
+
+@router.get("/privacy", response_class=HTMLResponse)
+def privacy_policy() -> HTMLResponse:
+    return _render_by_keywords(
+        PRIVACY_KEYWORDS,
+        "No privacy policy document found.",
+        title="Privacy Policy",
+        title_tr="Gizlilik Politikası",
+    )
+
+
+@router.get("/terms", response_class=HTMLResponse)
+def terms_of_service() -> HTMLResponse:
+    return _render_by_keywords(
+        TERMS_KEYWORDS,
+        "No terms document found.",
+        title="Terms of Service",
+        title_tr="Kullanım Koşulları",
+    )
+
+
+@router.get("/kvkk", response_class=HTMLResponse)
+def kvkk_notice() -> HTMLResponse:
+    return _render_by_keywords(
+        KVKK_KEYWORDS,
+        "No KVKK disclosure document found.",
+        title="KVKK Disclosure",
+        title_tr="KVKK Aydınlatma Metni",
+    )
+
+
+@router.get("/cookies", response_class=HTMLResponse)
+@router.get("/cookie-policy", response_class=HTMLResponse)
+@router.get("/cerez-politikasi", response_class=HTMLResponse)
+def cookie_policy() -> HTMLResponse:
+    return _render_by_keywords(
+        COOKIE_KEYWORDS,
+        "No cookie policy document found.",
+        title="Cookie Policy",
+        title_tr="Çerez Politikası",
+    )
+
+
+@router.get("/distance-sales-agreement", response_class=HTMLResponse)
+@router.get("/mesafeli-satis-sozlesmesi", response_class=HTMLResponse)
+def distance_sales_agreement() -> HTMLResponse:
+    return _render_by_keywords(
+        DISTANCE_SALES_KEYWORDS,
+        "No distance sales agreement document found.",
+        title="Distance Sales Agreement",
+        title_tr="Mesafeli Satış Sözleşmesi",
+    )
+
+
+# ── 301 Redirects from old ugly URLs ─────────────────────────────────────────
+
+@router.get("/legal/_extracted/files/CVFit_Gizlilik_Politikasi.docx")
+async def redirect_old_privacy():
+    return RedirectResponse(url="/privacy", status_code=301)
+
+@router.get("/legal/_extracted/files/CVFit_Kullanim_Kosullari.docx")
+async def redirect_old_terms():
+    return RedirectResponse(url="/terms", status_code=301)
+
+@router.get("/legal/_extracted/files/CVFit_KVKK_Aydinlatma_Metni.docx")
+async def redirect_old_kvkk():
+    return RedirectResponse(url="/kvkk", status_code=301)
+
+@router.get("/legal/_extracted/files/CVFit_Cerez_Politikasi.docx")
+async def redirect_old_cookie():
+    return RedirectResponse(url="/cerez-politikasi", status_code=301)
+
+@router.get("/legal/_extracted/files/CVFit_Mesafeli_Satis_Sozlesmesi.docx")
+async def redirect_old_distance_sales():
+    return RedirectResponse(url="/mesafeli-satis-sozlesmesi", status_code=301)
+
+
+# ── Catch-all for direct file access (must be LAST) ───────────────────────────
+
 @router.get("/legal/{file_path:path}")
 def legal_document(file_path: str) -> HTMLResponse:
     legal_dir = _get_legal_dir()
@@ -672,31 +759,3 @@ def legal_document(file_path: str) -> HTMLResponse:
 
     resolved = _safe_resolve_file(legal_dir, file_path)
     return _render_legal_preview(resolved, legal_dir)
-
-
-@router.get("/privacy")
-def privacy_policy() -> RedirectResponse:
-    return _redirect_by_keywords(PRIVACY_KEYWORDS, "No privacy policy document found.")
-
-
-@router.get("/terms")
-def terms_of_service() -> RedirectResponse:
-    return _redirect_by_keywords(TERMS_KEYWORDS, "No terms document found.")
-
-
-@router.get("/kvkk")
-def kvkk_notice() -> RedirectResponse:
-    return _redirect_by_keywords(KVKK_KEYWORDS, "No KVKK disclosure document found.")
-
-
-@router.get("/cookies")
-@router.get("/cookie-policy")
-@router.get("/cerez-politikasi")
-def cookie_policy() -> RedirectResponse:
-    return _redirect_by_keywords(COOKIE_KEYWORDS, "No cookie policy document found.")
-
-
-@router.get("/distance-sales-agreement")
-@router.get("/mesafeli-satis-sozlesmesi")
-def distance_sales_agreement() -> RedirectResponse:
-    return _redirect_by_keywords(DISTANCE_SALES_KEYWORDS, "No distance sales agreement document found.")
