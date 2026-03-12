@@ -43,7 +43,7 @@ Is Ilani:
     )
     try:
         return int(''.join(filter(str.isdigit, message.content[0].text.strip()))[:3])
-    except:
+    except Exception:
         return 0
 
 
@@ -51,7 +51,7 @@ def get_user_from_token(token: str):
     try:
         user = supabase.auth.get_user(token)
         return user.user
-    except:
+    except Exception:
         return None
 
 
@@ -59,7 +59,7 @@ def get_user_profile(user_id: str):
     try:
         result = supabase.table("profiles").select("*").eq("id", user_id).single().execute()
         return result.data
-    except:
+    except Exception:
         return None
 
 
@@ -161,7 +161,7 @@ JSON formatı:
 
     try:
         cv_data = json.loads(raw)
-    except:
+    except Exception:
         return JSONResponse({"error": "AI yanıtı parse edilemedi", "raw": raw[:500]}, status_code=500)
 
     new_score = get_match_score(str(cv_data), job_description)
@@ -180,7 +180,7 @@ JSON formatı:
             "cv_data": cv_data,
             "keywords": cv_data.get("added_keywords", [])
         }).execute()
-    except:
+    except Exception:
         pass
 
     return JSONResponse({

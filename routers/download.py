@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Form, HTTPException
+from fastapi import APIRouter, Form, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
-import os, json, tempfile, subprocess, shutil, platform
+import os, json, tempfile, subprocess, shutil, platform, logging
+
+logger = logging.getLogger(__name__)
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -44,8 +46,15 @@ def parse_theme_renk(theme: str):
     renk = parts[1] if len(parts) > 1 and parts[1] in RENKLER else "mavi"
     return tema_adi, renk
 
+def _cleanup_file(path: str):
+    try:
+        os.unlink(path)
+    except OSError:
+        pass
+
+
 @router.post("/download-pdf")
-async def download_pdf(cv_text: str = Form(...), theme: str = Form("classic_mavi")):
+async def download_pdf(background_tasks: BackgroundTasks, cv_text: str = Form(...), theme: str = Form("classic_mavi")):
     try:
         cv = json.loads(cv_text)
     except Exception:
@@ -63,13 +72,14 @@ async def download_pdf(cv_text: str = Form(...), theme: str = Form("classic_mavi
     tema_modul.render(c, cv, page_w, page_h, renk)
     c.save()
 
+    background_tasks.add_task(_cleanup_file, tmp.name)
     return FileResponse(tmp.name, media_type="application/pdf", filename="uyarlanmis_cv.pdf")
 
 
 DOCX_THEMES_JSON = os.path.join(os.path.dirname(__file__), "..", "services", "docx_themes", "themes.json")
 
 @router.post("/download-docx")
-async def download_docx(cv_text: str = Form(...), theme: str = Form("classic_mavi")):
+async def download_docx(background_tasks: BackgroundTasks, cv_text: str = Form(...), theme: str = Form("classic_mavi")):
     try:
         cv = json.loads(cv_text)
     except Exception:
@@ -118,6 +128,8 @@ async def download_docx(cv_text: str = Form(...), theme: str = Form("classic_mav
     tmp_out.close()
     out_path = tmp_out.name
 
+    # Safely embed CV data as JSON string to prevent code injection
+    cv_json_safe = json.dumps(cv_json)
     js = f"""
 const {{
   Document, Packer, Paragraph, TextRun,
@@ -125,7 +137,7 @@ const {{
   BorderStyle, WidthType, ShadingType, VerticalAlign, AlignmentType
 }} = require('docx');
 const fs = require('fs');
-const cv  = {cv_json};
+const cv  = JSON.parse({cv_json_safe});
 const OUT = {json.dumps(out_path)};
 const PAL = {json.dumps(pal)};
 
@@ -149,9 +161,11 @@ Packer.toBuffer(doc)
             raise Exception("Node: " + result.stderr[:400])
     except Exception as e:
         os.unlink(tmp_js.name)
-        raise HTTPException(status_code=500, detail="DOCX olusturulamadi: " + str(e))
+        logger.error("DOCX generation error: %s", e)
+        raise HTTPException(status_code=500, detail="DOCX olusturulamadi")
 
     os.unlink(tmp_js.name)
+    background_tasks.add_task(_cleanup_file, out_path)
     return FileResponse(
         out_path,
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",

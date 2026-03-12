@@ -1,22 +1,16 @@
-from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse, HTMLResponse
-import os, json, hashlib, requests as req_lib
+from fastapi import APIRouter, Request, HTTPException
+from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
+import os, json, hashlib, uuid, logging, requests as req_lib
 from supabase import create_client
 
+try:
+    import iyzipay
+except ImportError:
+    iyzipay = None
+
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
-
-def get_user_from_token(token: str):
-    try:
-        return supabase.auth.get_user(token).user
-    except:
-        return None
-
-def get_user_profile(user_id: str):
-    try:
-        return supabase.table("profiles").select("*").eq("id", user_id).single().execute().data
-    except:
-        return None
-
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
@@ -27,8 +21,24 @@ BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-def get_supabase():
-    return supabase
+iyzico_options = {
+    'api_key': IYZICO_API_KEY,
+    'secret_key': IYZICO_SECRET_KEY,
+    'base_url': IYZICO_BASE_URL,
+}
+
+
+def get_user_from_token(token: str):
+    try:
+        return supabase.auth.get_user(token).user
+    except Exception:
+        return None
+
+def get_user_profile(user_id: str):
+    try:
+        return supabase.table("profiles").select("*").eq("id", user_id).single().execute().data
+    except Exception:
+        return None
 
 @router.post("/api/payment/confirm")
 async def payment_confirm(request: Request):
@@ -36,6 +46,8 @@ async def payment_confirm(request: Request):
     token = body.get("access_token")
     plan = body.get("plan", "single")
 
+    if not token:
+        raise HTTPException(status_code=401, detail="Token gerekli")
     user = get_user_from_token(token)
     if not user:
         raise HTTPException(status_code=401, detail="Gecersiz token")
@@ -126,14 +138,18 @@ async def start_payment(request: Request):
             "conversation_id": conversation_id,
             "status": "pending"
         }).execute()
-    except:
-        pass
+    except Exception as e:
+        logger.error("Payment insert error: %s", e)
+
+    if iyzipay is None:
+        raise HTTPException(status_code=500, detail="Odeme sistemi yapilandirilamadi")
 
     try:
         checkout_form = iyzipay.CheckoutFormInitialize().create(request_data, iyzico_options)
         result = json.loads(checkout_form.read().decode('utf-8'))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"iyzico baglanti hatasi: {str(e)}")
+        logger.error("iyzico connection error: %s", e)
+        raise HTTPException(status_code=500, detail="Odeme sistemi ile baglanti kurulamadi")
 
     if result.get("status") == "success":
         return {
@@ -154,12 +170,16 @@ async def payment_callback(request: Request):
     if not iyzico_token:
         return RedirectResponse(url="/payment/fail", status_code=303)
 
+    if iyzipay is None:
+        logger.error("iyzipay module not available for callback")
+        return RedirectResponse(url="/payment/fail", status_code=303)
+
     try:
         result_data = {'locale': 'tr', 'token': iyzico_token}
         checkout_form = iyzipay.CheckoutForm().retrieve(result_data, iyzico_options)
         result = json.loads(checkout_form.read().decode('utf-8'))
     except Exception as e:
-        print("iyzico callback error:", e)
+        logger.error("iyzico callback error: %s", e)
         return RedirectResponse(url="/payment/fail", status_code=303)
 
     if result.get("status") == "success" and result.get("paymentStatus") == "SUCCESS":
@@ -177,7 +197,7 @@ async def payment_callback(request: Request):
                     supabase.table("profiles").update({"free_credits": new_credits}).eq("id", user_id).execute()
                 supabase.table("payments").update({"status": "success"}).eq("conversation_id", conversation_id).execute()
         except Exception as e:
-            print("Payment callback error:", e)
+            logger.error("Payment callback error: %s", e)
         return RedirectResponse(url="/payment/success", status_code=303)
     else:
         return RedirectResponse(url="/payment/fail", status_code=303)

@@ -23,14 +23,14 @@ def _get_base_url(request: Request) -> str:
 def get_user_from_token(token: str):
     try:
         return supabase.auth.get_user(token).user
-    except:
+    except Exception:
         return None
 
 
 def get_user_profile(user_id: str):
     try:
         return supabase.table("profiles").select("*").eq("id", user_id).single().execute().data
-    except:
+    except Exception:
         return None
 
 
@@ -96,6 +96,6 @@ async def auth_verify(request: Request):
 async def auth_logout():
     try:
         supabase.auth.sign_out()
-    except:
+    except Exception:
         pass
     return {"success": True}
