@@ -117,7 +117,8 @@ async def paddle_webhook(request: Request):
     logger.info("Paddle webhook: %s", event_type)
 
     # Ödeme tamamlandı
-    if event_type in ("transaction.completed", "transaction.paid"):
+    
+if event_type == "transaction.completed":
         tx = payload.get("data", {})
         transaction_id = tx.get("id")
         custom_data    = tx.get("custom_data") or {}
