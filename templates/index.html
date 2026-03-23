@@ -636,6 +636,10 @@ textarea.fs-input{resize:vertical;min-height:90px;line-height:1.6}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<script>
+  Paddle.Initialize({ token: 'live_ab0ef681adb9d955db733cb2698' });
+</script>
 </head>
 <body>
 
@@ -1480,7 +1484,30 @@ function openAccModal(){
   document.getElementById("aAv").innerHTML=cUser.avatar_url?`<img src="${cUser.avatar_url}" alt="${name} profil fotoğrafı">`:name.charAt(0).toUpperCase();
   openModal("accModal");
 }
-function buyPlan(type){if(!localStorage.getItem("cvfit_access_token")){loginWithGoogle();return}window.location.href={single:"https://sandbox.iyzi.link/AAJuwA",pro:"https://sandbox.iyzi.link/AAJuwQ"}[type]}
+async function buyPlan(type) {
+  const token = localStorage.getItem("cvfit_access_token");
+  if (!token) { loginWithGoogle(); return; }
+  try {
+    const res = await fetch('/api/payment/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: type, access_token: token })
+    });
+    const data = await res.json();
+    if (!data.success) { alert('Ödeme başlatılamadı!'); return; }
+    Paddle.Checkout.open({
+      transactionId: data.transaction_id,
+      settings: { displayMode: 'overlay', theme: 'dark', locale: 'tr' },
+      eventCallback: function(e) {
+        if (e.name === 'checkout.completed') {
+          closeModal('premModal');
+          alert('🎉 Ödeme başarılı! Planınız aktifleştirildi.');
+          setTimeout(() => window.location.reload(), 1500);
+        }
+      }
+    });
+  } catch(err) { alert('Bir hata oluştu, lütfen tekrar deneyin.'); }
+}
 
 async function loadHist(){
   const t=localStorage.getItem("cvfit_access_token");if(!t)return;

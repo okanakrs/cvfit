@@ -1,31 +1,23 @@
 from fastapi import APIRouter, Request, HTTPException
-from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
-import os, json, hashlib, uuid, logging, requests as req_lib
+from fastapi.responses import JSONResponse
+import os, logging, hmac, hashlib, json
 from supabase import create_client
-
-try:
-    import iyzipay
-except ImportError:
-    iyzipay = None
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_URL      = os.getenv("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
-IYZICO_API_KEY = os.getenv("IYZICO_API_KEY")
-IYZICO_SECRET_KEY = os.getenv("IYZICO_SECRET_KEY")
-IYZICO_BASE_URL = os.getenv("IYZICO_BASE_URL", "sandbox-api.iyzipay.com")
-BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+PADDLE_API_KEY    = os.getenv("PADDLE_API_KEY")
+PADDLE_WEBHOOK_SECRET = os.getenv("PADDLE_WEBHOOK_SECRET", "")
+
+PADDLE_TEKIL_PRICE_ID = os.getenv("PADDLE_TEKIL_PRICE_ID", "pri_01kme95qpfjbqftqg6wgcf6qrt")
+PADDLE_PRO_PRICE_ID   = os.getenv("PADDLE_PRO_PRICE_ID",   "pri_01kme9291xerp3e37wtm8z9pcx")
+
+PADDLE_API_BASE = "https://api.paddle.com"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-iyzico_options = {
-    'api_key': IYZICO_API_KEY,
-    'secret_key': IYZICO_SECRET_KEY,
-    'base_url': IYZICO_BASE_URL,
-}
 
 
 def get_user_from_token(token: str):
@@ -40,168 +32,154 @@ def get_user_profile(user_id: str):
     except Exception:
         return None
 
-@router.post("/api/payment/confirm")
-async def payment_confirm(request: Request):
+
+@router.post("/api/payment/create-checkout")
+async def create_checkout(request: Request):
+    """
+    Paddle Checkout oturumu oluşturur.
+    Frontend Paddle.js ile bu transaction_id'yi kullanarak checkout açar.
+    """
     body = await request.json()
-    token = body.get("access_token")
-    plan = body.get("plan", "single")
+    plan  = body.get("plan", "single")   # "single" veya "pro"
+    token = body.get("access_token", "")
 
-    if not token:
-        raise HTTPException(status_code=401, detail="Token gerekli")
-    user = get_user_from_token(token)
+    user = get_user_from_token(token) if token else None
     if not user:
-        raise HTTPException(status_code=401, detail="Gecersiz token")
+        raise HTTPException(status_code=401, detail="Giriş gerekli")
 
-    if plan == "pro":
-        supabase.table("profiles").update({"plan": "pro", "free_credits": 9999}).eq("id", user.id).execute()
-    else:
-        profile = get_user_profile(user.id)
-        new_credits = (profile.get("free_credits") or 0) + 1
-        supabase.table("profiles").update({"free_credits": new_credits}).eq("id", user.id).execute()
+    price_id = PADDLE_TEKIL_PRICE_ID if plan == "single" else PADDLE_PRO_PRICE_ID
 
-    return {"success": True}
+    import httpx
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{PADDLE_API_BASE}/transactions",
+                headers={
+                    "Authorization": f"Bearer {PADDLE_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "items": [{"price_id": price_id, "quantity": 1}],
+                    "customer": {"email": user.email},
+                    "custom_data": {
+                        "user_id": user.id,
+                        "plan": plan
+                    }
+                }
+            )
+        data = resp.json()
+    except Exception as e:
+        logger.error("Paddle transaction error: %s", e)
+        raise HTTPException(status_code=500, detail="Ödeme sistemi ile bağlantı kurulamadı")
 
+    if resp.status_code != 201:
+        logger.error("Paddle error: %s", data)
+        raise HTTPException(status_code=400, detail=data.get("error", {}).get("detail", "Ödeme başlatılamadı"))
 
-@router.post("/api/payment/start")
-async def start_payment(request: Request):
-    body = await request.json()
-    plan = body.get("plan", "single")
-    token_str = body.get("access_token", "")
+    transaction_id = data["data"]["id"]
 
-    user = get_user_from_token(token_str) if token_str else None
-    if not user:
-        raise HTTPException(status_code=401, detail="Giris gerekli")
-
-    conversation_id = str(uuid.uuid4()).replace("-", "")[:12]
-    price_display = "39.00" if plan == "single" else "149.00"
-    price_int = 3900 if plan == "single" else 14900
-    plan_name = "Tekil Analiz" if plan == "single" else "Pro Plan - Aylik"
-
-    full_name = user.user_metadata.get("full_name") or "CVFit Kullanici"
-    name_parts = full_name.split()
-    first_name = name_parts[0]
-    last_name = name_parts[-1] if len(name_parts) > 1 else "Kullanici"
-
-    request_data = {
-        'locale': 'tr',
-        'conversationId': conversation_id,
-        'price': price_display,
-        'paidPrice': price_display,
-        'currency': 'TRY',
-        'basketId': f'cvfit-{plan}-{user.id[:8]}',
-        'paymentGroup': 'PRODUCT',
-        'callbackUrl': f'{BASE_URL}/api/payment/callback',
-        'enabledInstallments': ['1', '2', '3'],
-        'buyer': {
-            'id': user.id[:20],
-            'name': first_name,
-            'surname': last_name,
-            'gsmNumber': '+905350000000',
-            'email': user.email,
-            'identityNumber': '11111111111',
-            'lastLoginDate': '2025-01-01 00:00:00',
-            'registrationDate': '2025-01-01 00:00:00',
-            'registrationAddress': 'Turkiye',
-            'ip': '85.34.78.112',
-            'city': 'Istanbul',
-            'country': 'Turkey',
-            'zipCode': '34000'
-        },
-        'shippingAddress': {
-            'contactName': full_name,
-            'city': 'Istanbul',
-            'country': 'Turkey',
-            'address': 'Turkiye',
-            'zipCode': '34000'
-        },
-        'billingAddress': {
-            'contactName': full_name,
-            'city': 'Istanbul',
-            'country': 'Turkey',
-            'address': 'Turkiye',
-            'zipCode': '34000'
-        },
-        'basketItems': [{
-            'id': f'cvfit-{plan}',
-            'name': plan_name,
-            'category1': 'Yazilim',
-            'itemType': 'VIRTUAL',
-            'price': price_display
-        }]
-    }
-
+    # Ödemeyi pending olarak kaydet
     try:
         supabase.table("payments").insert({
             "user_id": user.id,
             "plan": plan,
-            "amount": price_int,
-            "conversation_id": conversation_id,
+            "amount": 3900 if plan == "single" else 14900,
+            "transaction_id": transaction_id,
             "status": "pending"
         }).execute()
     except Exception as e:
         logger.error("Payment insert error: %s", e)
 
-    if iyzipay is None:
-        raise HTTPException(status_code=500, detail="Odeme sistemi yapilandirilamadi")
+    return {"success": True, "transaction_id": transaction_id}
+
+
+@router.post("/api/payment/webhook")
+async def paddle_webhook(request: Request):
+    """
+    Paddle'dan gelen webhook olaylarını işler.
+    Ödeme tamamlandığında kullanıcı planını günceller.
+    """
+    raw_body = await request.body()
+
+    # Webhook imzasını doğrula
+    if PADDLE_WEBHOOK_SECRET:
+        signature = request.headers.get("paddle-signature", "")
+        if not _verify_webhook_signature(raw_body, signature, PADDLE_WEBHOOK_SECRET):
+            logger.warning("Paddle webhook signature mismatch")
+            raise HTTPException(status_code=401, detail="Geçersiz imza")
 
     try:
-        checkout_form = iyzipay.CheckoutFormInitialize().create(request_data, iyzico_options)
-        result = json.loads(checkout_form.read().decode('utf-8'))
-    except Exception as e:
-        logger.error("iyzico connection error: %s", e)
-        raise HTTPException(status_code=500, detail="Odeme sistemi ile baglanti kurulamadi")
+        payload = json.loads(raw_body)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Geçersiz payload")
 
-    if result.get("status") == "success":
-        return {
-            "success": True,
-            "checkoutFormContent": result.get("checkoutFormContent"),
-            "token": result.get("token"),
-            "conversation_id": conversation_id
-        }
-    else:
-        raise HTTPException(status_code=400, detail=result.get("errorMessage", "Odeme baslatılamadi"))
+    event_type = payload.get("event_type", "")
+    logger.info("Paddle webhook: %s", event_type)
+
+    # Ödeme tamamlandı
+    if event_type in ("transaction.completed", "transaction.paid"):
+        tx = payload.get("data", {})
+        transaction_id = tx.get("id")
+        custom_data    = tx.get("custom_data") or {}
+        user_id        = custom_data.get("user_id")
+        plan           = custom_data.get("plan", "single")
+
+        if not user_id:
+            # custom_data yoksa payments tablosundan bul
+            try:
+                row = supabase.table("payments").select("*").eq("transaction_id", transaction_id).single().execute()
+                if row.data:
+                    user_id = row.data["user_id"]
+                    plan    = row.data["plan"]
+            except Exception:
+                pass
+
+        if user_id:
+            _activate_plan(user_id, plan)
+            try:
+                supabase.table("payments").update({"status": "success"}).eq("transaction_id", transaction_id).execute()
+            except Exception as e:
+                logger.error("Payment update error: %s", e)
+
+    # Abonelik yenilendi
+    elif event_type == "subscription.activated":
+        sub = payload.get("data", {})
+        custom_data = sub.get("custom_data") or {}
+        user_id     = custom_data.get("user_id")
+        if user_id:
+            _activate_plan(user_id, "pro")
+
+    return {"success": True}
 
 
-@router.post("/api/payment/callback")
-async def payment_callback(request: Request):
-    form = await request.form()
-    iyzico_token = form.get("token")
-
-    if not iyzico_token:
-        return RedirectResponse(url="/payment/fail", status_code=303)
-
-    if iyzipay is None:
-        logger.error("iyzipay module not available for callback")
-        return RedirectResponse(url="/payment/fail", status_code=303)
-
+def _activate_plan(user_id: str, plan: str):
+    """Kullanıcının planını aktifleştirir."""
     try:
-        result_data = {'locale': 'tr', 'token': iyzico_token}
-        checkout_form = iyzipay.CheckoutForm().retrieve(result_data, iyzico_options)
-        result = json.loads(checkout_form.read().decode('utf-8'))
+        if plan == "pro":
+            supabase.table("profiles").update({
+                "plan": "pro",
+                "free_credits": 9999
+            }).eq("id", user_id).execute()
+        else:
+            profile = get_user_profile(user_id)
+            new_credits = (profile.get("free_credits") or 0) + 1
+            supabase.table("profiles").update({
+                "free_credits": new_credits
+            }).eq("id", user_id).execute()
+        logger.info("Plan activated: user=%s plan=%s", user_id, plan)
     except Exception as e:
-        logger.error("iyzico callback error: %s", e)
-        return RedirectResponse(url="/payment/fail", status_code=303)
-
-    if result.get("status") == "success" and result.get("paymentStatus") == "SUCCESS":
-        conversation_id = result.get("conversationId", "")
-        try:
-            payment_row = supabase.table("payments").select("*").eq("conversation_id", conversation_id).single().execute()
-            if payment_row.data:
-                user_id = payment_row.data["user_id"]
-                plan = payment_row.data["plan"]
-                if plan == "pro":
-                    supabase.table("profiles").update({"plan": "pro", "free_credits": 9999}).eq("id", user_id).execute()
-                else:
-                    profile = get_user_profile(user_id)
-                    new_credits = (profile.get("free_credits") or 0) + 1
-                    supabase.table("profiles").update({"free_credits": new_credits}).eq("id", user_id).execute()
-                supabase.table("payments").update({"status": "success"}).eq("conversation_id", conversation_id).execute()
-        except Exception as e:
-            logger.error("Payment callback error: %s", e)
-        return RedirectResponse(url="/payment/success", status_code=303)
-    else:
-        return RedirectResponse(url="/payment/fail", status_code=303)
+        logger.error("Plan activation error: %s", e)
 
 
-# ── ANALİZ ────────────────────────────────────────────────────────────────────
-
+def _verify_webhook_signature(raw_body: bytes, signature_header: str, secret: str) -> bool:
+    """Paddle webhook imzasını doğrular."""
+    try:
+        # Paddle imza formatı: ts=timestamp;h1=hash
+        parts = dict(p.split("=", 1) for p in signature_header.split(";"))
+        ts    = parts.get("ts", "")
+        h1    = parts.get("h1", "")
+        signed_payload = f"{ts}:{raw_body.decode()}"
+        expected = hmac.new(secret.encode(), signed_payload.encode(), hashlib.sha256).hexdigest()
+        return hmac.compare_digest(expected, h1)
+    except Exception:
+        return False
