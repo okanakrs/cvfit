@@ -28,13 +28,25 @@ _fonts_registered = False
 def register_fonts():
     global _fonts_registered
     if _fonts_registered: return
-    base = os.path.join(os.path.dirname(__file__), "..", "static")
-    try:
-        pdfmetrics.registerFont(TTFont("DJ",   os.path.join(base, "DejaVuSans.ttf")))
-        pdfmetrics.registerFont(TTFont("DJ-B", os.path.join(base, "DejaVuSans-Bold.ttf")))
-        _fonts_registered = True
-    except Exception:
-        pass
+    
+    # Önce proje kökünden dene
+    base_options = [
+        os.path.join(os.path.dirname(__file__), "..", "static"),
+        os.path.join(os.path.dirname(__file__), "static"),
+        "/app/static",
+    ]
+    
+    for base in base_options:
+        regular = os.path.join(base, "DejaVuSans.ttf")
+        bold    = os.path.join(base, "DejaVuSans-Bold.ttf")
+        if os.path.exists(regular) and os.path.exists(bold):
+            pdfmetrics.registerFont(TTFont("DJ",   regular))
+            pdfmetrics.registerFont(TTFont("DJ-B", bold))
+            _fonts_registered = True
+            logger.info("Fonts registered from: %s", base)
+            return
+    
+    logger.error("DejaVu fonts NOT FOUND! PDF text will not be selectable.")
 
 def parse_theme_renk(theme: str):
     """
