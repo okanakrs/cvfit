@@ -33,6 +33,29 @@ def get_user_profile(user_id: str):
         return None
 
 
+def is_discount_eligible_for_user(user_id: str) -> bool:
+    """Ilk satin alma disinda indirimin tekrar kullanilmasini engeller."""
+    try:
+        profile = get_user_profile(user_id)
+        if (profile or {}).get("plan") == "pro":
+            return False
+
+        paid = (
+            supabase
+            .table("payments")
+            .select("transaction_id")
+            .eq("user_id", user_id)
+            .eq("plan", "pro")
+            .eq("status", "success")
+            .limit(1)
+            .execute()
+        )
+        return not bool(paid.data)
+    except Exception:
+        # Guvenli varsayim: emin degilsek indirim uygulama.
+        return False
+
+
 @router.post("/api/payment/create-checkout")
 async def create_checkout(request: Request):
     """
@@ -43,12 +66,31 @@ async def create_checkout(request: Request):
     plan  = body.get("plan", "single")   # "single" veya "pro"
     token = body.get("access_token", "")
     session_token = body.get("session_token", "")
+    override_price_id = body.get("price_id")
+    discount_id = body.get("discount_id")
+    customer_email = body.get("customer_email")
 
     user = get_user_from_token(token) if token else None
     if not user:
         raise HTTPException(status_code=401, detail="Giriş gerekli")
 
     price_id = PADDLE_TEKIL_PRICE_ID if plan == "single" else PADDLE_PRO_PRICE_ID
+    if isinstance(override_price_id, str) and override_price_id.startswith("pri_"):
+        price_id = override_price_id
+
+    payload = {
+        "items": [{"price_id": price_id, "quantity": 1}],
+        "customer": {"email": customer_email or user.email},
+        "custom_data": {
+            "user_id": user.id,
+            "plan": plan,
+            "session_token": session_token
+        }
+    }
+    if isinstance(discount_id, str) and discount_id and is_discount_eligible_for_user(user.id):
+        payload["discount_id"] = discount_id
+    elif isinstance(discount_id, str) and discount_id:
+        logger.info("Discount ignored for user=%s (not eligible)", user.id)
 
     import httpx
     try:
@@ -59,15 +101,7 @@ async def create_checkout(request: Request):
                     "Authorization": f"Bearer {PADDLE_API_KEY}",
                     "Content-Type": "application/json",
                 },
-                json={
-                    "items": [{"price_id": price_id, "quantity": 1}],
-                    "customer": {"email": user.email},
-                    "custom_data": {
-                        "user_id": user.id,
-                        "plan": plan,
-                        "session_token": session_token
-                    }
-                }
+                json=payload
             )
         data = resp.json()
     except Exception as e:

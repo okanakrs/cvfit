@@ -28,6 +28,7 @@ interface AuthState {
   loading: boolean
   login: () => void
   logout: () => Promise<void>
+  refresh: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthState>({
@@ -36,6 +37,7 @@ const AuthContext = createContext<AuthState>({
   loading: true,
   login: () => {},
   logout: async () => {},
+  refresh: async () => {},
 })
 
 export function useAuth() {
@@ -48,6 +50,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const API_URL = process.env.NEXT_PUBLIC_API_URL || ""
 
+  const verify = useCallback(async (token: string) => {
+    const response = await fetch("/auth/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ access_token: token }),
+    })
+
+    if (!response.ok) {
+      throw new Error("invalid")
+    }
+
+    const data = await response.json()
+    setUser(data.user)
+    setProfile(data.profile)
+    localStorage.setItem("cvfit_user_name", data.user.full_name || "")
+
+    const sessionToken = localStorage.getItem("cvfit_session_token")
+    if (sessionToken) {
+      fetch(`${API_URL}/api/cv/claim`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_token: sessionToken, access_token: token }),
+      }).catch(() => {})
+    }
+  }, [API_URL])
+
   // Verify token on mount
   useEffect(() => {
     const token = localStorage.getItem("cvfit_access_token")
@@ -56,29 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    fetch("/auth/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ access_token: token }),
-    })
-      .then((r) => {
-        if (!r.ok) throw new Error("invalid")
-        return r.json()
-      })
-      .then((data) => {
-        setUser(data.user)
-        setProfile(data.profile)
-        localStorage.setItem("cvfit_user_name", data.user.full_name || "")
-        // After setting user/profile, claim any anonymous draft
-        const sessionToken = localStorage.getItem("cvfit_session_token")
-        if (sessionToken) {
-          fetch(`${API_URL}/api/cv/claim`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ session_token: sessionToken, access_token: token }),
-          }).catch(() => {})
-        }
-      })
+    verify(token)
       .catch(() => {
         // Token invalid — clear
         localStorage.removeItem("cvfit_access_token")
@@ -86,7 +92,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem("cvfit_user_name")
       })
       .finally(() => setLoading(false))
-  }, [])
+  }, [verify])
+
+  const refresh = useCallback(async () => {
+    const token = localStorage.getItem("cvfit_access_token")
+    if (!token) {
+      setUser(null)
+      setProfile(null)
+      return
+    }
+
+    try {
+      await verify(token)
+    } catch {
+      localStorage.removeItem("cvfit_access_token")
+      localStorage.removeItem("cvfit_refresh_token")
+      localStorage.removeItem("cvfit_user_name")
+      setUser(null)
+      setProfile(null)
+    }
+  }, [verify])
 
   const login = useCallback(() => {
     window.location.href = "/auth/google"
@@ -114,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, profile, loading, login, logout, refresh }}>
       {children}
     </AuthContext.Provider>
   )

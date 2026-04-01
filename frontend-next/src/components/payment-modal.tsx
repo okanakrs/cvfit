@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { Loader2, CheckCircle2, FileDown, ArrowRight } from "lucide-react"
 import { toast } from "sonner"
+import { useAuth } from "@/lib/auth-context"
 
 declare global {
   interface Window {
@@ -43,6 +44,7 @@ const PADDLE_PRO_PRICE_ID = process.env.NEXT_PUBLIC_PADDLE_PRO_PRICE_ID || ""
 const PADDLE_FIRST_MONTH_DISCOUNT_ID = process.env.NEXT_PUBLIC_PADDLE_FIRST_MONTH_DISCOUNT_ID || ""
 
 export function PaymentModal({ open, onClose, sessionToken, downloadFormat, accessToken, onPaymentSuccess }: PaymentModalProps) {
+  const { refresh } = useAuth()
   const [loading, setLoading] = useState<"pro" | null>(null)
   const [paddleReady, setPaddleReady] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -64,7 +66,12 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
         eventCallback: (event: PaddleEvent) => {
           if (event.name === "checkout.completed") {
             setSuccess(true)
-            setTimeout(() => {
+            setTimeout(async () => {
+              // Webhook is asynchronous; refresh auth a few times to reflect Pro plan in UI.
+              for (let i = 0; i < 3; i++) {
+                await refresh()
+                await new Promise((resolve) => setTimeout(resolve, 600))
+              }
               onPaymentSuccess()
               onClose()
             }, 2000)
@@ -80,11 +87,15 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
     document.head.appendChild(script)
   }, [open, onClose, onPaymentSuccess])
 
-  function startCheckout(priceId: string, discountId?: string) {
+  async function startCheckout(priceId: string, discountId?: string) {
     const customerEmail = (typeof window !== "undefined" ? localStorage.getItem("cvfit_user_email") : "") || ""
 
     if (!priceId) {
       toast.error("Paddle priceId eksik. NEXT_PUBLIC_PADDLE_PRO_PRICE_ID ayarlayin.")
+      return
+    }
+    if (!accessToken) {
+      toast.error("Odeme icin once giris yapmaniz gerekiyor.")
       return
     }
     if (!paddleReady || !window.Paddle) {
@@ -94,14 +105,27 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
 
     setLoading("pro")
     try {
-      window.Paddle.Checkout.open({
-        items: [{ priceId, quantity: 1 }],
-        customer: customerEmail ? { email: customerEmail } : undefined,
-        discountId: discountId || undefined,
-        successCallback: () => {
-          window.location.href = "/dashboard"
-        },
+      const endpoint = API_URL ? `${API_URL}/api/payment/create-checkout` : "/api/payment/create-checkout"
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan: "pro",
+          price_id: priceId,
+          discount_id: discountId || null,
+          customer_email: customerEmail || null,
+          access_token: accessToken,
+          session_token: sessionToken,
+        }),
       })
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data?.detail || "Checkout baslatilamadi")
+      }
+      if (!data?.transaction_id) {
+        throw new Error("Transaction ID donmedi")
+      }
+      window.Paddle.Checkout.open({ transactionId: data.transaction_id })
     } catch (e) {
       console.error(e)
       toast.error(e instanceof Error ? e.message : "Odeme baslatilamadi")
