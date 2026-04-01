@@ -1,0 +1,21 @@
+<svg width="520" height="132" viewBox="0 0 520 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CVFit logo dark" shape-rendering="geometricPrecision" text-rendering="optimizeLegibility">
+  <g transform="translate(20,18)" fill="none" stroke="#F8FAFC">
+    <rect x="0" y="0" width="84" height="96" rx="20" stroke-width="3"/>
+    <rect x="12" y="12" width="60" height="72" rx="10" stroke-width="2.5"/>
+    <rect x="24" y="28" width="30" height="3" rx="1.5" fill="#F8FAFC" stroke="none"/>
+    <rect x="24" y="38" width="22" height="3" rx="1.5" fill="#F8FAFC" opacity="0.65" stroke="none"/>
+    <rect x="24" y="48" width="28" height="3" rx="1.5" fill="#F8FAFC" opacity="0.65" stroke="none"/>
+    <rect x="24" y="58" width="18" height="3" rx="1.5" fill="#F8FAFC" opacity="0.65" stroke="none"/>
+    <line x1="8" y1="46" x2="76" y2="46" stroke-width="2" opacity="0.85"/>
+    <circle cx="8" cy="46" r="4.5" fill="#F8FAFC" stroke="none"/>
+    <g transform="translate(72,18)">
+      <polygon points="0,-10 2.2,-2.2 10,0 2.2,2.2 0,10 -2.2,2.2 -10,0 -2.2,-2.2" fill="#F8FAFC" stroke="none"/>
+      <polygon points="0,-4.2 1.1,-1.1 4.2,0 1.1,1.1 0,4.2 -1.1,1.1 -4.2,0 -1.1,-1.1" fill="#0F172A" stroke="none"/>
+    </g>
+  </g>
+  <g transform="translate(126,22)">
+    <text x="0" y="52" font-family="Inter, Helvetica Neue, Arial, sans-serif" font-size="58" font-weight="700" fill="#F8FAFC">CV</text>
+    <text x="78" y="52" font-family="Inter, Helvetica Neue, Arial, sans-serif" font-size="58" font-weight="320" fill="#F8FAFC">Fit</text>
+    <text x="2" y="88" font-family="Inter, Helvetica Neue, Arial, sans-serif" font-size="20" font-weight="700" fill="#CBD5E1" letter-spacing="2.9">AI-POWERED ATS-READY</text>
+  </g>
+</svg>
