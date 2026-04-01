@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { BLOG_POSTS } from "./blog/posts";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://cvfit.app";
+  const baseUrl = "https://www.cvfit.com.tr";
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
