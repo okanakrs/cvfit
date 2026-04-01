@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Loader2, CheckCircle2, FileDown, ArrowRight } from "lucide-react"
+import { toast } from "sonner"
 
 declare global {
   interface Window {
@@ -30,7 +31,7 @@ interface PaymentModalProps {
   onPaymentSuccess: () => void
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || ""
+const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || ""
 const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || ""
 
 export function PaymentModal({ open, onClose, sessionToken, downloadFormat, accessToken, onPaymentSuccess }: PaymentModalProps) {
@@ -40,6 +41,12 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
 
   useEffect(() => {
     if (!open) return
+
+    if (!PADDLE_CLIENT_TOKEN) {
+      toast.error("Paddle token eksik. NEXT_PUBLIC_PADDLE_CLIENT_TOKEN ayarlayın.")
+      return
+    }
+
     if (window.Paddle) { setPaddleReady(true); return }
     const script = document.createElement("script")
     script.src = "https://cdn.paddle.com/paddle/v2/paddle.js"
@@ -58,23 +65,42 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
       })
       setPaddleReady(true)
     }
+    script.onerror = () => {
+      setPaddleReady(false)
+      toast.error("Odeme sistemi yuklenemedi. Sayfayi yenileyip tekrar deneyin.")
+    }
     document.head.appendChild(script)
   }, [open, onClose, onPaymentSuccess])
 
   async function startCheckout(plan: "pro") {
+    if (!accessToken) {
+      toast.error("Odeme icin once giris yapmaniz gerekiyor.")
+      return
+    }
+    if (!paddleReady || !window.Paddle) {
+      toast.error("Odeme sistemi hazirlaniyor. Bir kac saniye sonra tekrar deneyin.")
+      return
+    }
+
     setLoading(plan)
     try {
-      const res = await fetch(`${BACKEND_URL}/api/payment/create-checkout`, {
+      const endpoint = API_URL ? `${API_URL}/api/payment/create-checkout` : "/api/payment/create-checkout"
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan, access_token: accessToken, session_token: sessionToken }),
       })
       const data = await res.json()
-      if (data.transaction_id && paddleReady) {
-        window.Paddle?.Checkout.open({ transactionId: data.transaction_id })
+      if (!res.ok) {
+        throw new Error(data?.detail || "Checkout baslatilamadi")
       }
+      if (!data?.transaction_id) {
+        throw new Error("Transaction ID donmedi")
+      }
+      window.Paddle.Checkout.open({ transactionId: data.transaction_id })
     } catch (e) {
       console.error(e)
+      toast.error(e instanceof Error ? e.message : "Odeme baslatilamadi")
     } finally {
       setLoading(null)
     }
@@ -120,9 +146,9 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
             <li>✓ Öncelikli destek</li>
           </ul>
 
-          <Button className="w-full" disabled={loading !== null} onClick={() => startCheckout("pro")}>
+          <Button className="w-full" disabled={loading !== null || !paddleReady} onClick={() => startCheckout("pro")}>
             {loading === "pro" ? <Loader2 className="size-4 mr-2 animate-spin" /> : <ArrowRight className="size-4 mr-2" />}
-            Hemen Başla
+            {paddleReady ? "Hemen Basla" : "Odeme sistemi hazirlaniyor..."}
           </Button>
           </div>
         
