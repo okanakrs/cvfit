@@ -10,7 +10,6 @@ router = APIRouter()
 SUPABASE_URL      = os.getenv("SUPABASE_URL")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 PADDLE_API_KEY    = os.getenv("PADDLE_API_KEY")
-PADDLE_CLIENT_TOKEN = os.getenv("PADDLE_CLIENT_TOKEN", "")
 PADDLE_WEBHOOK_SECRET = os.getenv("PADDLE_WEBHOOK_SECRET", "")
 
 PADDLE_TEKIL_PRICE_ID = os.getenv("PADDLE_TEKIL_PRICE_ID", "pri_01kme95qpfjbqftqg6wgcf6qrt")
@@ -19,14 +18,6 @@ PADDLE_PRO_PRICE_ID   = os.getenv("PADDLE_PRO_PRICE_ID",   "pri_01kme9291xerp3e3
 PADDLE_API_BASE = "https://api.paddle.com"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-
-@router.get("/api/payment/public-config")
-async def payment_public_config():
-    """Frontend icin gerekli genel odeme konfigunu dondurur."""
-    return {
-        "paddle_client_token": PADDLE_CLIENT_TOKEN,
-    }
 
 
 def get_user_from_token(token: str):
