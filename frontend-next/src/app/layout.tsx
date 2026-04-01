@@ -80,6 +80,14 @@ export const metadata: Metadata = {
       "ATS sistemlerini geçen CV'ler oluşturun. CVFit ile CV'nizi ATS'e optimize edin, daha fazla mülakata çıkın.",
     images: ["/og-image.png"],
   },
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "32x32" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
   robots: {
     index: true,
     follow: true,
