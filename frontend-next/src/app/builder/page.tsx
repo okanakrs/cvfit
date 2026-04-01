@@ -420,7 +420,7 @@ function ensureIds(data: CVData): CVData {
 function CVBuilderPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, profile, loading: authLoading } = useAuth()
+  const { user, profile, loading: authLoading, refresh } = useAuth()
 
   const [cvData, setCvData] = useState<CVData>(emptyCVData)
   const [template, setTemplate] = useState<Template>("classic")
@@ -548,7 +548,20 @@ function CVBuilderPage() {
 
   async function handleDownloadRequest(format: "pdf" | "docx") {
     setDownloadFormat(format)
+    if (authLoading) {
+      toast.info("Hesap bilgileri kontrol ediliyor, lutfen tekrar deneyin.")
+      return
+    }
+
+    const liveAccessToken = typeof window !== "undefined" ? localStorage.getItem("cvfit_access_token") || "" : ""
+
     if (!user) {
+      if (liveAccessToken) {
+        // Token exists but auth context may not be hydrated yet; continue to payment flow.
+        await refresh()
+        setPaymentOpen(true)
+        return
+      }
       sessionStorage.setItem("cvfit_download_intent", format)
       sessionStorage.setItem("cvfit_post_login_redirect", "/builder")
       window.location.href = "/auth/google"
