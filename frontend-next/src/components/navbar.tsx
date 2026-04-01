@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { Sun, Moon, LogOut, Sparkles, ChevronDown } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth-context";
+import { useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +28,7 @@ function getInitials(name: string): string {
 export function Navbar() {
   const { setTheme, resolvedTheme } = useTheme();
   const { user, profile, loading, login, logout } = useAuth();
+  const t = useTranslations("navigation");
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -48,33 +51,43 @@ export function Navbar() {
       }`}
     >
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
-        {/* Logo — sol */}
-        <a href="/" className="flex items-center shrink-0" aria-label="CVFit ana sayfa">
-          <img src="/cvfit-logo-light.svg" alt="CVFit" className="h-11 md:h-12 w-auto dark:hidden" />
-          <img src="/cvfit-logo-dark.svg" alt="CVFit" className="hidden h-11 md:h-12 w-auto dark:block" />
+        {/* Logo */}
+        <a href="/" className="flex items-center shrink-0" aria-label={t("home_label")}>
+          <img
+            src="/cvfit-logo-light.svg"
+            alt="CVFit"
+            className="h-11 md:h-12 w-auto dark:hidden"
+          />
+          <img
+            src="/cvfit-logo-dark.svg"
+            alt="CVFit"
+            className="hidden h-11 md:h-12 w-auto dark:block"
+          />
         </a>
 
-        {/* Nav links — orta */}
+        {/* Nav links */}
         <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
-          <a href="/builder" className="nav-link">CV Oluştur</a>
-          <a href="/how-it-works" className="nav-link">Nasıl Çalışır</a>
-          <a href="/pricing" className="nav-link">Fiyatlandırma</a>
-          <a href="/blog" className="nav-link">Blog</a>
+          <a href="/builder" className="nav-link">{t("build_cv")}</a>
+          <a href="/how-it-works" className="nav-link">{t("how_it_works")}</a>
+          <a href="/pricing" className="nav-link">{t("pricing")}</a>
+          <a href="/blog" className="nav-link">{t("blog")}</a>
           {isPro && (
             <a href="/ats" className="nav-link flex items-center gap-1.5">
               <Sparkles className="size-3.5 text-purple-500" />
-              ATS Analizi
+              {t("ats_analysis")}
             </a>
           )}
         </nav>
 
-        {/* Sağ taraf */}
+        {/* Right side */}
         <div className="flex items-center gap-2 shrink-0">
+          <LanguageSwitcher />
+
           {mounted && (
             <button
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
               className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-              aria-label="Tema değiştir"
+              aria-label={t("toggle_theme")}
             >
               {resolvedTheme === "dark" ? (
                 <Moon className="h-4 w-4" />
@@ -93,7 +106,7 @@ export function Navbar() {
                   </AvatarFallback>
                 </Avatar>
                 <span className="text-sm text-foreground font-medium max-w-[100px] truncate hidden sm:block">
-                  {user.full_name?.split(" ")[0] || "Hesabım"}
+                  {user.full_name?.split(" ")[0] || t("my_account")}
                 </span>
                 {isPro && (
                   <span className="text-[10px] font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white px-1.5 py-0.5 rounded-full hidden sm:block">
@@ -108,9 +121,12 @@ export function Navbar() {
                   <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="text-red-500 focus:text-red-500 cursor-pointer">
+                <DropdownMenuItem
+                  onClick={logout}
+                  className="text-red-500 focus:text-red-500 cursor-pointer"
+                >
                   <LogOut className="h-4 w-4 mr-2" />
-                  Çıkış Yap
+                  {t("sign_out")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -125,7 +141,7 @@ export function Navbar() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              Giriş Yap
+              {t("sign_in")}
             </button>
           ) : null}
         </div>
