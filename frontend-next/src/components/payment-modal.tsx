@@ -11,7 +11,13 @@ declare global {
     Paddle?: {
       Initialize: (config: { token: string; eventCallback?: (data: PaddleEvent) => void }) => void
       Checkout: {
-        open: (config: { transactionId: string }) => void
+        open: (config: {
+          transactionId?: string
+          items?: Array<{ priceId: string; quantity: number }>
+          customer?: { email?: string }
+          discountId?: string
+          successCallback?: () => void
+        }) => void
       }
     }
   }
@@ -33,36 +39,19 @@ interface PaymentModalProps {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || ""
 const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || ""
+const PADDLE_PRO_PRICE_ID = process.env.NEXT_PUBLIC_PADDLE_PRO_PRICE_ID || ""
+const PADDLE_FIRST_MONTH_DISCOUNT_ID = process.env.NEXT_PUBLIC_PADDLE_FIRST_MONTH_DISCOUNT_ID || ""
 
 export function PaymentModal({ open, onClose, sessionToken, downloadFormat, accessToken, onPaymentSuccess }: PaymentModalProps) {
   const [loading, setLoading] = useState<"pro" | null>(null)
   const [paddleReady, setPaddleReady] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [clientToken, setClientToken] = useState(PADDLE_CLIENT_TOKEN)
-
-  useEffect(() => {
-    if (!open || clientToken) return
-
-    const endpoint = API_URL ? `${API_URL}/api/payment/public-config` : "/api/payment/public-config"
-    fetch(endpoint)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("public config alinamadi"))))
-      .then((data) => {
-        const token = String(data?.paddle_client_token || "")
-        if (token) {
-          setClientToken(token)
-        } else {
-          toast.error("Paddle token eksik. Backend env icinde PADDLE_CLIENT_TOKEN ayarlayin.")
-        }
-      })
-      .catch(() => {
-        toast.error("Odeme ayarlari alinmadi. API URL ve backend deployunu kontrol edin.")
-      })
-  }, [open, clientToken])
 
   useEffect(() => {
     if (!open) return
 
-    if (!clientToken) {
+    if (!PADDLE_CLIENT_TOKEN) {
+      toast.error("Paddle token eksik. NEXT_PUBLIC_PADDLE_CLIENT_TOKEN ayarlayın.")
       return
     }
 
@@ -71,7 +60,7 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
     script.src = "https://cdn.paddle.com/paddle/v2/paddle.js"
     script.onload = () => {
       window.Paddle?.Initialize({
-        token: clientToken,
+        token: PADDLE_CLIENT_TOKEN,
         eventCallback: (event: PaddleEvent) => {
           if (event.name === "checkout.completed") {
             setSuccess(true)
@@ -89,11 +78,13 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
       toast.error("Odeme sistemi yuklenemedi. Sayfayi yenileyip tekrar deneyin.")
     }
     document.head.appendChild(script)
-  }, [open, onClose, onPaymentSuccess, clientToken])
+  }, [open, onClose, onPaymentSuccess])
 
-  async function startCheckout(plan: "pro") {
-    if (!accessToken) {
-      toast.error("Odeme icin once giris yapmaniz gerekiyor.")
+  function startCheckout(priceId: string, discountId?: string) {
+    const customerEmail = (typeof window !== "undefined" ? localStorage.getItem("cvfit_user_email") : "") || ""
+
+    if (!priceId) {
+      toast.error("Paddle priceId eksik. NEXT_PUBLIC_PADDLE_PRO_PRICE_ID ayarlayin.")
       return
     }
     if (!paddleReady || !window.Paddle) {
@@ -101,22 +92,16 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
       return
     }
 
-    setLoading(plan)
+    setLoading("pro")
     try {
-      const endpoint = API_URL ? `${API_URL}/api/payment/create-checkout` : "/api/payment/create-checkout"
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan, access_token: accessToken, session_token: sessionToken }),
+      window.Paddle.Checkout.open({
+        items: [{ priceId, quantity: 1 }],
+        customer: customerEmail ? { email: customerEmail } : undefined,
+        discountId: discountId || undefined,
+        successCallback: () => {
+          window.location.href = "/dashboard"
+        },
       })
-      const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data?.detail || "Checkout baslatilamadi")
-      }
-      if (!data?.transaction_id) {
-        throw new Error("Transaction ID donmedi")
-      }
-      window.Paddle.Checkout.open({ transactionId: data.transaction_id })
     } catch (e) {
       console.error(e)
       toast.error(e instanceof Error ? e.message : "Odeme baslatilamadi")
@@ -165,7 +150,11 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
             <li>✓ Öncelikli destek</li>
           </ul>
 
-          <Button className="w-full" disabled={loading !== null || !paddleReady} onClick={() => startCheckout("pro")}>
+          <Button
+            className="w-full"
+            disabled={loading !== null || !paddleReady}
+            onClick={() => startCheckout(PADDLE_PRO_PRICE_ID, PADDLE_FIRST_MONTH_DISCOUNT_ID)}
+          >
             {loading === "pro" ? <Loader2 className="size-4 mr-2 animate-spin" /> : <ArrowRight className="size-4 mr-2" />}
             {paddleReady ? "Hemen Basla" : "Odeme sistemi hazirlaniyor..."}
           </Button>
