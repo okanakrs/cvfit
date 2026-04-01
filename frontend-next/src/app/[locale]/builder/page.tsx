@@ -62,22 +62,13 @@ import { useDraftSync, loadDraftFromCloud, getSessionToken } from "@/lib/use-dra
 import { PaymentModal } from "@/components/payment-modal"
 import { ATSModal } from "@/components/ats-modal"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 type Template = "classic" | "modern" | "minimal" | "executive" | "creative" | "elegant" | "professional" | "tech" | "steel" | "bordeaux" | "navy" | "teal"
 const genId = () => crypto.randomUUID()
 const TEMPLATE_VALUES = new Set<Template>([
-  "classic",
-  "modern",
-  "minimal",
-  "executive",
-  "creative",
-  "elegant",
-  "professional",
-  "tech",
-  "steel",
-  "bordeaux",
-  "navy",
-  "teal",
+  "classic", "modern", "minimal", "executive", "creative", "elegant",
+  "professional", "tech", "steel", "bordeaux", "navy", "teal",
 ])
 
 function parseTemplateParam(value: string | null): Template | null {
@@ -85,22 +76,7 @@ function parseTemplateParam(value: string | null): Template | null {
   return TEMPLATE_VALUES.has(value as Template) ? (value as Template) : null
 }
 
-const TEMPLATES: { value: Template; label: string; desc: string }[] = [
-  { value: "classic", label: "Klasik", desc: "Sade & ATS dostu" },
-  { value: "modern", label: "Modern", desc: "İki kolon, mavi aksan" },
-  { value: "minimal", label: "Portre", desc: "Fotoğraflı, koyu sidebar" },
-  { value: "executive", label: "Kurumsal", desc: "Koyu header, profesyonel" },
-  { value: "creative", label: "Yaratıcı", desc: "Mor gradient, modern" },
-  { value: "elegant", label: "Zarif", desc: "Teal aksan, timeline" },
-  { value: "professional", label: "Profesyonel", desc: "Kırmızı aksan, kurumsal" },
-  { value: "tech", label: "Teknoloji", desc: "Dark sidebar, geliştirici" },
-  { value: "steel", label: "Çelik Mavi", desc: "Mavi sidebar, kurumsal" },
-  { value: "bordeaux", label: "Bordo", desc: "Koyu kırmızı sidebar, fotoğraflı" },
-  { value: "navy", label: "Lacivert", desc: "Koyu lacivert sidebar, fotoğraflı" },
-  { value: "teal", label: "Turkuaz", desc: "Teal header, iki kolon" },
-]
-
-function TemplateThumbnail({ t, active, onClick }: { t: typeof TEMPLATES[number]; active: boolean; onClick: () => void }) {
+function TemplateThumbnail({ tmpl, active, onClick, label, desc }: { tmpl: Template; active: boolean; onClick: () => void; label: string; desc: string }) {
   return (
     <button
       onClick={onClick}
@@ -110,9 +86,9 @@ function TemplateThumbnail({ t, active, onClick }: { t: typeof TEMPLATES[number]
       )}
     >
       <div className="w-14 h-[72px] rounded bg-white overflow-hidden shadow-sm">
-        <MiniPreview template={t.value} />
+        <MiniPreview template={tmpl} />
       </div>
-      <span className="text-[10px] font-medium text-foreground/80">{t.label}</span>
+      <span className="text-[10px] font-medium text-foreground/80">{label}</span>
     </button>
   )
 }
@@ -364,24 +340,8 @@ const A4_HEIGHT = 1123
 
 function CVPreview({ data, template, zoom, previewRef }: { data: CVData; template: Template; zoom: number; previewRef?: React.RefObject<HTMLDivElement | null> }) {
   return (
-    <div style={{
-      width: A4_WIDTH * zoom,
-      height: A4_HEIGHT * zoom,
-      margin: "0 auto",
-      position: "relative",
-      overflow: "hidden",
-    }}>
-      <div
-        style={{
-          transform: `scale(${zoom})`,
-          transformOrigin: "top left",
-          width: A4_WIDTH,
-          height: A4_HEIGHT,
-          position: "absolute",
-          top: 0,
-          left: 0,
-        }}
-      >
+    <div style={{ width: A4_WIDTH * zoom, height: A4_HEIGHT * zoom, margin: "0 auto", position: "relative", overflow: "hidden" }}>
+      <div style={{ transform: `scale(${zoom})`, transformOrigin: "top left", width: A4_WIDTH, height: A4_HEIGHT, position: "absolute", top: 0, left: 0 }}>
         <div ref={previewRef} className="bg-white text-gray-900 shadow-xl" style={{ width: A4_WIDTH, minHeight: A4_HEIGHT }}>
           {template === "classic" && <ClassicTemplate data={data} />}
           {template === "modern" && <ModernTemplate data={data} />}
@@ -421,6 +381,23 @@ function CVBuilderPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, profile, loading: authLoading, refresh } = useAuth()
+  const t = useTranslations("builder")
+  const tt = useTranslations("templates")
+
+  const TEMPLATES: { value: Template; label: string; desc: string }[] = [
+    { value: "classic",      label: tt("classic"),      desc: t("template_classic_desc") },
+    { value: "modern",       label: tt("modern"),       desc: t("template_modern_desc") },
+    { value: "minimal",      label: tt("minimal"),      desc: t("template_minimal_desc") },
+    { value: "executive",    label: tt("executive"),    desc: t("template_executive_desc") },
+    { value: "creative",     label: tt("creative"),     desc: t("template_creative_desc") },
+    { value: "elegant",      label: tt("elegant"),      desc: t("template_elegant_desc") },
+    { value: "professional", label: tt("professional"), desc: t("template_professional_desc") },
+    { value: "tech",         label: tt("tech"),         desc: t("template_tech_desc") },
+    { value: "steel",        label: tt("steel"),        desc: t("template_steel_desc") },
+    { value: "bordeaux",     label: tt("bordeaux"),     desc: t("template_bordeaux_desc") },
+    { value: "navy",         label: tt("navy"),         desc: t("template_navy_desc") },
+    { value: "teal",         label: tt("teal"),         desc: t("template_teal_desc") },
+  ]
 
   const [cvData, setCvData] = useState<CVData>(emptyCVData)
   const [template, setTemplate] = useState<Template>("classic")
@@ -436,7 +413,7 @@ function CVBuilderPage() {
 
   async function handleCVUpload(file: File) {
     if (!file || file.type !== "application/pdf") {
-      toast.error("Lütfen bir PDF dosyası seçin")
+      toast.error(t("toast_upload_pdf_only"))
       return
     }
     setParsing(true)
@@ -445,39 +422,30 @@ function CVBuilderPage() {
       fd.append("file", file)
       const res = await fetch(`${API_URL}/api/cv/parse`, { method: "POST", body: fd })
       const data = await res.json()
-      console.log("Parse response:", res.status, data)
       if (!res.ok) throw new Error(data.detail || JSON.stringify(data))
       const parsed = data.cv_data
-      // id ekle
-      const genId = () => crypto.randomUUID()
+      const g = () => crypto.randomUUID()
       setCvData({
         personal: { ...emptyCVData.personal, ...parsed.personal },
-        experience: (parsed.experience || []).map((e: Record<string,unknown>) => ({ id: genId(), ...e })),
-        education: (parsed.education || []).map((e: Record<string,unknown>) => ({ id: genId(), ...e })),
-        skills: (parsed.skills || []).map((e: Record<string,unknown>) => ({ id: genId(), ...e })),
-        languages: (parsed.languages || []).map((e: Record<string,unknown>) => ({ id: genId(), ...e })),
-        certifications: (parsed.certifications || []).map((e: Record<string,unknown>) => ({ id: genId(), ...e })),
+        experience: (parsed.experience || []).map((e: Record<string,unknown>) => ({ id: g(), ...e })),
+        education: (parsed.education || []).map((e: Record<string,unknown>) => ({ id: g(), ...e })),
+        skills: (parsed.skills || []).map((e: Record<string,unknown>) => ({ id: g(), ...e })),
+        languages: (parsed.languages || []).map((e: Record<string,unknown>) => ({ id: g(), ...e })),
+        certifications: (parsed.certifications || []).map((e: Record<string,unknown>) => ({ id: g(), ...e })),
       })
-      toast.success("CV başarıyla yüklendi!")
+      toast.success(t("toast_upload_success"))
     } catch (e) {
-      console.error("CV parse error:", e)
-      toast.error(`CV yüklenirken hata: ${e instanceof Error ? e.message : String(e)}`)
+      toast.error(`${t("toast_upload_error")} ${e instanceof Error ? e.message : String(e)}`)
     } finally {
       setParsing(false)
     }
   }
-  const [downloading, setDownloading] = useState(false)
 
+  const [downloading, setDownloading] = useState(false)
   const [openSections, setOpenSections] = useState({
-    personal: true,
-    experience: true,
-    education: false,
-    skills: false,
-    languages: false,
-    certifications: false,
+    personal: true, experience: true, education: false, skills: false, languages: false, certifications: false,
   })
 
-  // Load draft on mount
   useEffect(() => {
     async function load() {
       try {
@@ -493,7 +461,6 @@ function CVBuilderPage() {
             return
           }
         }
-        // Try cloud first
         const cloud = await loadDraftFromCloud()
         if (cloud) {
           setCvData(ensureIds(cloud.cv_data))
@@ -502,7 +469,6 @@ function CVBuilderPage() {
           setReady(true)
           return
         }
-        // Fallback to localStorage
         const saved = localStorage.getItem("cvfit_editor_data")
         if (saved) setCvData(ensureIds(JSON.parse(saved)))
         if (queryTemplate) {
@@ -518,10 +484,8 @@ function CVBuilderPage() {
     load()
   }, [searchParams])
 
-  // Auto-save
   useDraftSync(cvData, template, ready)
 
-  // Save status indicator
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     if (!ready) return
@@ -530,9 +494,8 @@ function CVBuilderPage() {
     saveTimer.current = setTimeout(() => setSaveStatus("saved"), 2000)
   }, [cvData, template, ready])
 
-  // Handle download intent after login redirect
   useEffect(() => {
-    if (authLoading || !user) return          // auth henüz yüklenmediyse bekle
+    if (authLoading || !user) return
     const intent = sessionStorage.getItem("cvfit_download_intent")
     if (intent === "pdf" || intent === "docx") {
       sessionStorage.removeItem("cvfit_download_intent")
@@ -549,15 +512,12 @@ function CVBuilderPage() {
   async function handleDownloadRequest(format: "pdf" | "docx") {
     setDownloadFormat(format)
     if (authLoading) {
-      toast.info("Hesap bilgileri kontrol ediliyor, lutfen tekrar deneyin.")
+      toast.info(t("toast_checking"))
       return
     }
-
     const liveAccessToken = typeof window !== "undefined" ? localStorage.getItem("cvfit_access_token") || "" : ""
-
     if (!user) {
       if (liveAccessToken) {
-        // Token exists but auth context may not be hydrated yet; continue to payment flow.
         await refresh()
         setPaymentOpen(true)
         return
@@ -605,10 +565,10 @@ function CVBuilderPage() {
         const blob = await Packer.toBlob(doc)
         saveAs(blob, `${cvData.personal.fullName || "cv"}-cv.docx`)
       }
-      toast.success("CV başarıyla indirildi!")
+      toast.success(t("toast_download_success"))
     } catch (e) {
       console.error(e)
-      toast.error("İndirme sırasında bir hata oluştu")
+      toast.error(t("toast_download_error"))
     } finally {
       setDownloading(false)
     }
@@ -646,19 +606,15 @@ function CVBuilderPage() {
     <div className="flex flex-col bg-background" style={{ height: "calc(100vh - 56px)" }}>
       {/* Header */}
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-border px-4 gap-2 bg-background/95 backdrop-blur-sm">
-        {/* Left: save status */}
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           {saveStatus === "saving" && (
-            <span className="flex items-center gap-1"><Loader2 className="size-3 animate-spin" />Kaydediliyor...</span>
+            <span className="flex items-center gap-1"><Loader2 className="size-3 animate-spin" />{t("saving")}</span>
           )}
           {saveStatus === "saved" && (
-            <span className="flex items-center gap-1 text-green-600 dark:text-green-400"><Cloud className="size-3 text-green-500" />Kaydedildi</span>
+            <span className="flex items-center gap-1 text-green-600 dark:text-green-400"><Cloud className="size-3 text-green-500" />{t("saved")}</span>
           )}
         </div>
-
-        {/* Right: actions */}
         <div className="flex items-center gap-3 shrink-0">
-          {/* Zoom */}
           <div className="flex items-center gap-1 border rounded-md px-1">
             <button onClick={() => setZoom(z => Math.max(0.5, z - 0.1))} className="p-1 hover:bg-muted rounded cursor-pointer">
               <ZoomOut className="size-3.5 text-muted-foreground" />
@@ -668,58 +624,34 @@ function CVBuilderPage() {
               <ZoomIn className="size-3.5 text-muted-foreground" />
             </button>
           </div>
-
-          {/* ATS Button (Pro only) */}
           {profile?.plan === "pro" && (
             <Button variant="outline" size="sm" onClick={() => setAtsOpen(true)}>
               <Sparkles className="size-4 mr-1.5 text-primary" />
-              ATS Analizi
+              {t("ats_analysis")}
             </Button>
           )}
-
-          {/* Download buttons */}
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={downloading}
-            onClick={() => handleDownloadRequest("pdf")}
-          >
+          <Button variant="outline" size="sm" disabled={downloading} onClick={() => handleDownloadRequest("pdf")}>
             {downloading ? <Loader2 className="size-4 mr-1 animate-spin" /> : <FileDown className="size-4 mr-1" />}
-            PDF İndir
+            {t("download_pdf")}
           </Button>
-          <Button
-            size="sm"
-            disabled={downloading}
-            onClick={() => handleDownloadRequest("docx")}
-          >
+          <Button size="sm" disabled={downloading} onClick={() => handleDownloadRequest("docx")}>
             {downloading ? <Loader2 className="size-4 mr-1 animate-spin" /> : <FileText className="size-4 mr-1" />}
-            DOCX İndir
+            {t("download_docx")}
           </Button>
         </div>
       </header>
 
       {/* Content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Panel — Editor */}
+        {/* Left Panel */}
         <div className="w-[52%] overflow-y-auto p-6 space-y-4">
-          {/* CV Upload */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf"
-            className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCVUpload(f); e.target.value = "" }}
-          />
+          <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCVUpload(f); e.target.value = "" }} />
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={parsing}
             className="w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-muted/40 transition-all px-4 py-3 text-sm text-muted-foreground hover:text-foreground cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {parsing ? (
-              <><Loader2 className="size-4 animate-spin" />CV okunuyor...</>
-            ) : (
-              <><Upload className="size-4" />Mevcut CV&apos;nizi yükleyin (PDF)</>
-            )}
+            {parsing ? <><Loader2 className="size-4 animate-spin" />{t("uploading")}</> : <><Upload className="size-4" />{t("upload_cv")}</>}
           </button>
 
           {/* Kişisel Bilgiler */}
@@ -728,18 +660,17 @@ function CVBuilderPage() {
               <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <User className="size-4 text-muted-foreground" />
-                  Kişisel Bilgiler
+                  {t("personal_info")}
                 </div>
                 <ChevronDown className={cn("size-4 text-muted-foreground transition-transform duration-200", openSections.personal && "rotate-180")} />
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <Separator />
                 <CardContent className="p-4 space-y-3">
-                  {/* Photo Upload */}
                   <div className="flex items-center gap-3">
                     <div className="w-14 h-14 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0 border border-border">
                       {cvData.personal.photo ? (
-                        <img src={cvData.personal.photo} alt="Fotoğraf" className="w-full h-full object-cover" />
+                        <img src={cvData.personal.photo} alt="Photo" className="w-full h-full object-cover" />
                       ) : (
                         <User className="size-6 text-muted-foreground" />
                       )}
@@ -748,42 +679,28 @@ function CVBuilderPage() {
                       <label htmlFor="photo-upload" className="cursor-pointer">
                         <div className="flex items-center gap-2 text-sm border border-border rounded-md px-3 py-1.5 hover:bg-muted/50 transition-colors w-fit">
                           <Upload className="size-3.5" />
-                          Fotoğraf Yükle
+                          {t("upload_photo")}
                         </div>
-                        <input
-                          id="photo-upload"
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (!file) return
-                            const reader = new FileReader()
-                            reader.onload = (ev) => updatePersonal("photo", ev.target?.result as string)
-                            reader.readAsDataURL(file)
-                          }}
-                        />
+                        <input id="photo-upload" type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => updatePersonal("photo", ev.target?.result as string); reader.readAsDataURL(file) }} />
                       </label>
                       {cvData.personal.photo && (
-                        <button className="text-xs text-destructive hover:underline" onClick={() => updatePersonal("photo", "")}>
-                          Fotoğrafı kaldır
-                        </button>
+                        <button className="text-xs text-destructive hover:underline" onClick={() => updatePersonal("photo", "")}>{t("remove_photo")}</button>
                       )}
-                      <p className="text-xs text-muted-foreground">Portre şablonunda görünür</p>
+                      <p className="text-xs text-muted-foreground">{t("photo_hint")}</p>
                     </div>
                   </div>
-                  <Input placeholder="Adınız Soyadınız" className="text-base" value={cvData.personal.fullName} onChange={(e) => updatePersonal("fullName", e.target.value)} />
-                  <Input placeholder="Frontend Developer" value={cvData.personal.title} onChange={(e) => updatePersonal("title", e.target.value)} />
+                  <Input placeholder={t("placeholder_name")} className="text-base" value={cvData.personal.fullName} onChange={(e) => updatePersonal("fullName", e.target.value)} />
+                  <Input placeholder={t("placeholder_title")} value={cvData.personal.title} onChange={(e) => updatePersonal("title", e.target.value)} />
                   <div className="grid grid-cols-3 gap-2">
-                    <Input placeholder="E-posta" type="email" value={cvData.personal.email} onChange={(e) => updatePersonal("email", e.target.value)} />
-                    <Input placeholder="Telefon" value={cvData.personal.phone} onChange={(e) => updatePersonal("phone", e.target.value)} />
-                    <Input placeholder="Konum" value={cvData.personal.location} onChange={(e) => updatePersonal("location", e.target.value)} />
+                    <Input placeholder={t("placeholder_email")} type="email" value={cvData.personal.email} onChange={(e) => updatePersonal("email", e.target.value)} />
+                    <Input placeholder={t("placeholder_phone")} value={cvData.personal.phone} onChange={(e) => updatePersonal("phone", e.target.value)} />
+                    <Input placeholder={t("placeholder_location")} value={cvData.personal.location} onChange={(e) => updatePersonal("location", e.target.value)} />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <Input placeholder="LinkedIn URL" value={cvData.personal.linkedin} onChange={(e) => updatePersonal("linkedin", e.target.value)} />
-                    <Input placeholder="Website" value={cvData.personal.website} onChange={(e) => updatePersonal("website", e.target.value)} />
+                    <Input placeholder={t("placeholder_linkedin")} value={cvData.personal.linkedin} onChange={(e) => updatePersonal("linkedin", e.target.value)} />
+                    <Input placeholder={t("placeholder_website")} value={cvData.personal.website} onChange={(e) => updatePersonal("website", e.target.value)} />
                   </div>
-                  <Textarea placeholder="Kendinizi kısaca tanıtın..." rows={4} value={cvData.personal.summary} onChange={(e) => updatePersonal("summary", e.target.value)} />
+                  <Textarea placeholder={t("placeholder_summary")} rows={4} value={cvData.personal.summary} onChange={(e) => updatePersonal("summary", e.target.value)} />
                 </CardContent>
               </CollapsibleContent>
             </Card>
@@ -795,7 +712,7 @@ function CVBuilderPage() {
               <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Briefcase className="size-4 text-muted-foreground" />
-                  Deneyim
+                  {t("experience")}
                   {cvData.experience.length > 0 && <span className="text-xs text-muted-foreground">({cvData.experience.length})</span>}
                 </div>
                 <ChevronDown className={cn("size-4 text-muted-foreground transition-transform duration-200", openSections.experience && "rotate-180")} />
@@ -809,22 +726,22 @@ function CVBuilderPage() {
                         <Trash2 className="size-3.5" />
                       </Button>
                       <div className="grid grid-cols-2 gap-2 pr-8">
-                        <Input placeholder="Şirket" value={exp.company} onChange={(e) => updateExperience(exp.id, { company: e.target.value })} />
-                        <Input placeholder="Pozisyon" value={exp.position} onChange={(e) => updateExperience(exp.id, { position: e.target.value })} />
+                        <Input placeholder={t("placeholder_company")} value={exp.company} onChange={(e) => updateExperience(exp.id, { company: e.target.value })} />
+                        <Input placeholder={t("placeholder_position")} value={exp.position} onChange={(e) => updateExperience(exp.id, { position: e.target.value })} />
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        <Input placeholder="Başlangıç (Oca 2022)" value={exp.startDate} onChange={(e) => updateExperience(exp.id, { startDate: e.target.value })} />
-                        <Input placeholder="Bitiş (Ara 2023)" value={exp.endDate} disabled={exp.current} onChange={(e) => updateExperience(exp.id, { endDate: e.target.value })} />
+                        <Input placeholder={t("placeholder_start")} value={exp.startDate} onChange={(e) => updateExperience(exp.id, { startDate: e.target.value })} />
+                        <Input placeholder={t("placeholder_end")} value={exp.endDate} disabled={exp.current} onChange={(e) => updateExperience(exp.id, { endDate: e.target.value })} />
                       </div>
                       <label className="flex items-center gap-2 text-sm cursor-pointer">
                         <Checkbox checked={exp.current} onCheckedChange={(checked) => updateExperience(exp.id, { current: !!checked, endDate: checked ? "" : exp.endDate })} />
-                        Devam ediyor
+                        {t("ongoing")}
                       </label>
-                      <Textarea placeholder="Görev ve başarılarınızı yazın..." rows={3} value={exp.description} onChange={(e) => updateExperience(exp.id, { description: e.target.value })} />
+                      <Textarea placeholder={t("placeholder_exp_desc")} rows={3} value={exp.description} onChange={(e) => updateExperience(exp.id, { description: e.target.value })} />
                     </div>
                   ))}
                   <Button variant="outline" size="sm" className="w-full" onClick={addExperience}>
-                    <Plus className="size-4 mr-1" /> Deneyim Ekle
+                    <Plus className="size-4 mr-1" /> {t("add_experience")}
                   </Button>
                 </CardContent>
               </CollapsibleContent>
@@ -837,7 +754,7 @@ function CVBuilderPage() {
               <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <GraduationCap className="size-4 text-muted-foreground" />
-                  Eğitim
+                  {t("education")}
                   {cvData.education.length > 0 && <span className="text-xs text-muted-foreground">({cvData.education.length})</span>}
                 </div>
                 <ChevronDown className={cn("size-4 text-muted-foreground transition-transform duration-200", openSections.education && "rotate-180")} />
@@ -851,18 +768,18 @@ function CVBuilderPage() {
                         <Trash2 className="size-3.5" />
                       </Button>
                       <div className="grid grid-cols-2 gap-2 pr-8">
-                        <Input placeholder="Okul / Üniversite" value={edu.school} onChange={(e) => updateEducation(edu.id, { school: e.target.value })} />
-                        <Input placeholder="Bölüm" value={edu.field} onChange={(e) => updateEducation(edu.id, { field: e.target.value })} />
+                        <Input placeholder={t("placeholder_school")} value={edu.school} onChange={(e) => updateEducation(edu.id, { school: e.target.value })} />
+                        <Input placeholder={t("placeholder_field")} value={edu.field} onChange={(e) => updateEducation(edu.id, { field: e.target.value })} />
                       </div>
                       <div className="grid grid-cols-3 gap-2">
-                        <Input placeholder="Derece (Lisans)" value={edu.degree} onChange={(e) => updateEducation(edu.id, { degree: e.target.value })} />
-                        <Input placeholder="Başlangıç" value={edu.startDate} onChange={(e) => updateEducation(edu.id, { startDate: e.target.value })} />
-                        <Input placeholder="Bitiş" value={edu.endDate} onChange={(e) => updateEducation(edu.id, { endDate: e.target.value })} />
+                        <Input placeholder={t("placeholder_degree")} value={edu.degree} onChange={(e) => updateEducation(edu.id, { degree: e.target.value })} />
+                        <Input placeholder={t("placeholder_start")} value={edu.startDate} onChange={(e) => updateEducation(edu.id, { startDate: e.target.value })} />
+                        <Input placeholder={t("placeholder_end")} value={edu.endDate} onChange={(e) => updateEducation(edu.id, { endDate: e.target.value })} />
                       </div>
                     </div>
                   ))}
                   <Button variant="outline" size="sm" className="w-full" onClick={addEducation}>
-                    <Plus className="size-4 mr-1" /> Eğitim Ekle
+                    <Plus className="size-4 mr-1" /> {t("add_education")}
                   </Button>
                 </CardContent>
               </CollapsibleContent>
@@ -875,7 +792,7 @@ function CVBuilderPage() {
               <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Wrench className="size-4 text-muted-foreground" />
-                  Beceriler
+                  {t("skills")}
                   {cvData.skills.length > 0 && <span className="text-xs text-muted-foreground">({cvData.skills.length})</span>}
                 </div>
                 <ChevronDown className={cn("size-4 text-muted-foreground transition-transform duration-200", openSections.skills && "rotate-180")} />
@@ -885,7 +802,7 @@ function CVBuilderPage() {
                 <CardContent className="p-4 space-y-3">
                   {cvData.skills.map((skill) => (
                     <div key={skill.id} className="flex items-center gap-2">
-                      <Input placeholder="Beceri (React, Python...)" value={skill.name} onChange={(e) => updateSkill(skill.id, { name: e.target.value })} className="flex-1" />
+                      <Input placeholder={t("placeholder_skill")} value={skill.name} onChange={(e) => updateSkill(skill.id, { name: e.target.value })} className="flex-1" />
                       <Select value={skill.level} onValueChange={(v) => updateSkill(skill.id, { level: v as Skill["level"] })}>
                         <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
                         <SelectContent>{SKILL_LEVELS.map((l) => (<SelectItem key={l} value={l}>{l}</SelectItem>))}</SelectContent>
@@ -896,7 +813,7 @@ function CVBuilderPage() {
                     </div>
                   ))}
                   <Button variant="outline" size="sm" className="w-full" onClick={addSkill}>
-                    <Plus className="size-4 mr-1" /> Beceri Ekle
+                    <Plus className="size-4 mr-1" /> {t("add_skill")}
                   </Button>
                 </CardContent>
               </CollapsibleContent>
@@ -909,7 +826,7 @@ function CVBuilderPage() {
               <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Globe className="size-4 text-muted-foreground" />
-                  Diller
+                  {t("languages")}
                   {cvData.languages.length > 0 && <span className="text-xs text-muted-foreground">({cvData.languages.length})</span>}
                 </div>
                 <ChevronDown className={cn("size-4 text-muted-foreground transition-transform duration-200", openSections.languages && "rotate-180")} />
@@ -919,7 +836,7 @@ function CVBuilderPage() {
                 <CardContent className="p-4 space-y-3">
                   {cvData.languages.map((lang) => (
                     <div key={lang.id} className="flex items-center gap-2">
-                      <Input placeholder="Dil" value={lang.name} onChange={(e) => updateLanguage(lang.id, { name: e.target.value })} className="flex-1" />
+                      <Input placeholder={t("placeholder_language")} value={lang.name} onChange={(e) => updateLanguage(lang.id, { name: e.target.value })} className="flex-1" />
                       <Select value={lang.level} onValueChange={(v) => updateLanguage(lang.id, { level: v as Language["level"] })}>
                         <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
                         <SelectContent>{LANG_LEVELS.map((l) => (<SelectItem key={l} value={l}>{l}</SelectItem>))}</SelectContent>
@@ -930,7 +847,7 @@ function CVBuilderPage() {
                     </div>
                   ))}
                   <Button variant="outline" size="sm" className="w-full" onClick={addLanguage}>
-                    <Plus className="size-4 mr-1" /> Dil Ekle
+                    <Plus className="size-4 mr-1" /> {t("add_language")}
                   </Button>
                 </CardContent>
               </CollapsibleContent>
@@ -943,7 +860,7 @@ function CVBuilderPage() {
               <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Award className="size-4 text-muted-foreground" />
-                  Sertifikalar
+                  {t("certifications")}
                   {cvData.certifications.length > 0 && <span className="text-xs text-muted-foreground">({cvData.certifications.length})</span>}
                 </div>
                 <ChevronDown className={cn("size-4 text-muted-foreground transition-transform duration-200", openSections.certifications && "rotate-180")} />
@@ -957,17 +874,17 @@ function CVBuilderPage() {
                         <Trash2 className="size-3.5" />
                       </Button>
                       <div className="grid grid-cols-2 gap-2 pr-8">
-                        <Input placeholder="Sertifika Adı" value={cert.name} onChange={(e) => updateCertification(cert.id, { name: e.target.value })} />
-                        <Input placeholder="Veren Kurum" value={cert.issuer} onChange={(e) => updateCertification(cert.id, { issuer: e.target.value })} />
+                        <Input placeholder={t("placeholder_cert_name")} value={cert.name} onChange={(e) => updateCertification(cert.id, { name: e.target.value })} />
+                        <Input placeholder={t("placeholder_cert_issuer")} value={cert.issuer} onChange={(e) => updateCertification(cert.id, { issuer: e.target.value })} />
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        <Input placeholder="Tarih" value={cert.date} onChange={(e) => updateCertification(cert.id, { date: e.target.value })} />
-                        <Input placeholder="URL (opsiyonel)" value={cert.url} onChange={(e) => updateCertification(cert.id, { url: e.target.value })} />
+                        <Input placeholder={t("placeholder_cert_date")} value={cert.date} onChange={(e) => updateCertification(cert.id, { date: e.target.value })} />
+                        <Input placeholder={t("placeholder_cert_url")} value={cert.url} onChange={(e) => updateCertification(cert.id, { url: e.target.value })} />
                       </div>
                     </div>
                   ))}
                   <Button variant="outline" size="sm" className="w-full" onClick={addCertification}>
-                    <Plus className="size-4 mr-1" /> Sertifika Ekle
+                    <Plus className="size-4 mr-1" /> {t("add_certification")}
                   </Button>
                 </CardContent>
               </CollapsibleContent>
@@ -980,20 +897,17 @@ function CVBuilderPage() {
           <div className="w-full flex justify-center">
             <CVPreview data={cvData} template={template} zoom={zoom} previewRef={cvPreviewRef} />
           </div>
-
-          {/* Template Selector */}
           <div className="w-full pb-4" style={{ maxWidth: "800px" }}>
-            <p className="text-xs text-muted-foreground mb-3 font-medium">Şablon Seç</p>
+            <p className="text-xs text-muted-foreground mb-3 font-medium">{t("select_template")}</p>
             <div className="flex items-end gap-3 overflow-x-auto pb-1">
-              {TEMPLATES.map((t) => (
-                <TemplateThumbnail key={t.value} t={t} active={template === t.value} onClick={() => setTemplate(t.value)} />
+              {TEMPLATES.map((tmpl) => (
+                <TemplateThumbnail key={tmpl.value} tmpl={tmpl.value} label={tmpl.label} desc={tmpl.desc} active={template === tmpl.value} onClick={() => setTemplate(tmpl.value)} />
               ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Payment Modal */}
       <PaymentModal
         open={paymentOpen}
         onClose={() => setPaymentOpen(false)}
@@ -1002,8 +916,6 @@ function CVBuilderPage() {
         accessToken={accessToken}
         onPaymentSuccess={() => doDownload(downloadFormat)}
       />
-
-      {/* ATS Modal */}
       <ATSModal
         open={atsOpen}
         onClose={() => setAtsOpen(false)}
@@ -1013,43 +925,26 @@ function CVBuilderPage() {
             const mapped = incoming as Record<string, unknown>
             if (!mapped || typeof mapped !== "object") return
             const g = () => crypto.randomUUID()
-
             const normalizeSkillLevel = (value: unknown): Skill["level"] => {
               if (typeof value === "number" && Number.isFinite(value)) {
                 const idx = Math.min(Math.max(Math.round(value) - 1, 0), SKILL_LEVELS.length - 1)
                 return SKILL_LEVELS[idx]
               }
-              if (typeof value === "string" && SKILL_LEVELS.includes(value as Skill["level"])) {
-                return value as Skill["level"]
-              }
+              if (typeof value === "string" && SKILL_LEVELS.includes(value as Skill["level"])) return value as Skill["level"]
               return "Orta"
             }
-
             const normalizeLanguageLevel = (value: unknown): Language["level"] => {
-              if (typeof value === "string" && LANG_LEVELS.includes(value as Language["level"])) {
-                return value as Language["level"]
-              }
+              if (typeof value === "string" && LANG_LEVELS.includes(value as Language["level"])) return value as Language["level"]
               return "B1"
             }
-
             setCvData((prev) => ({
               ...prev,
               personal: mapped.personal ? { ...prev.personal, ...(mapped.personal as object) } : prev.personal,
-              experience: Array.isArray(mapped.experience)
-                ? (mapped.experience as Record<string,unknown>[]).map((e) => ({ id: g(), company: "", position: "", startDate: "", endDate: "", current: false, description: "", ...e }))
-                : prev.experience,
-              education: Array.isArray(mapped.education)
-                ? (mapped.education as Record<string,unknown>[]).map((e) => ({ id: g(), school: "", degree: "", field: "", startDate: "", endDate: "", gpa: "", ...e }))
-                : prev.education,
-              skills: Array.isArray(mapped.skills)
-                ? (mapped.skills as Record<string,unknown>[]).map((e) => ({ id: g(), name: "", ...e, level: normalizeSkillLevel(e.level) }))
-                : prev.skills,
-              languages: Array.isArray(mapped.languages)
-                ? (mapped.languages as Record<string,unknown>[]).map((e) => ({ id: g(), name: "", ...e, level: normalizeLanguageLevel(e.level) }))
-                : prev.languages,
-              certifications: Array.isArray(mapped.certifications)
-                ? (mapped.certifications as Record<string,unknown>[]).map((e) => ({ id: g(), name: "", issuer: "", date: "", ...e }))
-                : prev.certifications,
+              experience: Array.isArray(mapped.experience) ? (mapped.experience as Record<string,unknown>[]).map((e) => ({ id: g(), company: "", position: "", startDate: "", endDate: "", current: false, description: "", ...e })) : prev.experience,
+              education: Array.isArray(mapped.education) ? (mapped.education as Record<string,unknown>[]).map((e) => ({ id: g(), school: "", degree: "", field: "", startDate: "", endDate: "", gpa: "", ...e })) : prev.education,
+              skills: Array.isArray(mapped.skills) ? (mapped.skills as Record<string,unknown>[]).map((e) => ({ id: g(), name: "", ...e, level: normalizeSkillLevel(e.level) })) : prev.skills,
+              languages: Array.isArray(mapped.languages) ? (mapped.languages as Record<string,unknown>[]).map((e) => ({ id: g(), name: "", ...e, level: normalizeLanguageLevel(e.level) })) : prev.languages,
+              certifications: Array.isArray(mapped.certifications) ? (mapped.certifications as Record<string,unknown>[]).map((e) => ({ id: g(), name: "", issuer: "", date: "", ...e })) : prev.certifications,
             }))
           } catch { /* ignore */ }
         }}
