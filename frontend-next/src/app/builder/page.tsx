@@ -403,7 +403,7 @@ function CVPreview({ data, template, zoom, previewRef }: { data: CVData; templat
 
 const SKILL_LEVELS: Skill["level"][] = ["Başlangıç", "Orta", "İleri", "Uzman"]
 const LANG_LEVELS: Language["level"][] = ["A1", "A2", "B1", "B2", "C1", "C2", "Anadil"]
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || ""
+const API_URL = process.env.NEXT_PUBLIC_API_URL || ""
 
 function ensureIds(data: CVData): CVData {
   const g = () => crypto.randomUUID()
@@ -443,7 +443,7 @@ function CVBuilderPage() {
     try {
       const fd = new FormData()
       fd.append("file", file)
-      const res = await fetch("/api/cv/parse", { method: "POST", body: fd })
+      const res = await fetch(`${API_URL}/api/cv/parse`, { method: "POST", body: fd })
       const data = await res.json()
       console.log("Parse response:", res.status, data)
       if (!res.ok) throw new Error(data.detail || JSON.stringify(data))

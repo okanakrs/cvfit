@@ -46,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || ""
 
   // Verify token on mount
   useEffect(() => {
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // After setting user/profile, claim any anonymous draft
         const sessionToken = localStorage.getItem("cvfit_session_token")
         if (sessionToken) {
-          fetch("/api/cv/claim", {
+          fetch(`${API_URL}/api/cv/claim`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ session_token: sessionToken, access_token: token }),
