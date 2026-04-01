@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/navbar";
 import { AuthProvider } from "@/lib/auth-context";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import "./globals.css";
 
 const inter = Inter({
@@ -41,6 +42,7 @@ export default function RootLayout({
             <Toaster />
           </TooltipProvider>
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
