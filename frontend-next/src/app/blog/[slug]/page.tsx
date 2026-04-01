@@ -1,7 +1,34 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, Clock } from "lucide-react"
 import { BLOG_POSTS, getPostBySlug } from "../posts"
+import { BlogContent } from "../BlogContent"
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const post = getPostBySlug(slug)
+  if (!post) return {}
+  return {
+    title: post.title,
+    description: post.excerpt,
+    alternates: { canonical: `/blog/${slug}` },
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      url: `https://cvfit.app/blog/${slug}`,
+      type: "article",
+    },
+  }
+}
+
+export async function generateStaticParams() {
+  return BLOG_POSTS.map((p) => ({ slug: p.slug }))
+}
 
 export default async function BlogDetailPage({
   params,
@@ -40,10 +67,8 @@ export default async function BlogDetailPage({
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-4">{post.title}</h1>
         <p className="text-muted-foreground leading-relaxed mb-10">{post.excerpt}</p>
 
-        <article className="space-y-5 text-[15px] leading-7 text-foreground/90">
-          {post.content.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
-          ))}
+        <article className="text-[15px] leading-7 text-foreground/90">
+          <BlogContent blocks={post.content} />
         </article>
       </section>
 

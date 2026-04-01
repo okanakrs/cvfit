@@ -212,6 +212,30 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── ATS Info ──────────────────────────────────────────────── */}
+      <section className="py-16 px-4 border-t border-border">
+        <div className="mx-auto max-w-4xl grid md:grid-cols-2 gap-10">
+          <div>
+            <h2 className="text-xl font-bold mb-3">ATS Optimize CV Nedir?</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              ATS (Applicant Tracking System), şirketlerin başvuruları otomatik
+              taradığı yazılımlardır. ATS uyumlu bir CV; doğru anahtar kelimeleri,
+              temiz bir yapıyı ve standart bölümleri içerir. CVFit&apos;in
+              şablonları bu kriterlere göre tasarlanmıştır.
+            </p>
+          </div>
+          <div>
+            <h2 className="text-xl font-bold mb-3">ATS Geçen CV Nasıl Yapılır?</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              ATS sistemini geçen bir CV oluşturmak için iş ilanındaki anahtar
+              kelimeleri CV&apos;nize ekleyin, sade bir şablon kullanın ve
+              tablolardan kaçının. CVFit Pro ile yapay zeka, CV&apos;nizi hedef
+              ilanınıza göre otomatik olarak ATS&apos;e optimize eder.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA ───────────────────────────────────────────────────── */}
       <section className="py-16 px-4 border-t border-border bg-muted/30">
         <div className="mx-auto max-w-xl text-center">
