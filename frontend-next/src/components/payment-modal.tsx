@@ -38,12 +38,31 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
   const [loading, setLoading] = useState<"pro" | null>(null)
   const [paddleReady, setPaddleReady] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [clientToken, setClientToken] = useState(PADDLE_CLIENT_TOKEN)
+
+  useEffect(() => {
+    if (!open || clientToken) return
+
+    const endpoint = API_URL ? `${API_URL}/api/payment/public-config` : "/api/payment/public-config"
+    fetch(endpoint)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("public config alinamadi"))))
+      .then((data) => {
+        const token = String(data?.paddle_client_token || "")
+        if (token) {
+          setClientToken(token)
+        } else {
+          toast.error("Paddle token eksik. Backend env icinde PADDLE_CLIENT_TOKEN ayarlayin.")
+        }
+      })
+      .catch(() => {
+        toast.error("Odeme ayarlari alinmadi. API URL ve backend deployunu kontrol edin.")
+      })
+  }, [open, clientToken])
 
   useEffect(() => {
     if (!open) return
 
-    if (!PADDLE_CLIENT_TOKEN) {
-      toast.error("Paddle token eksik. NEXT_PUBLIC_PADDLE_CLIENT_TOKEN ayarlayın.")
+    if (!clientToken) {
       return
     }
 
@@ -52,7 +71,7 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
     script.src = "https://cdn.paddle.com/paddle/v2/paddle.js"
     script.onload = () => {
       window.Paddle?.Initialize({
-        token: PADDLE_CLIENT_TOKEN,
+        token: clientToken,
         eventCallback: (event: PaddleEvent) => {
           if (event.name === "checkout.completed") {
             setSuccess(true)
@@ -70,7 +89,7 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
       toast.error("Odeme sistemi yuklenemedi. Sayfayi yenileyip tekrar deneyin.")
     }
     document.head.appendChild(script)
-  }, [open, onClose, onPaymentSuccess])
+  }, [open, onClose, onPaymentSuccess, clientToken])
 
   async function startCheckout(plan: "pro") {
     if (!accessToken) {
