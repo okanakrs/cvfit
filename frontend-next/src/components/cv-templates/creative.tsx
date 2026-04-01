@@ -1,9 +1,11 @@
 import type { CVData } from "@/types/cv"
+import { getCVLabels } from "@/lib/cv-labels"
 
 const ACCENT = "#7c3aed"
 
-export default function CreativeTemplate({ data }: { data: CVData }) {
+export default function CreativeTemplate({ data, locale }: { data: CVData; locale?: string }) {
   const p = data.personal
+  const L = getCVLabels(locale)
   return (
     <div className="flex" style={{ minHeight: 1123, fontFamily: "Roboto, Arial, sans-serif" }}>
       {/* Sidebar — 34% */}
@@ -19,7 +21,7 @@ export default function CreativeTemplate({ data }: { data: CVData }) {
           {p.title && <p className="text-sm mt-1 opacity-80">{p.title}</p>}
         </div>
 
-        <SideSection title="İLETİŞİM">
+        <SideSection title={L.contact}>
           <div className="space-y-1.5 text-sm opacity-90">
             {p.email && <p>✉ {p.email}</p>}
             {p.phone && <p>✆ {p.phone}</p>}
@@ -30,7 +32,7 @@ export default function CreativeTemplate({ data }: { data: CVData }) {
         </SideSection>
 
         {data.skills.length > 0 && (
-          <SideSection title="BECERİLER">
+          <SideSection title={L.skills}>
             <div className="flex flex-wrap gap-1.5">
               {data.skills.map((s) => (
                 <span key={s.id} className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
@@ -42,7 +44,7 @@ export default function CreativeTemplate({ data }: { data: CVData }) {
         )}
 
         {data.languages.length > 0 && (
-          <SideSection title="DİLLER">
+          <SideSection title={L.languages}>
             <div className="space-y-1.5">
               {data.languages.map((l) => (
                 <div key={l.id} className="flex justify-between text-sm">
@@ -59,14 +61,14 @@ export default function CreativeTemplate({ data }: { data: CVData }) {
       <div className="p-7 space-y-5" style={{ width: "66%" }}>
         {p.summary && (
           <div>
-            <MainHeading>HAKKIMDA</MainHeading>
+            <MainHeading>{L.about}</MainHeading>
             <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">{p.summary}</p>
           </div>
         )}
 
         {data.experience.length > 0 && (
           <div>
-            <MainHeading>DENEYİM</MainHeading>
+            <MainHeading>{L.experience}</MainHeading>
             <div className="space-y-4 border-l-2 pl-4 ml-1" style={{ borderColor: "#ddd6fe" }}>
               {data.experience.map((exp) => (
                 <div key={exp.id} className="relative">
@@ -74,7 +76,7 @@ export default function CreativeTemplate({ data }: { data: CVData }) {
                   <div className="flex justify-between items-baseline">
                     <span className="text-sm font-bold text-gray-900">{exp.position || "Pozisyon"}</span>
                     <span className="text-sm text-gray-400 shrink-0 ml-4">
-                      {exp.startDate}{exp.startDate && " – "}{exp.current ? "Devam Ediyor" : exp.endDate}
+                      {exp.startDate}{exp.startDate && " – "}{exp.current ? L.ongoing : exp.endDate}
                     </span>
                   </div>
                   {exp.company && <p className="text-sm font-medium" style={{ color: ACCENT }}>{exp.company}</p>}
@@ -87,7 +89,7 @@ export default function CreativeTemplate({ data }: { data: CVData }) {
 
         {data.education.length > 0 && (
           <div>
-            <MainHeading>EĞİTİM</MainHeading>
+            <MainHeading>{L.education}</MainHeading>
             <div className="space-y-3">
               {data.education.map((edu) => (
                 <div key={edu.id}>
@@ -109,7 +111,7 @@ export default function CreativeTemplate({ data }: { data: CVData }) {
 
         {data.certifications.length > 0 && (
           <div>
-            <MainHeading>SERTİFİKALAR</MainHeading>
+            <MainHeading>{L.certifications}</MainHeading>
             <div className="space-y-2">
               {data.certifications.map((c) => (
                 <div key={c.id} className="text-sm">

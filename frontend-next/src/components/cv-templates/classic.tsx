@@ -1,7 +1,9 @@
 import type { CVData } from "@/types/cv"
+import { getCVLabels } from "@/lib/cv-labels"
 
-export default function ClassicTemplate({ data }: { data: CVData }) {
+export default function ClassicTemplate({ data, locale }: { data: CVData; locale?: string }) {
   const p = data.personal
+  const L = getCVLabels(locale)
   return (
     <div className="p-10 font-sans text-gray-800" style={{ fontFamily: "Roboto, Arial, sans-serif" }}>
       {/* Header */}
@@ -20,13 +22,13 @@ export default function ClassicTemplate({ data }: { data: CVData }) {
       </div>
 
       {p.summary && (
-        <Section title="ÖZET">
+        <Section title={L.summary}>
           <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{p.summary}</p>
         </Section>
       )}
 
       {data.experience.length > 0 && (
-        <Section title="DENEYİM">
+        <Section title={L.experience}>
           <div className="space-y-4">
             {data.experience.map((exp) => (
               <div key={exp.id}>
@@ -36,7 +38,7 @@ export default function ClassicTemplate({ data }: { data: CVData }) {
                     {exp.company && <span className="text-sm text-gray-600">,  {exp.company}</span>}
                   </div>
                   <span className="text-sm text-gray-500 shrink-0 ml-4">
-                    {exp.startDate}{exp.startDate && " – "}{exp.current ? "Devam Ediyor" : exp.endDate}
+                    {exp.startDate}{exp.startDate && " – "}{exp.current ? L.ongoing : exp.endDate}
                   </span>
                 </div>
                 {exp.description && (
@@ -49,7 +51,7 @@ export default function ClassicTemplate({ data }: { data: CVData }) {
       )}
 
       {data.education.length > 0 && (
-        <Section title="EĞİTİM">
+        <Section title={L.education}>
           <div className="space-y-2">
             {data.education.map((edu) => (
               <div key={edu.id} className="flex justify-between items-baseline">
@@ -70,7 +72,7 @@ export default function ClassicTemplate({ data }: { data: CVData }) {
       )}
 
       {data.skills.length > 0 && (
-        <Section title="BECERİLER">
+        <Section title={L.skills}>
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-700">
             {data.skills.map((s) => (
               <span key={s.id}>{s.name}{s.level ? ` (${s.level})` : ""}</span>
@@ -80,7 +82,7 @@ export default function ClassicTemplate({ data }: { data: CVData }) {
       )}
 
       {data.languages.length > 0 && (
-        <Section title="DİLLER">
+        <Section title={L.languages}>
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-700">
             {data.languages.map((l) => (
               <span key={l.id}>{l.name}{l.level ? ` (${l.level})` : ""}</span>
@@ -90,7 +92,7 @@ export default function ClassicTemplate({ data }: { data: CVData }) {
       )}
 
       {data.certifications.length > 0 && (
-        <Section title="SERTİFİKALAR">
+        <Section title={L.certifications}>
           <div className="space-y-1.5">
             {data.certifications.map((c) => (
               <div key={c.id} className="text-sm">

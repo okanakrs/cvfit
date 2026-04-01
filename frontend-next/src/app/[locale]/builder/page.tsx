@@ -62,7 +62,7 @@ import { useDraftSync, loadDraftFromCloud, getSessionToken } from "@/lib/use-dra
 import { PaymentModal } from "@/components/payment-modal"
 import { ATSModal } from "@/components/ats-modal"
 import { toast } from "sonner"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 type Template = "classic" | "modern" | "minimal" | "executive" | "creative" | "elegant" | "professional" | "tech" | "steel" | "bordeaux" | "navy" | "teal"
 const genId = () => crypto.randomUUID()
@@ -343,13 +343,13 @@ function CVPreview({ data, template, zoom, previewRef }: { data: CVData; templat
     <div style={{ width: A4_WIDTH * zoom, height: A4_HEIGHT * zoom, margin: "0 auto", position: "relative", overflow: "hidden" }}>
       <div style={{ transform: `scale(${zoom})`, transformOrigin: "top left", width: A4_WIDTH, height: A4_HEIGHT, position: "absolute", top: 0, left: 0 }}>
         <div ref={previewRef} className="bg-white text-gray-900 shadow-xl" style={{ width: A4_WIDTH, minHeight: A4_HEIGHT }}>
-          {template === "classic" && <ClassicTemplate data={data} />}
-          {template === "modern" && <ModernTemplate data={data} />}
+          {template === "classic" && <ClassicTemplate data={data} locale={locale} />}
+          {template === "modern" && <ModernTemplate data={data} locale={locale} />}
           {template === "minimal" && <MinimalTemplate data={data} />}
           {template === "executive" && <ExecutiveTemplate data={data} />}
-          {template === "creative" && <CreativeTemplate data={data} />}
+          {template === "creative" && <CreativeTemplate data={data} locale={locale} />}
           {template === "elegant" && <ElegantTemplate data={data} />}
-          {template === "professional" && <ProfessionalTemplate data={data} />}
+          {template === "professional" && <ProfessionalTemplate data={data} locale={locale} />}
           {template === "tech" && <TechTemplate data={data} />}
           {template === "steel" && <SteelTemplate data={data} />}
           {template === "bordeaux" && <BordeauxTemplate data={data} />}
@@ -383,6 +383,7 @@ function CVBuilderPage() {
   const { user, profile, loading: authLoading, refresh } = useAuth()
   const t = useTranslations("builder")
   const tt = useTranslations("templates")
+  const locale = useLocale()
 
   const TEMPLATES: { value: Template; label: string; desc: string }[] = [
     { value: "classic",      label: tt("classic"),      desc: t("template_classic_desc") },

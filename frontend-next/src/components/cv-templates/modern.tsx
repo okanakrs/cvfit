@@ -1,4 +1,5 @@
 import type { CVData } from "@/types/cv"
+import { getCVLabels } from "@/lib/cv-labels"
 
 const ACCENT = "#2563eb"
 
@@ -6,8 +7,9 @@ function skillPct(level: string) {
   return level === "Uzman" ? 100 : level === "İleri" ? 75 : level === "Orta" ? 50 : 25
 }
 
-export default function ModernTemplate({ data }: { data: CVData }) {
+export default function ModernTemplate({ data, locale }: { data: CVData; locale?: string }) {
   const p = data.personal
+  const L = getCVLabels(locale)
   return (
     <div className="flex" style={{ minHeight: 1123, fontFamily: "Roboto, Arial, sans-serif" }}>
       {/* Left Sidebar */}
@@ -18,7 +20,7 @@ export default function ModernTemplate({ data }: { data: CVData }) {
         </div>
 
         <div>
-          <SidebarHeading>İLETİŞİM</SidebarHeading>
+          <SidebarHeading>{L.contact}</SidebarHeading>
           <div className="space-y-1 text-sm text-gray-600">
             {p.email && <p>{p.email}</p>}
             {p.phone && <p>{p.phone}</p>}
@@ -30,7 +32,7 @@ export default function ModernTemplate({ data }: { data: CVData }) {
 
         {data.skills.length > 0 && (
           <div>
-            <SidebarHeading>BECERİLER</SidebarHeading>
+            <SidebarHeading>{L.skills}</SidebarHeading>
             <div className="space-y-2">
               {data.skills.map((s) => (
                 <div key={s.id}>
@@ -49,7 +51,7 @@ export default function ModernTemplate({ data }: { data: CVData }) {
 
         {data.languages.length > 0 && (
           <div>
-            <SidebarHeading>DİLLER</SidebarHeading>
+            <SidebarHeading>{L.languages}</SidebarHeading>
             <div className="space-y-1">
               {data.languages.map((l) => (
                 <div key={l.id} className="flex justify-between text-sm">
@@ -66,21 +68,21 @@ export default function ModernTemplate({ data }: { data: CVData }) {
       <div className="p-7 space-y-5" style={{ width: "65%" }}>
         {p.summary && (
           <div>
-            <MainHeading>HAKKIMDA</MainHeading>
+            <MainHeading>{L.about}</MainHeading>
             <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{p.summary}</p>
           </div>
         )}
 
         {data.experience.length > 0 && (
           <div>
-            <MainHeading>DENEYİM</MainHeading>
+            <MainHeading>{L.experience}</MainHeading>
             <div className="space-y-4">
               {data.experience.map((exp) => (
                 <div key={exp.id}>
                   <div className="flex justify-between items-baseline">
                     <span className="text-sm font-bold text-gray-900">{exp.position || "Pozisyon"}</span>
                     <span className="text-sm text-gray-400 shrink-0 ml-4">
-                      {exp.startDate}{exp.startDate && " – "}{exp.current ? "Devam Ediyor" : exp.endDate}
+                      {exp.startDate}{exp.startDate && " – "}{exp.current ? L.ongoing : exp.endDate}
                     </span>
                   </div>
                   {exp.company && <p className="text-sm font-medium" style={{ color: ACCENT }}>{exp.company}</p>}
@@ -93,7 +95,7 @@ export default function ModernTemplate({ data }: { data: CVData }) {
 
         {data.education.length > 0 && (
           <div>
-            <MainHeading>EĞİTİM</MainHeading>
+            <MainHeading>{L.education}</MainHeading>
             <div className="space-y-3">
               {data.education.map((edu) => (
                 <div key={edu.id}>
@@ -111,7 +113,7 @@ export default function ModernTemplate({ data }: { data: CVData }) {
 
         {data.certifications.length > 0 && (
           <div>
-            <MainHeading>SERTİFİKALAR</MainHeading>
+            <MainHeading>{L.certifications}</MainHeading>
             <div className="space-y-2">
               {data.certifications.map((c) => (
                 <div key={c.id} className="text-sm">

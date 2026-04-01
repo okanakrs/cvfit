@@ -1,10 +1,12 @@
 import type { CVData } from "@/types/cv"
+import { getCVLabels } from "@/lib/cv-labels"
 
 const ACCENT = "#dc2626" // red-600
 const BG_DARK = "#111827" // gray-900
 
-export default function ProfessionalTemplate({ data }: { data: CVData }) {
+export default function ProfessionalTemplate({ data, locale }: { data: CVData; locale?: string }) {
   const p = data.personal
+  const L = getCVLabels(locale)
   return (
     <div style={{ minHeight: 1123, fontFamily: "Roboto, Arial, sans-serif" }}>
       {/* Header — accent strip top */}
@@ -44,7 +46,7 @@ export default function ProfessionalTemplate({ data }: { data: CVData }) {
 
         {/* Experience */}
         {data.experience.length > 0 && (
-          <ProSection title="İŞ DENEYİMİ" color={ACCENT}>
+          <ProSection title={L.workExperience} color={ACCENT}>
             <div className="space-y-3">
               {data.experience.map((exp) => (
                 <div key={exp.id}>
@@ -65,7 +67,7 @@ export default function ProfessionalTemplate({ data }: { data: CVData }) {
                     <span className="text-xs text-gray-400 shrink-0 ml-2">
                       {exp.startDate}
                       {exp.startDate && " – "}
-                      {exp.current ? "Devam Ediyor" : exp.endDate}
+                      {exp.current ? L.ongoing : exp.endDate}
                     </span>
                   </div>
                   {exp.description && (
@@ -81,7 +83,7 @@ export default function ProfessionalTemplate({ data }: { data: CVData }) {
 
         {/* Education */}
         {data.education.length > 0 && (
-          <ProSection title="EĞİTİM" color={ACCENT}>
+          <ProSection title={L.education} color={ACCENT}>
             <div className="space-y-2">
               {data.education.map((edu) => (
                 <div key={edu.id} className="flex justify-between items-baseline">
@@ -107,7 +109,7 @@ export default function ProfessionalTemplate({ data }: { data: CVData }) {
 
         {/* Skills — tag pills */}
         {data.skills.length > 0 && (
-          <ProSection title="BECERİLER" color={ACCENT}>
+          <ProSection title={L.skills} color={ACCENT}>
             <div className="flex flex-wrap gap-1.5">
               {data.skills.map((s) => (
                 <span
@@ -133,7 +135,7 @@ export default function ProfessionalTemplate({ data }: { data: CVData }) {
                 className="text-xs uppercase tracking-wider font-bold mb-1.5"
                 style={{ color: ACCENT }}
               >
-                Diller
+                {L.languagesShort}
               </h3>
               <div className="space-y-1">
                 {data.languages.map((l) => (
@@ -151,7 +153,7 @@ export default function ProfessionalTemplate({ data }: { data: CVData }) {
                 className="text-xs uppercase tracking-wider font-bold mb-1.5"
                 style={{ color: ACCENT }}
               >
-                Sertifikalar
+                {L.certificationsShort}
               </h3>
               <div className="space-y-1.5">
                 {data.certifications.map((c) => (
