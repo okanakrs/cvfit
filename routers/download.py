@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Form, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Form, HTTPException, BackgroundTasks, Request, Header
+from typing import Optional
 from fastapi.responses import FileResponse
 import os, json, tempfile, subprocess, shutil, platform, logging
 
@@ -66,7 +67,21 @@ def _cleanup_file(path: str):
 
 
 @router.post("/download-pdf")
-async def download_pdf(background_tasks: BackgroundTasks, cv_text: str = Form(...), theme: str = Form("classic_mavi")):
+async def download_pdf(background_tasks: BackgroundTasks, request: Request, cv_text: str = Form(...), theme: str = Form("classic_mavi"), authorization: Optional[str] = Header(None)):
+    from routers.auth import get_user_from_token, get_user_profile
+    token = (authorization or "").replace("Bearer ", "").strip()
+    user = get_user_from_token(token) if token else None
+    if not user:
+        raise HTTPException(status_code=401, detail="İndirmek için giriş yapmanız gerekiyor")
+    profile = get_user_profile(user.id)
+    plan = profile.get("plan", "free") if profile else "free"
+    if plan != "pro":
+        from supabase import create_client
+        import os
+        sb = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_ANON_KEY"))
+        paid = sb.table("cv_downloads").select("id").eq("user_id", user.id).limit(1).execute()
+        if not paid.data:
+            raise HTTPException(status_code=402, detail="İndirmek için ödeme yapmanız gerekiyor")
     try:
         cv = json.loads(cv_text)
     except Exception:
@@ -91,7 +106,21 @@ async def download_pdf(background_tasks: BackgroundTasks, cv_text: str = Form(..
 DOCX_THEMES_JSON = os.path.join(os.path.dirname(__file__), "..", "services", "docx_themes", "themes.json")
 
 @router.post("/download-docx")
-async def download_docx(background_tasks: BackgroundTasks, cv_text: str = Form(...), theme: str = Form("classic_mavi")):
+async def download_docx(background_tasks: BackgroundTasks, request: Request, cv_text: str = Form(...), theme: str = Form("classic_mavi"), authorization: Optional[str] = Header(None)):
+    from routers.auth import get_user_from_token, get_user_profile
+    token = (authorization or "").replace("Bearer ", "").strip()
+    user = get_user_from_token(token) if token else None
+    if not user:
+        raise HTTPException(status_code=401, detail="İndirmek için giriş yapmanız gerekiyor")
+    profile = get_user_profile(user.id)
+    plan = profile.get("plan", "free") if profile else "free"
+    if plan != "pro":
+        from supabase import create_client
+        import os
+        sb = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_ANON_KEY"))
+        paid = sb.table("cv_downloads").select("id").eq("user_id", user.id).limit(1).execute()
+        if not paid.data:
+            raise HTTPException(status_code=402, detail="İndirmek için ödeme yapmanız gerekiyor")
     try:
         cv = json.loads(cv_text)
     except Exception:

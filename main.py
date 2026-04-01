@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import auth, payment, analyze, download, legal
+from routers import auth, payment, analyze, download, legal, cv_draft
 
 app = FastAPI(title="CVFit")
 
@@ -33,6 +33,7 @@ app.include_router(payment.router,  tags=["payment"])
 app.include_router(analyze.router,  tags=["analyze"])
 app.include_router(download.router, tags=["download"])
 app.include_router(legal.router,    tags=["legal"])
+app.include_router(cv_draft.router, tags=["cv_draft"])
 
 # ── Sayfa route'ları ──────────────────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)

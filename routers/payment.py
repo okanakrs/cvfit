@@ -42,6 +42,7 @@ async def create_checkout(request: Request):
     body = await request.json()
     plan  = body.get("plan", "single")   # "single" veya "pro"
     token = body.get("access_token", "")
+    session_token = body.get("session_token", "")
 
     user = get_user_from_token(token) if token else None
     if not user:
@@ -63,7 +64,8 @@ async def create_checkout(request: Request):
                     "customer": {"email": user.email},
                     "custom_data": {
                         "user_id": user.id,
-                        "plan": plan
+                        "plan": plan,
+                        "session_token": session_token
                     }
                 }
             )
@@ -83,7 +85,7 @@ async def create_checkout(request: Request):
         supabase.table("payments").insert({
             "user_id": user.id,
             "plan": plan,
-            "amount": 3900 if plan == "single" else 14900,
+            "amount": 3999 if plan == "single" else 29900,
             "transaction_id": transaction_id,
             "status": "pending"
         }).execute()
@@ -141,6 +143,20 @@ async def paddle_webhook(request: Request):
                 supabase.table("payments").update({"status": "success"}).eq("transaction_id", transaction_id).execute()
             except Exception as e:
                 logger.error("Payment update error: %s", e)
+            session_token = custom_data.get("session_token")
+            if session_token:
+                try:
+                    supabase.table("cv_drafts").update({"user_id": user_id}).eq("session_token", session_token).execute()
+                    draft = supabase.table("cv_drafts").select("id").eq("session_token", session_token).limit(1).execute()
+                    draft_id = draft.data[0]["id"] if draft.data else None
+                    supabase.table("cv_downloads").insert({
+                        "user_id": user_id,
+                        "cv_draft_id": draft_id,
+                        "format": "pdf",
+                        "payment_id": transaction_id,
+                    }).execute()
+                except Exception as e:
+                    logger.error("Draft claim error: %s", e)
 
     # Abonelik yenilendi
     elif event_type == "subscription.activated":

@@ -3,69 +3,295 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CVFit - Giriş Yapılıyor...</title>
-<link rel="icon" type="image/x-icon" href="/medias/favicon.ico">
-<link rel="icon" type="image/png" sizes="192x192" href="/medias/cvfit-icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/medias/cvfit-apple-touch-icon.png">
-<meta name="theme-color" content="#3730a3">
+<title>CVFit | Giriş</title>
 <style>
-  body { background: #0a0a0f; color: #e8e8f0; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-  .box { text-align: center; }
-  .spinner { width: 48px; height: 48px; border: 3px solid #2a2a3a; border-top-color: #7c6aff; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+  :root {
+    --bg: #f6f7fb;
+    --bg-soft: #ffffff;
+    --fg: #101423;
+    --muted: #5c647a;
+    --border: #dde2ef;
+    --ring: #d7def8;
+    --brand: #355adf;
+    --brand-soft: rgba(53, 90, 223, 0.12);
+    --ok: #16a34a;
+    --ok-soft: rgba(22, 163, 74, 0.14);
+    --err: #dc2626;
+    --err-soft: rgba(220, 38, 38, 0.14);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #090d16;
+      --bg-soft: #111727;
+      --fg: #eef1ff;
+      --muted: #9ca6c8;
+      --border: #212c47;
+      --ring: #2e3d63;
+      --brand: #7d9bff;
+      --brand-soft: rgba(125, 155, 255, 0.18);
+      --ok: #4ade80;
+      --ok-soft: rgba(74, 222, 128, 0.16);
+      --err: #f87171;
+      --err-soft: rgba(248, 113, 113, 0.16);
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    font-family: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    background:
+      radial-gradient(900px 420px at 50% -140px, var(--brand-soft), transparent 65%),
+      radial-gradient(500px 220px at 80% 120%, rgba(82, 121, 255, 0.08), transparent 60%),
+      var(--bg);
+    color: var(--fg);
+    display: grid;
+    place-items: center;
+    padding: 20px;
+  }
+
+  .page {
+    width: min(92vw, 560px);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .logo-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: var(--fg);
+    color: var(--bg-soft);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+  }
+
+  .logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--fg);
+    letter-spacing: -0.25px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 30px 28px 24px;
+    background: color-mix(in oklab, var(--bg-soft) 94%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    box-shadow:
+      0 20px 60px rgba(8, 14, 31, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    text-align: center;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: color-mix(in oklab, var(--bg-soft) 90%, transparent);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    padding: 8px 13px;
+  }
+
+  .badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--brand);
+    box-shadow: 0 0 0 7px color-mix(in oklab, var(--brand) 28%, transparent);
+    animation: pulse 1.5s ease-out infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--brand) 28%, transparent); }
+    100% { box-shadow: 0 0 0 9px rgba(0, 0, 0, 0); }
+  }
+
+  .icon-wrap {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+  }
+
+  .icon-loading { background: var(--brand-soft); border: 1px solid var(--ring); }
+  .icon-success { background: var(--ok-soft); border: 1px solid color-mix(in oklab, var(--ok) 45%, var(--border)); }
+  .icon-error { background: var(--err-soft); border: 1px solid color-mix(in oklab, var(--err) 45%, var(--border)); }
+
+  .spinner {
+    width: 26px;
+    height: 26px;
+    border: 2px solid color-mix(in oklab, var(--brand) 26%, transparent);
+    border-top-color: var(--brand);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+  }
+
   @keyframes spin { to { transform: rotate(360deg); } }
-  p { color: #6b6b80; font-size: 15px; }
+
+  .check { font-size: 26px; color: var(--ok); }
+  .cross { font-size: 26px; color: var(--err); }
+
+  .title {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    line-height: 1.25;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 30ch;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    margin-top: 4px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .hint a {
+    color: var(--brand);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .hint a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 540px) {
+    .card {
+      padding: 26px 20px 20px;
+      border-radius: 18px;
+    }
+
+    .title {
+      font-size: 19px;
+    }
+  }
 </style>
 </head>
 <body>
-<div class="box">
-  <div class="spinner"></div>
-  <p id="msg">Giriş yapılıyor...</p>
-</div>
+  <main class="page">
+    <div class="logo" aria-label="CVFit logosu">
+      <div class="logo-box">CV</div>
+      <span class="logo-text">Fit</span>
+    </div>
+
+    <section class="card" aria-live="polite">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        Güvenli giriş işlemi
+      </div>
+
+      <div class="icon-wrap icon-loading" id="iconWrap">
+        <div class="spinner" id="spinner"></div>
+        <span class="check" id="checkIcon" style="display:none">✓</span>
+        <span class="cross" id="crossIcon" style="display:none">✕</span>
+      </div>
+
+      <p class="title" id="title">Hesabınız doğrulanıyor</p>
+      <p class="subtitle" id="subtitle">CVFit hesabınıza güvenli şekilde giriş yapılıyor. Lütfen sayfayı kapatmayın.</p>
+
+      <div class="divider"></div>
+      <p class="hint">Yönlendirme olmazsa <a href="/builder">CV düzenleyiciye geç</a>.</p>
+    </section>
+  </main>
+
 <script>
-  // Supabase bazen token'ı URL fragment'te (#access_token=...) gönderir
-  // Bazen query param olarak (?code=...) gönderir - server handle eder
-
-  // Server tarafından gelen token (PKCE flow)
-  const serverAccessToken  = "{{ access_token }}";
+  const serverAccessToken = "{{ access_token }}";
   const serverRefreshToken = "{{ refresh_token }}";
-  const serverError        = "{{ error }}";
+  const serverError = "{{ error }}";
 
-  // Fragment'ten token al (implicit flow)
   function getFragmentParam(name) {
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    return params.get(name);
+    return new URLSearchParams(window.location.hash.substring(1)).get(name);
   }
 
-  const fragmentAccessToken  = getFragmentParam("access_token");
-  const fragmentRefreshToken = getFragmentParam("refresh_token");
+  const accessToken = (serverAccessToken && serverAccessToken !== "None")
+    ? serverAccessToken
+    : getFragmentParam("access_token");
 
-  const accessToken  = (serverAccessToken && serverAccessToken !== "None" && serverAccessToken !== "")
-                        ? serverAccessToken
-                        : fragmentAccessToken;
-  const refreshToken = (serverRefreshToken && serverRefreshToken !== "None" && serverRefreshToken !== "")
-                        ? serverRefreshToken
-                        : fragmentRefreshToken;
+  const refreshToken = (serverRefreshToken && serverRefreshToken !== "None")
+    ? serverRefreshToken
+    : getFragmentParam("refresh_token");
+
+  function setSuccess() {
+    const wrap = document.getElementById("iconWrap");
+    wrap.className = "icon-wrap icon-success";
+    document.getElementById("spinner").style.display = "none";
+    document.getElementById("checkIcon").style.display = "inline";
+    document.getElementById("title").textContent = "Giriş başarılı";
+    document.getElementById("subtitle").textContent = "Hesabınız bağlandı. CV düzenleyiciye yönlendiriliyorsunuz...";
+  }
+
+  function setError(msg) {
+    const wrap = document.getElementById("iconWrap");
+    wrap.className = "icon-wrap icon-error";
+    document.getElementById("spinner").style.display = "none";
+    document.getElementById("crossIcon").style.display = "inline";
+    document.getElementById("title").textContent = "Giriş başarısız";
+    document.getElementById("subtitle").textContent = msg || "Doğrulama tamamlanamadı. Lütfen tekrar deneyin.";
+  }
+
+  function getRedirect() {
+    const saved = sessionStorage.getItem("cvfit_post_login_redirect");
+    if (saved) {
+      sessionStorage.removeItem("cvfit_post_login_redirect");
+      return saved;
+    }
+    return "/builder";
+  }
 
   if (accessToken) {
-    localStorage.setItem("cvfit_access_token",  accessToken);
+    localStorage.setItem("cvfit_access_token", accessToken);
     localStorage.setItem("cvfit_refresh_token", refreshToken || "");
-    document.getElementById("msg").textContent = "Giriş başarılı! Yönlendiriliyorsunuz...";
-    setTimeout(() => window.location.href = "/", 1000);
-  } else if (serverError && serverError !== "None" && serverError !== "") {
-    document.getElementById("msg").textContent = "Giriş başarısız: " + serverError;
-    setTimeout(() => window.location.href = "/", 3000);
+    setSuccess();
+    setTimeout(() => { window.location.href = getRedirect(); }, 1000);
+  } else if (serverError && serverError !== "None") {
+    setError(serverError);
+    setTimeout(() => { window.location.href = "/"; }, 3000);
   } else {
-    // Belki fragment henüz yüklenmedi, kısa bekle
     setTimeout(() => {
-      const retryToken = getFragmentParam("access_token");
-      if (retryToken) {
-        localStorage.setItem("cvfit_access_token", retryToken);
+      const token = getFragmentParam("access_token");
+      if (token) {
+        localStorage.setItem("cvfit_access_token", token);
         localStorage.setItem("cvfit_refresh_token", getFragmentParam("refresh_token") || "");
-        window.location.href = "/";
+        setSuccess();
+        setTimeout(() => { window.location.href = getRedirect(); }, 1000);
       } else {
-        document.getElementById("msg").textContent = "Giriş başarısız: Token bulunamadı. Lütfen tekrar deneyin.";
-        setTimeout(() => window.location.href = "/", 3000);
+        setError("Token bulunamadı. Tekrar deneyin.");
+        setTimeout(() => { window.location.href = "/"; }, 3000);
       }
     }, 500);
   }
