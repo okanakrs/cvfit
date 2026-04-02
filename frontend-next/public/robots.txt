@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://cvfit.app/sitemap.xml
+Sitemap: https://www.cvfit.com.tr/sitemap.xml

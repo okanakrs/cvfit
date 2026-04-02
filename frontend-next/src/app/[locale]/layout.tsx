@@ -24,7 +24,7 @@ const jsonLd = {
   applicationCategory: "BusinessApplication",
   description:
     "ATS-friendly resume builder powered by AI. Optimize your resume for any job posting.",
-  url: "https://www.cvfit.com.tr",
+  url: "https://www.cvfit.com.tr/tr",
   operatingSystem: "Web",
   offers: {
     "@type": "Offer",

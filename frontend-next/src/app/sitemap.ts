@@ -4,76 +4,77 @@ import { BLOG_POSTS } from "./blog/posts";
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.cvfit.com.tr";
   const now = new Date();
+  const locale = "tr";
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
-      url: baseUrl,
+      url: `${baseUrl}/${locale}`,
       lastModified: now,
       changeFrequency: "weekly",
       priority: 1,
     },
     {
-      url: `${baseUrl}/builder`,
+      url: `${baseUrl}/${locale}/builder`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/editor`,
+      url: `${baseUrl}/${locale}/editor`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/ats`,
+      url: `${baseUrl}/${locale}/ats`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/pricing`,
+      url: `${baseUrl}/${locale}/pricing`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/how-it-works`,
+      url: `${baseUrl}/${locale}/how-it-works`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/blog`,
+      url: `${baseUrl}/${locale}/blog`,
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/privacy`,
+      url: `${baseUrl}/${locale}/privacy`,
       lastModified: now,
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
-      url: `${baseUrl}/terms`,
+      url: `${baseUrl}/${locale}/terms`,
       lastModified: now,
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
-      url: `${baseUrl}/kvkk`,
+      url: `${baseUrl}/${locale}/kvkk`,
       lastModified: now,
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
-      url: `${baseUrl}/cerez-politikasi`,
+      url: `${baseUrl}/${locale}/cerez-politikasi`,
       lastModified: now,
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
-      url: `${baseUrl}/mesafeli-satis-sozlesmesi`,
+      url: `${baseUrl}/${locale}/mesafeli-satis-sozlesmesi`,
       lastModified: now,
       changeFrequency: "yearly",
       priority: 0.3,
@@ -81,7 +82,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const blogRoutes: MetadataRoute.Sitemap = BLOG_POSTS.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
+    url: `${baseUrl}/${locale}/blog/${post.slug}`,
     lastModified: now,
     changeFrequency: "monthly",
     priority: 0.7,
