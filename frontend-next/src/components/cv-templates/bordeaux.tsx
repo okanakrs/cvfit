@@ -3,6 +3,7 @@ import type { CVData } from "@/types/cv"
 import { getCVLabels } from "@/lib/cv-labels"
 
 const SIDEBAR_BG = "#7b1a1a"
+const ACCENT = "#7b1a1a"
 
 function DotRating({ value, max = 5 }: { value: number; max?: number }) {
   return (
