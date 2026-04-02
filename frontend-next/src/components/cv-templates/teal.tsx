@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import type { CVData } from "@/types/cv"
 import { getCVLabels } from "@/lib/cv-labels"
 

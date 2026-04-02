@@ -45,7 +45,7 @@ function DropZone({ file, onFile }: { file: File | null; onFile: (f: File) => vo
         <>
           <Upload className="h-10 w-10 text-muted-foreground" />
           <div>
-            <p className="text-sm font-semibold">PDF'inizi sürükleyin veya tıklayın</p>
+            <p className="text-sm font-semibold">PDF&apos;inizi sürükleyin veya tıklayın</p>
             <p className="text-xs text-muted-foreground mt-1">Sadece .pdf dosyaları kabul edilir</p>
           </div>
         </>
@@ -78,7 +78,7 @@ export default function ATSPage() {
       <div>
         <h1 className="text-2xl font-bold mb-2">ATS Optimizasyonu</h1>
         <p className="text-muted-foreground max-w-md">
-          Bu özellik yalnızca Pro kullanıcılara açıktır. CV'nizi yapay zeka ile analiz edin.
+          Bu özellik yalnızca Pro kullanıcılara açıktır. CV&apos;nizi yapay zeka ile analiz edin.
         </p>
       </div>
       <Button onClick={() => router.push("/pricing")}>Planı Gör</Button>
@@ -124,7 +124,7 @@ export default function ATSPage() {
           <Sparkles className="size-6 text-primary" />
         </div>
         <h1 className="text-3xl font-bold tracking-tight">ATS Analizi</h1>
-        <p className="mt-2 text-muted-foreground">CV'nizi yükleyin, iş ilanıyla karşılaştırın</p>
+        <p className="mt-2 text-muted-foreground">CV&apos;nizi yükleyin, iş ilanıyla karşılaştırın</p>
       </div>
 
       <div className="space-y-5">

@@ -79,19 +79,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Verify token on mount
   useEffect(() => {
     const token = localStorage.getItem("cvfit_access_token")
-    if (!token) {
-      setLoading(false)
-      return
-    }
 
-    verify(token)
-      .catch(() => {
-        // Token invalid — clear
+    void (async () => {
+      if (!token) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        await verify(token)
+      } catch {
         localStorage.removeItem("cvfit_access_token")
         localStorage.removeItem("cvfit_refresh_token")
         localStorage.removeItem("cvfit_user_name")
-      })
-      .finally(() => setLoading(false))
+      } finally {
+        setLoading(false)
+      }
+    })()
   }, [verify])
 
   const refresh = useCallback(async () => {

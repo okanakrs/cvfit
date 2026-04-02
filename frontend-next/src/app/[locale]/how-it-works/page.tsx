@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
+import { Link } from "@/navigation";
 import { useTranslations } from "next-intl";
 
 export default function HowItWorksPage() {
@@ -28,12 +29,12 @@ export default function HowItWorksPage() {
         <p className="text-muted-foreground text-lg max-w-lg mx-auto mb-10">
           {t("subtitle")}
         </p>
-        <a
+        <Link
           href="/builder"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary hover:opacity-90 text-primary-foreground text-sm font-semibold transition-all"
         >
           {t("try_now")} <ArrowRight className="size-4" />
-        </a>
+        </Link>
       </section>
 
       {/* Steps — vertical timeline */}
@@ -63,12 +64,12 @@ export default function HowItWorksPage() {
       <section className="border-t border-border bg-muted/30 py-20 px-4 text-center">
         <h2 className="text-2xl font-bold mb-3">{t("cta_title")}</h2>
         <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">{t("cta_body")}</p>
-        <a
+        <Link
           href="/pricing"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary hover:opacity-90 text-primary-foreground text-sm font-semibold transition-all"
         >
           {t("cta_button")} <ArrowRight className="size-4" />
-        </a>
+        </Link>
       </section>
     </main>
   );

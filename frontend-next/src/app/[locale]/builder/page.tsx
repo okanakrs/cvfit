@@ -1,7 +1,8 @@
 "use client"
+/* eslint-disable @next/next/no-img-element */
 
-import { useState, useEffect, useRef, useCallback, Suspense } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useState, useEffect, useRef, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import type { CVData, Experience, Education, Skill, Language, Certification } from "@/types/cv"
 import { emptyCVData } from "@/types/cv"
 import { cn } from "@/lib/utils"
@@ -77,7 +78,7 @@ function parseTemplateParam(value: string | null): Template | null {
   return TEMPLATE_VALUES.has(value as Template) ? (value as Template) : null
 }
 
-function TemplateThumbnail({ tmpl, active, onClick, label, desc }: { tmpl: Template; active: boolean; onClick: () => void; label: string; desc: string }) {
+function TemplateThumbnail({ tmpl, active, onClick, label }: { tmpl: Template; active: boolean; onClick: () => void; label: string }) {
   return (
     <button
       onClick={onClick}
@@ -389,26 +390,25 @@ function ensureIds(data: CVData): CVData {
 }
 
 function CVBuilderPage() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const { user, profile, loading: authLoading, refresh } = useAuth()
   const t = useTranslations("builder")
   const tt = useTranslations("templates")
   const locale = useLocale()
 
-  const TEMPLATES: { value: Template; label: string; desc: string }[] = [
-    { value: "classic",      label: tt("classic"),      desc: t("template_classic_desc") },
-    { value: "modern",       label: tt("modern"),       desc: t("template_modern_desc") },
-    { value: "minimal",      label: tt("minimal"),      desc: t("template_minimal_desc") },
-    { value: "executive",    label: tt("executive"),    desc: t("template_executive_desc") },
-    { value: "creative",     label: tt("creative"),     desc: t("template_creative_desc") },
-    { value: "elegant",      label: tt("elegant"),      desc: t("template_elegant_desc") },
-    { value: "professional", label: tt("professional"), desc: t("template_professional_desc") },
-    { value: "tech",         label: tt("tech"),         desc: t("template_tech_desc") },
-    { value: "steel",        label: tt("steel"),        desc: t("template_steel_desc") },
-    { value: "bordeaux",     label: tt("bordeaux"),     desc: t("template_bordeaux_desc") },
-    { value: "navy",         label: tt("navy"),         desc: t("template_navy_desc") },
-    { value: "teal",         label: tt("teal"),         desc: t("template_teal_desc") },
+  const TEMPLATES: { value: Template; label: string }[] = [
+    { value: "classic",      label: tt("classic") },
+    { value: "modern",       label: tt("modern") },
+    { value: "minimal",      label: tt("minimal") },
+    { value: "executive",    label: tt("executive") },
+    { value: "creative",     label: tt("creative") },
+    { value: "elegant",      label: tt("elegant") },
+    { value: "professional", label: tt("professional") },
+    { value: "tech",         label: tt("tech") },
+    { value: "steel",        label: tt("steel") },
+    { value: "bordeaux",     label: tt("bordeaux") },
+    { value: "navy",         label: tt("navy") },
+    { value: "teal",         label: tt("teal") },
   ]
 
   const [cvData, setCvData] = useState<CVData>(emptyCVData)
@@ -616,9 +616,9 @@ function CVBuilderPage() {
   const sessionToken = typeof window !== "undefined" ? getSessionToken() : ""
 
   return (
-    <div className="flex flex-col bg-background" style={{ height: "calc(100vh - 56px)" }}>
+    <div className="flex flex-col bg-background" style={{ minHeight: "calc(100dvh - 56px)" }}>
       {/* Header */}
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-border px-4 gap-2 bg-background/95 backdrop-blur-sm">
+      <header className="flex min-h-14 shrink-0 flex-col gap-2 border-b border-border px-4 py-3 bg-background/95 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:py-0">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           {saveStatus === "saving" && (
             <span className="flex items-center gap-1"><Loader2 className="size-3 animate-spin" />{t("saving")}</span>
@@ -627,7 +627,7 @@ function CVBuilderPage() {
             <span className="flex items-center gap-1 text-green-600 dark:text-green-400"><Cloud className="size-3 text-green-500" />{t("saved")}</span>
           )}
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex w-full flex-wrap items-center gap-2 shrink-0 sm:w-auto sm:justify-end">
           <div className="flex items-center gap-1 border rounded-md px-1">
             <button onClick={() => setZoom(z => Math.max(0.5, z - 0.1))} className="p-1 hover:bg-muted rounded cursor-pointer">
               <ZoomOut className="size-3.5 text-muted-foreground" />
@@ -643,11 +643,11 @@ function CVBuilderPage() {
               {t("ats_analysis")}
             </Button>
           )}
-          <Button variant="outline" size="sm" disabled={downloading} onClick={() => handleDownloadRequest("pdf")}>
+          <Button variant="outline" size="sm" className="flex-1 sm:flex-none" disabled={downloading} onClick={() => handleDownloadRequest("pdf")}> 
             {downloading ? <Loader2 className="size-4 mr-1 animate-spin" /> : <FileDown className="size-4 mr-1" />}
             {t("download_pdf")}
           </Button>
-          <Button size="sm" disabled={downloading} onClick={() => handleDownloadRequest("docx")}>
+          <Button size="sm" className="flex-1 sm:flex-none" disabled={downloading} onClick={() => handleDownloadRequest("docx")}> 
             {downloading ? <Loader2 className="size-4 mr-1 animate-spin" /> : <FileText className="size-4 mr-1" />}
             {t("download_docx")}
           </Button>
@@ -655,9 +655,9 @@ function CVBuilderPage() {
       </header>
 
       {/* Content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
         {/* Left Panel */}
-        <div className="w-[52%] overflow-y-auto p-6 space-y-4">
+        <div className="w-full overflow-y-auto p-4 space-y-4 lg:w-[52%] lg:p-6">
           <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCVUpload(f); e.target.value = "" }} />
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -704,12 +704,12 @@ function CVBuilderPage() {
                   </div>
                   <Input placeholder={t("placeholder_name")} className="text-base" value={cvData.personal.fullName} onChange={(e) => updatePersonal("fullName", e.target.value)} />
                   <Input placeholder={t("placeholder_title")} value={cvData.personal.title} onChange={(e) => updatePersonal("title", e.target.value)} />
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                     <Input placeholder={t("placeholder_email")} type="email" value={cvData.personal.email} onChange={(e) => updatePersonal("email", e.target.value)} />
                     <Input placeholder={t("placeholder_phone")} value={cvData.personal.phone} onChange={(e) => updatePersonal("phone", e.target.value)} />
                     <Input placeholder={t("placeholder_location")} value={cvData.personal.location} onChange={(e) => updatePersonal("location", e.target.value)} />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <Input placeholder={t("placeholder_linkedin")} value={cvData.personal.linkedin} onChange={(e) => updatePersonal("linkedin", e.target.value)} />
                     <Input placeholder={t("placeholder_website")} value={cvData.personal.website} onChange={(e) => updatePersonal("website", e.target.value)} />
                   </div>
@@ -738,11 +738,11 @@ function CVBuilderPage() {
                       <Button variant="ghost" size="icon-xs" className="absolute top-2 right-2 text-destructive hover:text-destructive" onClick={() => removeExperience(exp.id)}>
                         <Trash2 className="size-3.5" />
                       </Button>
-                      <div className="grid grid-cols-2 gap-2 pr-8">
+                      <div className="grid grid-cols-1 gap-2 pr-8 sm:grid-cols-2">
                         <Input placeholder={t("placeholder_company")} value={exp.company} onChange={(e) => updateExperience(exp.id, { company: e.target.value })} />
                         <Input placeholder={t("placeholder_position")} value={exp.position} onChange={(e) => updateExperience(exp.id, { position: e.target.value })} />
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         <Input placeholder={t("placeholder_start")} value={exp.startDate} onChange={(e) => updateExperience(exp.id, { startDate: e.target.value })} />
                         <Input placeholder={t("placeholder_end")} value={exp.endDate} disabled={exp.current} onChange={(e) => updateExperience(exp.id, { endDate: e.target.value })} />
                       </div>
@@ -780,11 +780,11 @@ function CVBuilderPage() {
                       <Button variant="ghost" size="icon-xs" className="absolute top-2 right-2 text-destructive hover:text-destructive" onClick={() => removeEducation(edu.id)}>
                         <Trash2 className="size-3.5" />
                       </Button>
-                      <div className="grid grid-cols-2 gap-2 pr-8">
+                      <div className="grid grid-cols-1 gap-2 pr-8 sm:grid-cols-2">
                         <Input placeholder={t("placeholder_school")} value={edu.school} onChange={(e) => updateEducation(edu.id, { school: e.target.value })} />
                         <Input placeholder={t("placeholder_field")} value={edu.field} onChange={(e) => updateEducation(edu.id, { field: e.target.value })} />
                       </div>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                         <Input placeholder={t("placeholder_degree")} value={edu.degree} onChange={(e) => updateEducation(edu.id, { degree: e.target.value })} />
                         <Input placeholder={t("placeholder_start")} value={edu.startDate} onChange={(e) => updateEducation(edu.id, { startDate: e.target.value })} />
                         <Input placeholder={t("placeholder_end")} value={edu.endDate} onChange={(e) => updateEducation(edu.id, { endDate: e.target.value })} />
@@ -814,10 +814,10 @@ function CVBuilderPage() {
                 <Separator />
                 <CardContent className="p-4 space-y-3">
                   {cvData.skills.map((skill) => (
-                    <div key={skill.id} className="flex items-center gap-2">
+                    <div key={skill.id} className="flex flex-col gap-2 sm:flex-row sm:items-center">
                       <Input placeholder={t("placeholder_skill")} value={skill.name} onChange={(e) => updateSkill(skill.id, { name: e.target.value })} className="flex-1" />
                       <Select value={skill.level} onValueChange={(v) => updateSkill(skill.id, { level: v as Skill["level"] })}>
-                        <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="w-full sm:w-32"><SelectValue /></SelectTrigger>
                         <SelectContent>{SKILL_LEVELS.map((l) => (<SelectItem key={l} value={l}>{(SKILL_LEVEL_LABELS[locale] || SKILL_LEVEL_LABELS.tr)[l]}</SelectItem>))}</SelectContent>
                       </Select>
                       <Button variant="ghost" size="icon-xs" className="text-destructive hover:text-destructive shrink-0" onClick={() => removeSkill(skill.id)}>
@@ -848,10 +848,10 @@ function CVBuilderPage() {
                 <Separator />
                 <CardContent className="p-4 space-y-3">
                   {cvData.languages.map((lang) => (
-                    <div key={lang.id} className="flex items-center gap-2">
+                    <div key={lang.id} className="flex flex-col gap-2 sm:flex-row sm:items-center">
                       <Input placeholder={t("placeholder_language")} value={lang.name} onChange={(e) => updateLanguage(lang.id, { name: e.target.value })} className="flex-1" />
                       <Select value={lang.level} onValueChange={(v) => updateLanguage(lang.id, { level: v as Language["level"] })}>
-                        <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="w-full sm:w-24"><SelectValue /></SelectTrigger>
                         <SelectContent>{LANG_LEVELS.map((l) => (<SelectItem key={l} value={l}>{(LANG_LEVEL_LABELS[locale] || LANG_LEVEL_LABELS.tr)[l] || l}</SelectItem>))}</SelectContent>
                       </Select>
                       <Button variant="ghost" size="icon-xs" className="text-destructive hover:text-destructive shrink-0" onClick={() => removeLanguage(lang.id)}>
@@ -886,11 +886,11 @@ function CVBuilderPage() {
                       <Button variant="ghost" size="icon-xs" className="absolute top-2 right-2 text-destructive hover:text-destructive" onClick={() => removeCertification(cert.id)}>
                         <Trash2 className="size-3.5" />
                       </Button>
-                      <div className="grid grid-cols-2 gap-2 pr-8">
+                      <div className="grid grid-cols-1 gap-2 pr-8 sm:grid-cols-2">
                         <Input placeholder={t("placeholder_cert_name")} value={cert.name} onChange={(e) => updateCertification(cert.id, { name: e.target.value })} />
                         <Input placeholder={t("placeholder_cert_issuer")} value={cert.issuer} onChange={(e) => updateCertification(cert.id, { issuer: e.target.value })} />
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         <Input placeholder={t("placeholder_cert_date")} value={cert.date} onChange={(e) => updateCertification(cert.id, { date: e.target.value })} />
                         <Input placeholder={t("placeholder_cert_url")} value={cert.url} onChange={(e) => updateCertification(cert.id, { url: e.target.value })} />
                       </div>
@@ -906,15 +906,15 @@ function CVBuilderPage() {
         </div>
 
         {/* Right Panel — Preview */}
-        <div className="flex-1 overflow-y-auto bg-muted/30 p-4 flex flex-col items-center gap-6">
-          <div className="w-full flex justify-center">
+        <div className="flex-1 overflow-y-auto overflow-x-auto bg-muted/30 p-4 flex flex-col items-center gap-6 lg:p-4">
+          <div className="w-full flex justify-start lg:justify-center">
             <CVPreview data={cvData} template={template} zoom={zoom} previewRef={cvPreviewRef} locale={locale} />
           </div>
           <div className="w-full pb-4" style={{ maxWidth: "800px" }}>
             <p className="text-xs text-muted-foreground mb-3 font-medium">{t("select_template")}</p>
             <div className="flex items-end gap-3 overflow-x-auto pb-1">
               {TEMPLATES.map((tmpl) => (
-                <TemplateThumbnail key={tmpl.value} tmpl={tmpl.value} label={tmpl.label} desc={tmpl.desc} active={template === tmpl.value} onClick={() => setTemplate(tmpl.value)} />
+                <TemplateThumbnail key={tmpl.value} tmpl={tmpl.value} label={tmpl.label} active={template === tmpl.value} onClick={() => setTemplate(tmpl.value)} />
               ))}
             </div>
           </div>

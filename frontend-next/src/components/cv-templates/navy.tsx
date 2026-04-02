@@ -1,8 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 import type { CVData } from "@/types/cv"
 import { getCVLabels } from "@/lib/cv-labels"
 
 const SIDEBAR_BG = "#1a2744"
-const ACCENT = "#1a2744"
 
 function DotRating({ value, max = 5, filled = "#ffffff", empty = "rgba(255,255,255,0.2)" }: { value: number; max?: number; filled?: string; empty?: string }) {
   return (

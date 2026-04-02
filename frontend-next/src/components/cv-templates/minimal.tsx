@@ -1,8 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 import type { CVData } from "@/types/cv"
 import { getCVLabels } from "@/lib/cv-labels"
 
 const SIDEBAR_BG = "#263444"
-const ACCENT = "#ffffff"
 
 export default function MinimalTemplate({ data, locale }: { data: CVData; locale?: string }) {
   const p = data.personal

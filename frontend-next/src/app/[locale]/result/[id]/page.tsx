@@ -43,6 +43,7 @@ function ScoreCard({
   return (
     <Card className="flex-1">
       <CardHeader className="pb-2">
+        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
         <CardTitle className="text-3xl font-bold">{score}%</CardTitle>
       </CardHeader>
@@ -172,23 +173,32 @@ export default function ResultPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // If "demo" id, show demo data
-    if (id === "demo") {
-      setData(DEMO_DATA);
-      setLoading(false);
-      return;
-    }
+    let isActive = true;
 
-    // Try to load from sessionStorage (set after analysis)
-    const stored = sessionStorage.getItem(`analysis_${id}`);
-    if (stored) {
-      try {
-        setData(JSON.parse(stored));
-      } catch {
-        // invalid JSON, ignore
+    void (async () => {
+      let nextData: AnalysisResult | null = null;
+
+      if (id === "demo") {
+        nextData = DEMO_DATA;
+      } else {
+        const stored = sessionStorage.getItem(`analysis_${id}`);
+        if (stored) {
+          try {
+            nextData = JSON.parse(stored);
+          } catch {
+            nextData = null;
+          }
+        }
       }
-    }
-    setLoading(false);
+
+      if (!isActive) return;
+      setData(nextData);
+      setLoading(false);
+    })();
+
+    return () => {
+      isActive = false;
+    };
   }, [id]);
 
   if (loading) return <ResultSkeleton />;

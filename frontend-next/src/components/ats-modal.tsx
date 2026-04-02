@@ -122,7 +122,7 @@ export function ATSModal({ open, onClose, cvData, onTransfer }: ATSModalProps) {
           /* ── Input view ── */
           <div className="px-6 py-5 space-y-4">
             <p className="text-sm text-muted-foreground">
-              CV'niz otomatik olarak kullanılacak. Hedef iş ilanını yapıştırın.
+              CV&apos;niz otomatik olarak kullanılacak. Hedef iş ilanını yapıştırın.
             </p>
             <div>
               <label className="text-sm font-medium mb-1.5 block">İş İlanı</label>

@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
@@ -106,7 +107,7 @@ export default function LandingPage() {
             {t("badge")}
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
             {t("h1_line1")}
             <br />
             <span className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
@@ -157,7 +158,7 @@ export default function LandingPage() {
             <p className="text-muted-foreground">{t("templates_subtitle")}</p>
           </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-12 gap-3">
             {TEMPLATES_PREVIEW.map((tmpl) => (
               <button
                 key={tmpl.value}

@@ -85,7 +85,7 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
       toast.error("Odeme sistemi yuklenemedi. Sayfayi yenileyip tekrar deneyin.")
     }
     document.head.appendChild(script)
-  }, [open, onClose, onPaymentSuccess])
+  }, [open, onClose, onPaymentSuccess, refresh])
 
   async function startCheckout(priceId: string, discountId?: string) {
     const customerEmail = (typeof window !== "undefined" ? localStorage.getItem("cvfit_user_email") : "") || ""

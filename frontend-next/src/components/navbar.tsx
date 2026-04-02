@@ -1,8 +1,10 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Sun, Moon, LogOut, Sparkles, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Sun, Moon, LogOut, Sparkles, ChevronDown, Menu } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslations } from "next-intl";
@@ -29,12 +31,11 @@ function getInitials(name: string): string {
 export function Navbar() {
   const { setTheme, resolvedTheme } = useTheme();
   const { user, profile, loading, login, logout } = useAuth();
+  const router = useRouter();
   const t = useTranslations("navigation");
-  const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
@@ -82,21 +83,47 @@ export function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-2 shrink-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+              aria-label="Menü"
+            >
+              <Menu className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuItem onClick={() => router.push("/builder")}>
+                {t("build_cv")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/how-it-works")}>
+                {t("how_it_works")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/pricing")}>
+                {t("pricing")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/blog")}>
+                {t("blog")}
+              </DropdownMenuItem>
+              {isPro && (
+                <DropdownMenuItem onClick={() => router.push("/ats")}>
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="size-3.5 text-purple-500" />
+                    {t("ats_analysis")}
+                  </span>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <LanguageSwitcher />
 
-          {mounted && (
-            <button
-              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-              aria-label={t("toggle_theme")}
-            >
-              {resolvedTheme === "dark" ? (
-                <Moon className="h-4 w-4" />
-              ) : (
-                <Sun className="h-4 w-4" />
-              )}
-            </button>
-          )}
+          <button
+            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+            aria-label={t("toggle_theme")}
+          >
+            <Sun className="h-4 w-4 dark:hidden" />
+            <Moon className="hidden h-4 w-4 dark:block" />
+          </button>
 
           {!loading && user ? (
             <DropdownMenu>
@@ -134,7 +161,8 @@ export function Navbar() {
           ) : !loading ? (
             <button
               onClick={login}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-all shadow-sm"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-full bg-foreground text-background text-sm font-semibold hover:opacity-90 transition-all shadow-sm"
+              aria-label={t("sign_in")}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -142,7 +170,7 @@ export function Navbar() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              {t("sign_in")}
+              <span className="hidden sm:inline">{t("sign_in")}</span>
             </button>
           ) : null}
         </div>
