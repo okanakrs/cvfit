@@ -6,7 +6,6 @@ import type { CVData } from "@/types/cv"
  */
 export function mapAnalysisToCV(analysisResult: Record<string, unknown>): CVData {
   const cv = (analysisResult.cv_data ?? {}) as Record<string, unknown>
-  const addedKeywords = (analysisResult.added_keywords ?? cv.added_keywords ?? []) as string[]
 
   // Parse contact array
   const contact = (cv.contact ?? []) as string[]
@@ -28,13 +27,9 @@ export function mapAnalysisToCV(analysisResult: Record<string, unknown>): CVData
 
   // Parse experience
   const rawExp = (cv.experience ?? []) as Array<Record<string, unknown>>
-  const experience = rawExp.map((e, i) => {
+  const experience = rawExp.map((e) => {
     const bullets = (e.bullets ?? []) as string[]
-    // Append added keywords to first experience's description
-    let description = bullets.join("\n")
-    if (i === 0 && addedKeywords.length > 0) {
-      description += (description ? "\n" : "") + addedKeywords.join(", ")
-    }
+    const description = bullets.join("\n")
     const dateStr = (e.date ?? "") as string
     const [startDate, endDate] = parseDateRange(dateStr)
     return {

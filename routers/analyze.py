@@ -94,6 +94,136 @@ def cv_data_to_text(data: dict) -> str:
     return "\n".join(parts)
 
 
+GENERAL_SKILL_EVIDENCE = {
+    "takim calismasi": ["takim", "ekip", "birlikte", "isbirligi", "koordinasyon"],
+    "iletisim": ["iletisim", "musteri", "sunum", "raporlama", "gorusme"],
+    "problem cozme": ["problem", "cozum", "iyilestirme", "analiz", "optimiz"],
+    "liderlik": ["yonett", "lider", "ekip yonet", "sorumlu", "koordine"],
+    "proje yonetimi": ["proje", "planlama", "zaman cizelgesi", "teslim", "paydas"],
+    "zaman yonetimi": ["termin", "sure", "zaman", "oncelik", "deadline"],
+    "analitik dusunme": ["analiz", "veri", "rapor", "olcum", "kpi"],
+    "musteri odaklilik": ["musteri", "memnuniyet", "hizmet", "talep"],
+}
+
+GENERAL_SKILL_SYNONYMS = {
+    "takim calismasi": ["takim calismasi", "ekip calismasi", "teamwork"],
+    "iletisim": ["iletisim", "communication"],
+    "problem cozme": ["problem cozme", "problem solving"],
+    "liderlik": ["liderlik", "leadership"],
+    "proje yonetimi": ["proje yonetimi", "project management"],
+    "zaman yonetimi": ["zaman yonetimi", "time management"],
+    "analitik dusunme": ["analitik dusunme", "analytical thinking"],
+    "musteri odaklilik": ["musteri odaklilik", "customer focus"],
+}
+
+
+def _normalize_text(value: str) -> str:
+    if not value:
+        return ""
+    value = value.lower()
+    repl = {
+        "ç": "c", "ğ": "g", "ı": "i", "ö": "o", "ş": "s", "ü": "u",
+    }
+    for src, dst in repl.items():
+        value = value.replace(src, dst)
+    value = re.sub(r"\s+", " ", value)
+    return value.strip()
+
+
+def _extract_skill_name(skill_item):
+    if isinstance(skill_item, dict):
+        return str(skill_item.get("name", "")).strip()
+    if isinstance(skill_item, str):
+        return skill_item.strip()
+    return ""
+
+
+def _canonical_general_skill(skill_name: str):
+    norm = _normalize_text(skill_name)
+    for canonical, variants in GENERAL_SKILL_SYNONYMS.items():
+        if norm in (_normalize_text(v) for v in variants):
+            return canonical
+    return None
+
+
+def _term_or_synonym_in_cv(skill_name: str, cv_norm: str) -> bool:
+    if not skill_name:
+        return False
+
+    norm = _normalize_text(skill_name)
+    if norm and norm in cv_norm:
+        return True
+
+    canonical = _canonical_general_skill(skill_name)
+    if canonical:
+        for variant in GENERAL_SKILL_SYNONYMS.get(canonical, []):
+            if _normalize_text(variant) in cv_norm:
+                return True
+    return False
+
+
+def _is_general_transferable_skill(skill_name: str) -> bool:
+    return _canonical_general_skill(skill_name) is not None
+
+
+def _has_general_skill_evidence(skill_name: str, cv_norm: str) -> bool:
+    canonical = _canonical_general_skill(skill_name)
+    if not canonical:
+        return False
+    evidence_terms = GENERAL_SKILL_EVIDENCE.get(canonical, [])
+    return any(_normalize_text(term) in cv_norm for term in evidence_terms)
+
+
+def sanitize_skill_injection(cv_data: dict, original_cv_text: str, max_added: int = 5) -> dict:
+    cv_norm = _normalize_text(original_cv_text)
+    raw_skills = cv_data.get("skills", [])
+    skill_match = cv_data.get("skill_match", {}) if isinstance(cv_data.get("skill_match", {}), dict) else {}
+    bonus_terms = {_normalize_text(s) for s in (skill_match.get("bonus", []) or []) if isinstance(s, str)}
+
+    kept = []
+    seen = set()
+    added_general_count = 0
+    approved_added = []
+
+    for item in raw_skills if isinstance(raw_skills, list) else []:
+        name = _extract_skill_name(item)
+        if not name:
+            continue
+
+        norm_name = _normalize_text(name)
+        if not norm_name or norm_name in seen:
+            continue
+
+        mentioned_in_cv = _term_or_synonym_in_cv(name, cv_norm)
+        is_bonus = norm_name in bonus_terms
+
+        if mentioned_in_cv:
+            kept.append(item)
+            seen.add(norm_name)
+            continue
+
+        # Rule 4: never auto-inject bonus-category skills.
+        if is_bonus:
+            continue
+
+        # Rule 1 + 2 + 3: only inferred general skills with evidence, max 5.
+        if not _is_general_transferable_skill(name):
+            continue
+        if not _has_general_skill_evidence(name, cv_norm):
+            continue
+        if added_general_count >= max_added:
+            continue
+
+        kept.append(item)
+        seen.add(norm_name)
+        added_general_count += 1
+        approved_added.append(name)
+
+    cv_data["skills"] = kept
+    cv_data["added_keywords"] = approved_added
+    return cv_data
+
+
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.post("/analyze")
@@ -151,6 +281,10 @@ KURALLAR:
 5. skills ve languages için level değeri: CV'de seviye bilgisi varsa ona göre 1-5 arası kullan. CV'de seviye yoksa level alanını dahil etme (null veya 0 koyma, tamamen çıkar).
 6. Eğer orijinal CV'de beceri seviyeleri veya dil seviyeleri yoksa yeni CV'de de uydurma, sadece isim yaz.
 7. İş ilanındaki gereksinimleri analiz et ve beceri haritası oluştur
+8. CV'de hiç geçmeyen spesifik teknik/domain becerilerini (araç, framework, mevzuat vb.) skills alanına ekleme.
+9. Genel/aktarılabilir becerileri yalnızca CV içeriğinde dolaylı kanıt varsa ekle.
+10. Bonus kategorisi becerileri skills listesine ekleme; sadece skill_match.bonus içinde göster.
+11. Otomatik eklenen beceri sayısını sınırlı tut (maksimum 5).
 
 JSON formatı:
 {{
@@ -194,6 +328,8 @@ JSON formatı:
         cv_data = json.loads(raw)
     except Exception:
         return JSONResponse({"error": "AI yanıtı parse edilemedi", "raw": raw[:500]}, status_code=500)
+
+    cv_data = sanitize_skill_injection(cv_data, cv_content, max_added=5)
 
     new_score = get_match_score(cv_data_to_text(cv_data), job_description)
 
