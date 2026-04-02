@@ -422,6 +422,25 @@ function CVBuilderPage() {
   const [atsOpen, setAtsOpen] = useState(false)
   const [parsing, setParsing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const previewHostRef = useRef<HTMLDivElement>(null)
+  const [previewHostWidth, setPreviewHostWidth] = useState(0)
+
+  useEffect(() => {
+    if (!previewHostRef.current || typeof ResizeObserver === "undefined") return
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0]
+      if (!entry) return
+      setPreviewHostWidth(entry.contentRect.width)
+    })
+
+    observer.observe(previewHostRef.current)
+    return () => observer.disconnect()
+  }, [])
+
+  const previewZoom = previewHostWidth > 0
+    ? Math.min(zoom, Math.max(0.34, (previewHostWidth - 16) / A4_WIDTH))
+    : zoom
 
   async function handleCVUpload(file: File) {
     if (!file || file.type !== "application/pdf") {
@@ -906,9 +925,9 @@ function CVBuilderPage() {
         </div>
 
         {/* Right Panel — Preview */}
-        <div className="flex-1 overflow-y-auto overflow-x-auto bg-muted/30 p-4 flex flex-col items-center gap-6 lg:p-4">
-          <div className="w-full flex justify-start lg:justify-center">
-            <CVPreview data={cvData} template={template} zoom={zoom} previewRef={cvPreviewRef} locale={locale} />
+        <div className="flex-1 overflow-y-auto overflow-x-hidden bg-muted/30 p-4 flex flex-col items-center gap-6 lg:p-4">
+          <div ref={previewHostRef} className="w-full flex justify-center">
+            <CVPreview data={cvData} template={template} zoom={previewZoom} previewRef={cvPreviewRef} locale={locale} />
           </div>
           <div className="w-full pb-4" style={{ maxWidth: "800px" }}>
             <p className="text-xs text-muted-foreground mb-3 font-medium">{t("select_template")}</p>
