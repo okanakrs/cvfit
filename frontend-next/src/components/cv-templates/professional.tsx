@@ -14,7 +14,7 @@ export default function ProfessionalTemplate({ data, locale }: { data: CVData; l
       <div className="px-8 py-5 flex justify-between items-end border-b border-gray-200">
         <div>
           <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-            {p.fullName || "Ad Soyad"}
+            {p.fullName || L.fullName}
           </h1>
           {p.title && (
             <p className="text-xs font-semibold mt-0.5" style={{ color: ACCENT }}>
@@ -53,7 +53,7 @@ export default function ProfessionalTemplate({ data, locale }: { data: CVData; l
                   <div className="flex justify-between items-baseline">
                     <div className="flex items-baseline gap-2">
                       <span className="text-sm font-bold text-gray-900">
-                        {exp.position || "Pozisyon"}
+                        {exp.position || L.position}
                       </span>
                       {exp.company && (
                         <span

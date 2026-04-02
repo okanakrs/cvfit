@@ -6,6 +6,7 @@ import { Sun, Moon, LogOut, Sparkles, ChevronDown } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslations } from "next-intl";
+import { Link } from "@/navigation";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import {
   DropdownMenu,
@@ -52,7 +53,7 @@ export function Navbar() {
     >
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
         {/* Logo */}
-        <a href="/" className="flex items-center shrink-0" aria-label={t("home_label")}>
+        <Link href="/" className="flex items-center shrink-0" aria-label={t("home_label")}>
           <img
             src="/cvfit-logo-light.svg"
             alt="CVFit"
@@ -63,19 +64,19 @@ export function Navbar() {
             alt="CVFit"
             className="hidden h-11 md:h-12 w-auto dark:block"
           />
-        </a>
+        </Link>
 
         {/* Nav links */}
         <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
-          <a href="/builder" className="nav-link">{t("build_cv")}</a>
-          <a href="/how-it-works" className="nav-link">{t("how_it_works")}</a>
-          <a href="/pricing" className="nav-link">{t("pricing")}</a>
-          <a href="/blog" className="nav-link">{t("blog")}</a>
+          <Link href="/builder" className="nav-link">{t("build_cv")}</Link>
+          <Link href="/how-it-works" className="nav-link">{t("how_it_works")}</Link>
+          <Link href="/pricing" className="nav-link">{t("pricing")}</Link>
+          <Link href="/blog" className="nav-link">{t("blog")}</Link>
           {isPro && (
-            <a href="/ats" className="nav-link flex items-center gap-1.5">
+            <Link href="/ats" className="nav-link flex items-center gap-1.5">
               <Sparkles className="size-3.5 text-purple-500" />
               {t("ats_analysis")}
-            </a>
+            </Link>
           )}
         </nav>
 

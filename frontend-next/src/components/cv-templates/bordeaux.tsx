@@ -1,4 +1,5 @@
 import type { CVData } from "@/types/cv"
+import { getCVLabels } from "@/lib/cv-labels"
 
 const SIDEBAR_BG = "#7b1a1a"
 const ACCENT = "#7b1a1a"
@@ -30,8 +31,9 @@ function skillDots(level: string) {
   return map[level] ?? 2
 }
 
-export default function BordeauxTemplate({ data }: { data: CVData }) {
+export default function BordeauxTemplate({ data, locale }: { data: CVData; locale?: string }) {
   const p = data.personal
+  const L = getCVLabels(locale)
   return (
     <div className="flex" style={{ minHeight: 1123, fontFamily: "Roboto, Arial, sans-serif" }}>
       {/* Sidebar */}
@@ -55,12 +57,12 @@ export default function BordeauxTemplate({ data }: { data: CVData }) {
           )}
         </div>
         <div className="text-center">
-          <h1 className="text-base font-bold text-white leading-tight">{p.fullName || "Ad Soyad"}</h1>
+          <h1 className="text-base font-bold text-white leading-tight">{p.fullName || L.fullName}</h1>
           {p.title && <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.7)" }}>{p.title}</p>}
         </div>
 
         {/* Contact */}
-        <SideBlock title="Kişisel Bilgiler">
+        <SideBlock title={L.contact}>
           <div className="space-y-1 text-xs" style={{ color: "rgba(255,255,255,0.8)" }}>
             {p.phone && <p>{p.phone}</p>}
             {p.email && <p className="break-all">{p.email}</p>}
@@ -72,7 +74,7 @@ export default function BordeauxTemplate({ data }: { data: CVData }) {
 
         {/* Languages */}
         {data.languages.length > 0 && (
-          <SideBlock title="Diller">
+          <SideBlock title={L.languagesShort}>
             <div className="space-y-2">
               {data.languages.map((l) => (
                 <div key={l.id}>
@@ -89,7 +91,7 @@ export default function BordeauxTemplate({ data }: { data: CVData }) {
 
         {/* Skills in sidebar as dots */}
         {data.skills.length > 0 && (
-          <SideBlock title="Beceriler">
+          <SideBlock title={L.skills}>
             <div className="space-y-2">
               {data.skills.map((s) => (
                 <div key={s.id}>
@@ -106,14 +108,14 @@ export default function BordeauxTemplate({ data }: { data: CVData }) {
       <div className="p-6 space-y-5 bg-white" style={{ width: "67%" }}>
         {p.summary && (
           <div>
-            <MainHeading>Profil</MainHeading>
+            <MainHeading>{L.about}</MainHeading>
             <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">{p.summary}</p>
           </div>
         )}
 
         {data.education.length > 0 && (
           <div>
-            <MainHeading>Eğitimler</MainHeading>
+            <MainHeading>{L.education}</MainHeading>
             <div className="space-y-3">
               {data.education.map((edu) => (
                 <div key={edu.id}>
@@ -134,14 +136,14 @@ export default function BordeauxTemplate({ data }: { data: CVData }) {
 
         {data.experience.length > 0 && (
           <div>
-            <MainHeading>İş Deneyimi</MainHeading>
+            <MainHeading>{L.experience}</MainHeading>
             <div className="space-y-4">
               {data.experience.map((exp) => (
                 <div key={exp.id}>
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm font-bold text-gray-900">{exp.position || "Pozisyon"}</span>
+                    <span className="text-sm font-bold text-gray-900">{exp.position || L.position}</span>
                     <span className="text-xs shrink-0 ml-4" style={{ color: ACCENT }}>
-                      {exp.startDate}{exp.startDate && " – "}{exp.current ? "devam ediyor" : exp.endDate}
+                      {exp.startDate}{exp.startDate && " – "}{exp.current ? L.ongoing : exp.endDate}
                     </span>
                   </div>
                   {exp.company && <p className="text-sm font-medium text-gray-500">{exp.company}</p>}
@@ -156,7 +158,7 @@ export default function BordeauxTemplate({ data }: { data: CVData }) {
 
         {data.certifications.length > 0 && (
           <div>
-            <MainHeading>Sertifikalar</MainHeading>
+            <MainHeading>{L.certifications}</MainHeading>
             <div className="space-y-2">
               {data.certifications.map((c) => (
                 <div key={c.id} className="text-sm">

@@ -15,7 +15,7 @@ export default function ModernTemplate({ data, locale }: { data: CVData; locale?
       {/* Left Sidebar */}
       <div className="flex-shrink-0 p-6 space-y-5 bg-gray-100" style={{ width: "35%" }}>
         <div>
-          <h1 className="text-xl font-bold text-gray-900 leading-tight">{p.fullName || "Ad Soyad"}</h1>
+          <h1 className="text-xl font-bold text-gray-900 leading-tight">{p.fullName || L.fullName}</h1>
           {p.title && <p className="text-sm font-medium mt-1" style={{ color: ACCENT }}>{p.title}</p>}
         </div>
 
@@ -80,7 +80,7 @@ export default function ModernTemplate({ data, locale }: { data: CVData; locale?
               {data.experience.map((exp) => (
                 <div key={exp.id}>
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm font-bold text-gray-900">{exp.position || "Pozisyon"}</span>
+                    <span className="text-sm font-bold text-gray-900">{exp.position || L.position}</span>
                     <span className="text-sm text-gray-400 shrink-0 ml-4">
                       {exp.startDate}{exp.startDate && " – "}{exp.current ? L.ongoing : exp.endDate}
                     </span>

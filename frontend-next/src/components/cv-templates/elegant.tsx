@@ -1,16 +1,18 @@
 import type { CVData } from "@/types/cv"
+import { getCVLabels } from "@/lib/cv-labels"
 
 const ACCENT = "#0d9488" // teal-600
 
-export default function ElegantTemplate({ data }: { data: CVData }) {
+export default function ElegantTemplate({ data, locale }: { data: CVData; locale?: string }) {
   const p = data.personal
+  const L = getCVLabels(locale)
   return (
     <div className="p-8 space-y-0" style={{ minHeight: 1123, fontFamily: "Roboto, Arial, sans-serif" }}>
       {/* Header with accent top border */}
       <div className="pb-4 border-b border-gray-200">
         <div className="w-12 h-1 rounded-full mb-4" style={{ backgroundColor: ACCENT }} />
         <h1 className="text-2xl font-light text-gray-900 tracking-tight">
-          {p.fullName || "Ad Soyad"}
+          {p.fullName || L.fullName}
         </h1>
         {p.title && (
           <p className="text-sm font-medium mt-1" style={{ color: ACCENT }}>
@@ -28,7 +30,7 @@ export default function ElegantTemplate({ data }: { data: CVData }) {
 
       {/* Summary */}
       {p.summary && (
-        <ElegantSection title="Profesyonel Özet">
+        <ElegantSection title={L.summary}>
           <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed italic">
             {p.summary}
           </p>
@@ -37,7 +39,7 @@ export default function ElegantTemplate({ data }: { data: CVData }) {
 
       {/* Experience — timeline style */}
       {data.experience.length > 0 && (
-        <ElegantSection title="İş Deneyimi">
+        <ElegantSection title={L.experience}>
           <div className="space-y-3">
             {data.experience.map((exp, i) => (
               <div key={exp.id} className="flex gap-3">
@@ -58,12 +60,12 @@ export default function ElegantTemplate({ data }: { data: CVData }) {
                 <div className="pb-1 flex-1 min-w-0">
                   <div className="flex justify-between items-baseline">
                     <span className="text-sm font-semibold text-gray-900">
-                      {exp.position || "Pozisyon"}
+                      {exp.position || L.position}
                     </span>
                     <span className="text-xs text-gray-400 shrink-0">
                       {exp.startDate}
                       {exp.startDate && " – "}
-                      {exp.current ? "Devam" : exp.endDate}
+                      {exp.current ? L.ongoing : exp.endDate}
                     </span>
                   </div>
                   {exp.company && (
@@ -85,7 +87,7 @@ export default function ElegantTemplate({ data }: { data: CVData }) {
 
       {/* Education */}
       {data.education.length > 0 && (
-        <ElegantSection title="Eğitim">
+        <ElegantSection title={L.education}>
           <div className="space-y-2">
             {data.education.map((edu) => (
               <div key={edu.id} className="flex justify-between items-baseline">
@@ -118,7 +120,7 @@ export default function ElegantTemplate({ data }: { data: CVData }) {
               className="text-xs uppercase tracking-wider font-bold mb-2"
               style={{ color: ACCENT }}
             >
-              Beceriler
+              {L.skills}
             </h3>
             <div className="space-y-1.5">
               {data.skills.map((s) => {
@@ -150,7 +152,7 @@ export default function ElegantTemplate({ data }: { data: CVData }) {
               className="text-xs uppercase tracking-wider font-bold mb-2"
               style={{ color: ACCENT }}
             >
-              Diller
+              {L.languagesShort}
             </h3>
             <div className="space-y-1">
               {data.languages.map((l) => (
@@ -166,7 +168,7 @@ export default function ElegantTemplate({ data }: { data: CVData }) {
 
       {/* Certifications */}
       {data.certifications.length > 0 && (
-        <ElegantSection title="Sertifikalar">
+        <ElegantSection title={L.certificationsShort}>
           <div className="grid grid-cols-2 gap-2">
             {data.certifications.map((c) => (
               <div

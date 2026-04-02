@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import type { CVData, Experience, Education, Skill, Language, Certification } from "@/types/cv"
 import { emptyCVData } from "@/types/cv"
 import { cn } from "@/lib/utils"
+import { getCVLabels } from "@/lib/cv-labels"
 import { mapAnalysisToCV } from "@/lib/cv-mapper"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -338,23 +339,23 @@ function MiniPreview({ template }: { template: Template }) {
 const A4_WIDTH = 794
 const A4_HEIGHT = 1123
 
-function CVPreview({ data, template, zoom, previewRef }: { data: CVData; template: Template; zoom: number; previewRef?: React.RefObject<HTMLDivElement | null> }) {
+function CVPreview({ data, template, zoom, previewRef, locale }: { data: CVData; template: Template; zoom: number; previewRef?: React.RefObject<HTMLDivElement | null>; locale: string }) {
   return (
     <div style={{ width: A4_WIDTH * zoom, height: A4_HEIGHT * zoom, margin: "0 auto", position: "relative", overflow: "hidden" }}>
       <div style={{ transform: `scale(${zoom})`, transformOrigin: "top left", width: A4_WIDTH, height: A4_HEIGHT, position: "absolute", top: 0, left: 0 }}>
         <div ref={previewRef} className="bg-white text-gray-900 shadow-xl" style={{ width: A4_WIDTH, minHeight: A4_HEIGHT }}>
           {template === "classic" && <ClassicTemplate data={data} locale={locale} />}
           {template === "modern" && <ModernTemplate data={data} locale={locale} />}
-          {template === "minimal" && <MinimalTemplate data={data} />}
-          {template === "executive" && <ExecutiveTemplate data={data} />}
+          {template === "minimal" && <MinimalTemplate data={data} locale={locale} />}
+          {template === "executive" && <ExecutiveTemplate data={data} locale={locale} />}
           {template === "creative" && <CreativeTemplate data={data} locale={locale} />}
-          {template === "elegant" && <ElegantTemplate data={data} />}
+          {template === "elegant" && <ElegantTemplate data={data} locale={locale} />}
           {template === "professional" && <ProfessionalTemplate data={data} locale={locale} />}
-          {template === "tech" && <TechTemplate data={data} />}
-          {template === "steel" && <SteelTemplate data={data} />}
-          {template === "bordeaux" && <BordeauxTemplate data={data} />}
-          {template === "navy" && <NavyTemplate data={data} />}
-          {template === "teal" && <TealTemplate data={data} />}
+          {template === "tech" && <TechTemplate data={data} locale={locale} />}
+          {template === "steel" && <SteelTemplate data={data} locale={locale} />}
+          {template === "bordeaux" && <BordeauxTemplate data={data} locale={locale} />}
+          {template === "navy" && <NavyTemplate data={data} locale={locale} />}
+          {template === "teal" && <TealTemplate data={data} locale={locale} />}
         </div>
       </div>
     </div>
@@ -363,6 +364,16 @@ function CVPreview({ data, template, zoom, previewRef }: { data: CVData; templat
 
 const SKILL_LEVELS: Skill["level"][] = ["Başlangıç", "Orta", "İleri", "Uzman"]
 const LANG_LEVELS: Language["level"][] = ["A1", "A2", "B1", "B2", "C1", "C2", "Anadil"]
+
+const SKILL_LEVEL_LABELS: Record<string, Record<Skill["level"], string>> = {
+  tr: { "Başlangıç": "Başlangıç", "Orta": "Orta", "İleri": "İleri", "Uzman": "Uzman" },
+  en: { "Başlangıç": "Beginner", "Orta": "Intermediate", "İleri": "Advanced", "Uzman": "Expert" },
+}
+
+const LANG_LEVEL_LABELS: Record<string, Record<string, string>> = {
+  tr: { "Anadil": "Anadil" },
+  en: { "Anadil": "Native" },
+}
 const API_URL = process.env.NEXT_PUBLIC_API_URL || ""
 
 function ensureIds(data: CVData): CVData {
@@ -548,17 +559,18 @@ function CVBuilderPage() {
         const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = await import("docx")
         const { saveAs } = await import("file-saver")
         const p = cvData.personal
+        const L = getCVLabels(locale)
         const children: InstanceType<typeof Paragraph>[] = []
-        children.push(new Paragraph({ children: [new TextRun({ text: p.fullName || "Ad Soyad", bold: true, size: 32 })], alignment: AlignmentType.CENTER, spacing: { after: 100 } }))
+        children.push(new Paragraph({ children: [new TextRun({ text: p.fullName || L.fullName, bold: true, size: 32 })], alignment: AlignmentType.CENTER, spacing: { after: 100 } }))
         if (p.title) children.push(new Paragraph({ children: [new TextRun({ text: p.title, size: 22, color: "666666" })], alignment: AlignmentType.CENTER, spacing: { after: 100 } }))
         const contactParts = [p.email, p.phone, p.location, p.linkedin, p.website].filter(Boolean)
         if (contactParts.length) children.push(new Paragraph({ children: [new TextRun({ text: contactParts.join("  |  "), size: 18, color: "888888" })], alignment: AlignmentType.CENTER, spacing: { after: 200 } }))
-        if (p.summary) { children.push(new Paragraph({ text: "ÖZET", heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 100 } })); children.push(new Paragraph({ children: [new TextRun({ text: p.summary, size: 20 })], spacing: { after: 200 } })) }
+        if (p.summary) { children.push(new Paragraph({ text: L.summary, heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 100 } })); children.push(new Paragraph({ children: [new TextRun({ text: p.summary, size: 20 })], spacing: { after: 200 } })) }
         if (cvData.experience.length > 0) {
-          children.push(new Paragraph({ text: "DENEYİM", heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 100 } }))
+          children.push(new Paragraph({ text: L.experience, heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 100 } }))
           for (const exp of cvData.experience) {
-            const date = [exp.startDate, exp.current ? "Devam Ediyor" : exp.endDate].filter(Boolean).join(" – ")
-            children.push(new Paragraph({ children: [new TextRun({ text: exp.position || "Pozisyon", bold: true, size: 20 }), ...(exp.company ? [new TextRun({ text: ` — ${exp.company}`, size: 20 })] : []), ...(date ? [new TextRun({ text: `   ${date}`, size: 18, color: "888888" })] : [])], spacing: { after: 50 } }))
+            const date = [exp.startDate, exp.current ? L.ongoing : exp.endDate].filter(Boolean).join(" – ")
+            children.push(new Paragraph({ children: [new TextRun({ text: exp.position || L.position, bold: true, size: 20 }), ...(exp.company ? [new TextRun({ text: ` — ${exp.company}`, size: 20 })] : []), ...(date ? [new TextRun({ text: `   ${date}`, size: 18, color: "888888" })] : [])], spacing: { after: 50 } }))
             if (exp.description) children.push(new Paragraph({ children: [new TextRun({ text: exp.description, size: 20 })], spacing: { after: 150 } }))
           }
         }
@@ -806,7 +818,7 @@ function CVBuilderPage() {
                       <Input placeholder={t("placeholder_skill")} value={skill.name} onChange={(e) => updateSkill(skill.id, { name: e.target.value })} className="flex-1" />
                       <Select value={skill.level} onValueChange={(v) => updateSkill(skill.id, { level: v as Skill["level"] })}>
                         <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-                        <SelectContent>{SKILL_LEVELS.map((l) => (<SelectItem key={l} value={l}>{l}</SelectItem>))}</SelectContent>
+                        <SelectContent>{SKILL_LEVELS.map((l) => (<SelectItem key={l} value={l}>{(SKILL_LEVEL_LABELS[locale] || SKILL_LEVEL_LABELS.tr)[l]}</SelectItem>))}</SelectContent>
                       </Select>
                       <Button variant="ghost" size="icon-xs" className="text-destructive hover:text-destructive shrink-0" onClick={() => removeSkill(skill.id)}>
                         <Trash2 className="size-3.5" />
@@ -840,7 +852,7 @@ function CVBuilderPage() {
                       <Input placeholder={t("placeholder_language")} value={lang.name} onChange={(e) => updateLanguage(lang.id, { name: e.target.value })} className="flex-1" />
                       <Select value={lang.level} onValueChange={(v) => updateLanguage(lang.id, { level: v as Language["level"] })}>
                         <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
-                        <SelectContent>{LANG_LEVELS.map((l) => (<SelectItem key={l} value={l}>{l}</SelectItem>))}</SelectContent>
+                        <SelectContent>{LANG_LEVELS.map((l) => (<SelectItem key={l} value={l}>{(LANG_LEVEL_LABELS[locale] || LANG_LEVEL_LABELS.tr)[l] || l}</SelectItem>))}</SelectContent>
                       </Select>
                       <Button variant="ghost" size="icon-xs" className="text-destructive hover:text-destructive shrink-0" onClick={() => removeLanguage(lang.id)}>
                         <Trash2 className="size-3.5" />
@@ -896,7 +908,7 @@ function CVBuilderPage() {
         {/* Right Panel — Preview */}
         <div className="flex-1 overflow-y-auto bg-muted/30 p-4 flex flex-col items-center gap-6">
           <div className="w-full flex justify-center">
-            <CVPreview data={cvData} template={template} zoom={zoom} previewRef={cvPreviewRef} />
+            <CVPreview data={cvData} template={template} zoom={zoom} previewRef={cvPreviewRef} locale={locale} />
           </div>
           <div className="w-full pb-4" style={{ maxWidth: "800px" }}>
             <p className="text-xs text-muted-foreground mb-3 font-medium">{t("select_template")}</p>

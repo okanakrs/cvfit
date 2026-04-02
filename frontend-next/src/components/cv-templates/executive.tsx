@@ -1,15 +1,17 @@
 import type { CVData } from "@/types/cv"
+import { getCVLabels } from "@/lib/cv-labels"
 
 const HEADER_BG = "#1e293b" // slate-800 / lacivert tonu
 
-export default function ExecutiveTemplate({ data }: { data: CVData }) {
+export default function ExecutiveTemplate({ data, locale }: { data: CVData; locale?: string }) {
   const p = data.personal
+  const L = getCVLabels(locale)
   return (
     <div style={{ minHeight: 1123, fontFamily: "Roboto, Arial, sans-serif" }}>
       {/* Dark Header */}
       <div className="px-8 py-6" style={{ backgroundColor: HEADER_BG }}>
         <h1 className="text-xl font-bold text-white tracking-wide">
-          {p.fullName || "Ad Soyad"}
+          {p.fullName || L.fullName}
         </h1>
         {p.title && (
           <p className="text-sm text-slate-300 mt-0.5 font-light">{p.title}</p>
@@ -27,7 +29,7 @@ export default function ExecutiveTemplate({ data }: { data: CVData }) {
       <div className="px-8 py-5 space-y-0">
         {/* Summary */}
         {p.summary && (
-          <ExecSection title="Profesyonel Özet">
+          <ExecSection title={L.summary}>
             <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
               {p.summary}
             </p>
@@ -36,14 +38,14 @@ export default function ExecutiveTemplate({ data }: { data: CVData }) {
 
         {/* Experience */}
         {data.experience.length > 0 && (
-          <ExecSection title="İş Deneyimi">
+          <ExecSection title={L.experience}>
             <div className="space-y-3">
               {data.experience.map((exp) => (
                 <div key={exp.id}>
                   <div className="flex justify-between items-baseline">
                     <div>
                       <span className="text-sm font-bold text-gray-900">
-                        {exp.position || "Pozisyon"}
+                        {exp.position || L.position}
                       </span>
                       {exp.company && (
                         <span className="text-sm text-gray-500"> — {exp.company}</span>
@@ -52,7 +54,7 @@ export default function ExecutiveTemplate({ data }: { data: CVData }) {
                     <span className="text-xs text-gray-400 shrink-0 ml-2">
                       {exp.startDate}
                       {exp.startDate && " – "}
-                      {exp.current ? "Devam Ediyor" : exp.endDate}
+                      {exp.current ? L.ongoing : exp.endDate}
                     </span>
                   </div>
                   {exp.description && (
@@ -68,7 +70,7 @@ export default function ExecutiveTemplate({ data }: { data: CVData }) {
 
         {/* Education */}
         {data.education.length > 0 && (
-          <ExecSection title="Eğitim">
+          <ExecSection title={L.education}>
             <div className="space-y-2">
               {data.education.map((edu) => (
                 <div key={edu.id} className="flex justify-between items-baseline">
@@ -100,7 +102,7 @@ export default function ExecutiveTemplate({ data }: { data: CVData }) {
             {data.skills.length > 0 && (
               <div>
                 <h3 className="text-xs uppercase tracking-wider font-bold text-slate-700 mb-1.5">
-                  Beceriler
+                  {L.skills}
                 </h3>
                 <div className="flex flex-wrap gap-1.5">
                   {data.skills.map((s) => (
@@ -118,7 +120,7 @@ export default function ExecutiveTemplate({ data }: { data: CVData }) {
             {data.languages.length > 0 && (
               <div>
                 <h3 className="text-xs uppercase tracking-wider font-bold text-slate-700 mb-1.5">
-                  Diller
+                  {L.languagesShort}
                 </h3>
                 <div className="space-y-1">
                   {data.languages.map((l) => (
@@ -135,7 +137,7 @@ export default function ExecutiveTemplate({ data }: { data: CVData }) {
 
         {/* Certifications */}
         {data.certifications.length > 0 && (
-          <ExecSection title="Sertifikalar">
+          <ExecSection title={L.certificationsShort}>
             <div className="space-y-1.5">
               {data.certifications.map((c) => (
                 <div key={c.id} className="text-sm">

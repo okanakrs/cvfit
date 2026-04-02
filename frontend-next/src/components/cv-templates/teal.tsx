@@ -1,4 +1,5 @@
 import type { CVData } from "@/types/cv"
+import { getCVLabels } from "@/lib/cv-labels"
 
 const ACCENT = "#0d7b7b"
 
@@ -6,8 +7,9 @@ function skillPct(level: string) {
   return level === "Uzman" ? 95 : level === "İleri" ? 75 : level === "Orta" ? 50 : 25
 }
 
-export default function TealTemplate({ data }: { data: CVData }) {
+export default function TealTemplate({ data, locale }: { data: CVData; locale?: string }) {
   const p = data.personal
+  const L = getCVLabels(locale)
   return (
     <div style={{ minHeight: 1123, fontFamily: "Roboto, Arial, sans-serif", backgroundColor: "#ffffff" }}>
       {/* Top Header Bar */}
@@ -32,7 +34,7 @@ export default function TealTemplate({ data }: { data: CVData }) {
         </div>
         {/* Name & Contact */}
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-white leading-tight">{p.fullName || "Ad Soyad"}</h1>
+          <h1 className="text-2xl font-bold text-white leading-tight">{p.fullName || L.fullName}</h1>
           {p.title && <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.8)" }}>{p.title}</p>}
           <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-2 text-xs" style={{ color: "rgba(255,255,255,0.85)" }}>
             {p.email && <span>{p.email}</span>}
@@ -49,14 +51,14 @@ export default function TealTemplate({ data }: { data: CVData }) {
         <div className="p-6 space-y-5" style={{ width: "60%", borderRight: "1px solid #e5e7eb" }}>
           {p.summary && (
             <div>
-              <LeftHeading>Profil</LeftHeading>
+              <LeftHeading>{L.about}</LeftHeading>
               <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">{p.summary}</p>
             </div>
           )}
 
           {data.education.length > 0 && (
             <div>
-              <LeftHeading>Eğitim</LeftHeading>
+              <LeftHeading>{L.education}</LeftHeading>
               <div className="space-y-3">
                 {data.education.map((edu) => (
                   <div key={edu.id}>
@@ -78,14 +80,14 @@ export default function TealTemplate({ data }: { data: CVData }) {
 
           {data.experience.length > 0 && (
             <div>
-              <LeftHeading>İş Deneyimi</LeftHeading>
+              <LeftHeading>{L.experience}</LeftHeading>
               <div className="space-y-4">
                 {data.experience.map((exp) => (
                   <div key={exp.id}>
                     <div className="flex justify-between items-baseline">
-                      <span className="text-sm font-bold text-gray-900">{exp.position || "Pozisyon"}</span>
+                      <span className="text-sm font-bold text-gray-900">{exp.position || L.position}</span>
                       <span className="text-xs shrink-0 ml-2" style={{ color: ACCENT }}>
-                        {exp.startDate}{exp.startDate && " – "}{exp.current ? "devam ediyor" : exp.endDate}
+                        {exp.startDate}{exp.startDate && " – "}{exp.current ? L.ongoing : exp.endDate}
                       </span>
                     </div>
                     {exp.company && <p className="text-sm font-medium" style={{ color: ACCENT }}>{exp.company}</p>}
@@ -103,7 +105,7 @@ export default function TealTemplate({ data }: { data: CVData }) {
         <div className="p-6 space-y-5" style={{ width: "40%" }}>
           {data.skills.length > 0 && (
             <div>
-              <RightHeading>Beceriler</RightHeading>
+              <RightHeading>{L.skills}</RightHeading>
               <div className="space-y-2.5">
                 {data.skills.map((s) => (
                   <div key={s.id}>
@@ -125,7 +127,7 @@ export default function TealTemplate({ data }: { data: CVData }) {
 
           {data.languages.length > 0 && (
             <div>
-              <RightHeading>Diller</RightHeading>
+              <RightHeading>{L.languagesShort}</RightHeading>
               <div className="space-y-1.5">
                 {data.languages.map((l) => (
                   <div key={l.id} className="flex justify-between text-sm">
@@ -139,7 +141,7 @@ export default function TealTemplate({ data }: { data: CVData }) {
 
           {data.certifications.length > 0 && (
             <div>
-              <RightHeading>Sertifikalar</RightHeading>
+              <RightHeading>{L.certifications}</RightHeading>
               <div className="space-y-2">
                 {data.certifications.map((c) => (
                   <div key={c.id}>

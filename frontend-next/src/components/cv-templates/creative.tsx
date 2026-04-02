@@ -17,7 +17,7 @@ export default function CreativeTemplate({ data, locale }: { data: CVData; local
           </div>
         </div>
         <div className="text-center">
-          <h1 className="text-lg font-bold leading-tight">{p.fullName || "Ad Soyad"}</h1>
+          <h1 className="text-lg font-bold leading-tight">{p.fullName || L.fullName}</h1>
           {p.title && <p className="text-sm mt-1 opacity-80">{p.title}</p>}
         </div>
 
@@ -74,7 +74,7 @@ export default function CreativeTemplate({ data, locale }: { data: CVData; local
                 <div key={exp.id} className="relative">
                   <div className="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ACCENT }} />
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm font-bold text-gray-900">{exp.position || "Pozisyon"}</span>
+                    <span className="text-sm font-bold text-gray-900">{exp.position || L.position}</span>
                     <span className="text-sm text-gray-400 shrink-0 ml-4">
                       {exp.startDate}{exp.startDate && " – "}{exp.current ? L.ongoing : exp.endDate}
                     </span>

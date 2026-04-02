@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslations } from "next-intl";
+import { Link } from "@/navigation";
 import { Button } from "@/components/ui/button";
 import {
   FileDown,
@@ -285,21 +286,21 @@ export default function LandingPage() {
             />
           </div>
           <div className="flex items-center gap-5">
-            <a href="/privacy" className="hover:text-foreground transition-colors">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
               {t("footer_privacy")}
-            </a>
-            <a href="/terms" className="hover:text-foreground transition-colors">
+            </Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">
               {t("footer_terms")}
-            </a>
-            <a href="/kvkk" className="hover:text-foreground transition-colors">
+            </Link>
+            <Link href="/kvkk" className="hover:text-foreground transition-colors">
               {t("footer_kvkk")}
-            </a>
-            <a href="/cerez-politikasi" className="hover:text-foreground transition-colors">
+            </Link>
+            <Link href="/cerez-politikasi" className="hover:text-foreground transition-colors">
               {t("footer_cookie")}
-            </a>
-            <a href="/mesafeli-satis-sozlesmesi" className="hover:text-foreground transition-colors">
+            </Link>
+            <Link href="/mesafeli-satis-sozlesmesi" className="hover:text-foreground transition-colors">
               {t("footer_distance")}
-            </a>
+            </Link>
           </div>
           <div>{t("footer_rights")}</div>
         </div>

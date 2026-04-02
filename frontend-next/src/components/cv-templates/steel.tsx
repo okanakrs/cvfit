@@ -1,6 +1,7 @@
 "use client"
 
 import type { CVData } from "@/types/cv"
+import { getCVLabels } from "@/lib/cv-labels"
 
 const SIDEBAR_BG = "#3d6b8e"
 const BAR_COLOR = "#2c5072"
@@ -59,10 +60,12 @@ function SkillBar({ name, level }: { name: string; level: string }) {
   )
 }
 
-export default function SteelTemplate({ data }: { data: CVData }) {
+export default function SteelTemplate({ data, locale }: { data: CVData; locale?: string }) {
   const p = data.personal
+  const L = getCVLabels(locale)
+  const isEN = locale === "en"
   const dateRange = (start?: string, end?: string, current?: boolean) =>
-    [start, current ? "Halen" : end].filter(Boolean).join(" - ")
+    [start, current ? L.ongoing : end].filter(Boolean).join(" - ")
 
   return (
     <div style={{ display: "flex", minHeight: 1123, fontFamily: "Roboto, Arial, sans-serif" }}>
@@ -75,7 +78,7 @@ export default function SteelTemplate({ data }: { data: CVData }) {
           color: "#ffffff",
         }}
       >
-        {/* Kişisel header */}
+        {/* Personal header */}
         <h2
           style={{
             fontSize: 13,
@@ -88,40 +91,40 @@ export default function SteelTemplate({ data }: { data: CVData }) {
             marginBottom: 14,
           }}
         >
-          Kişisel
+          {isEN ? "Personal" : "Kişisel"}
         </h2>
 
         {p.fullName && (
           <>
-            <SideLabel>İsim</SideLabel>
+            <SideLabel>{isEN ? "Name" : "İsim"}</SideLabel>
             <SideValue>{p.fullName}</SideValue>
           </>
         )}
 
         {p.location && (
           <>
-            <SideLabel>Adres</SideLabel>
+            <SideLabel>{isEN ? "Address" : "Adres"}</SideLabel>
             <SideValue>{p.location}</SideValue>
           </>
         )}
 
         {p.phone && (
           <>
-            <SideLabel>Telefon numarası</SideLabel>
+            <SideLabel>{isEN ? "Phone" : "Telefon"}</SideLabel>
             <SideValue>{p.phone}</SideValue>
           </>
         )}
 
         {p.email && (
           <>
-            <SideLabel>E-posta</SideLabel>
+            <SideLabel>{isEN ? "Email" : "E-posta"}</SideLabel>
             <SideValue>{p.email}</SideValue>
           </>
         )}
 
         {p.website && (
           <>
-            <SideLabel>İnternet sitesi</SideLabel>
+            <SideLabel>{isEN ? "Website" : "İnternet sitesi"}</SideLabel>
             <SideValue>{p.website}</SideValue>
           </>
         )}
@@ -133,7 +136,7 @@ export default function SteelTemplate({ data }: { data: CVData }) {
           </>
         )}
 
-        {/* Diller */}
+        {/* Languages */}
         {data.languages.length > 0 && (
           <>
             <h2
@@ -149,7 +152,7 @@ export default function SteelTemplate({ data }: { data: CVData }) {
                 marginBottom: 14,
               }}
             >
-              Diller
+              {L.languagesShort}
             </h2>
             {data.languages.map((lang) => (
               <div
@@ -189,7 +192,7 @@ export default function SteelTemplate({ data }: { data: CVData }) {
             letterSpacing: 0.5,
           }}
         >
-          {p.fullName || "Ad Soyad"}
+          {p.fullName || L.fullName}
         </h1>
 
         {/* Summary */}
@@ -206,14 +209,14 @@ export default function SteelTemplate({ data }: { data: CVData }) {
           </p>
         )}
 
-        {/* İş Deneyimi */}
+        {/* Experience */}
         {data.experience.length > 0 && (
           <>
-            <SectionHeading>İş deneyimi</SectionHeading>
+            <SectionHeading>{L.workExperience}</SectionHeading>
             {data.experience.map((exp) => (
               <div key={exp.id} style={{ marginBottom: 14 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1a1a" }}>{exp.position}</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1a1a" }}>{exp.position || L.position}</p>
                 </div>
                 <p style={{ fontSize: 12, fontStyle: "italic", color: "#666666", marginBottom: 4 }}>
                   {[exp.company, dateRange(exp.startDate, exp.endDate, exp.current)]
@@ -234,15 +237,15 @@ export default function SteelTemplate({ data }: { data: CVData }) {
           </>
         )}
 
-        {/* Eğitim */}
+        {/* Education */}
         {data.education.length > 0 && (
           <>
-            <SectionHeading>Eğitim ve Nitelikler</SectionHeading>
+            <SectionHeading>{isEN ? "Education & Qualifications" : "Eğitim ve Nitelikler"}</SectionHeading>
             {data.education.map((edu) => (
               <div key={edu.id} style={{ marginBottom: 10 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                   <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1a1a" }}>
-                    {[edu.degree, edu.field].filter(Boolean).join(", ") || "Bölüm"}
+                    {[edu.degree, edu.field].filter(Boolean).join(", ") || (isEN ? "Field" : "Bölüm")}
                   </p>
                   <span style={{ fontSize: 11, color: "#888888" }}>
                     {dateRange(edu.startDate, edu.endDate)}
@@ -256,24 +259,26 @@ export default function SteelTemplate({ data }: { data: CVData }) {
           </>
         )}
 
-        {/* Referanslar */}
-        <SectionHeading>Referanslar</SectionHeading>
-        <p style={{ fontSize: 12, color: "#666666" }}>Talep durumunda referans sunulabilir.</p>
+        {/* References */}
+        <SectionHeading>{isEN ? "References" : "Referanslar"}</SectionHeading>
+        <p style={{ fontSize: 12, color: "#666666" }}>
+          {isEN ? "References available upon request." : "Talep durumunda referans sunulabilir."}
+        </p>
 
-        {/* Beceriler */}
+        {/* Skills */}
         {data.skills.length > 0 && (
           <>
-            <SectionHeading>Beceriler</SectionHeading>
+            <SectionHeading>{L.skills}</SectionHeading>
             {data.skills.map((skill) => (
               <SkillBar key={skill.id} name={skill.name} level={skill.level} />
             ))}
           </>
         )}
 
-        {/* Sertifikalar / Kurslar */}
+        {/* Certifications */}
         {data.certifications.length > 0 && (
           <>
-            <SectionHeading>Kurslar</SectionHeading>
+            <SectionHeading>{isEN ? "Courses & Certifications" : "Kurslar & Sertifikalar"}</SectionHeading>
             {data.certifications.map((cert) => (
               <div key={cert.id} style={{ marginBottom: 10 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>

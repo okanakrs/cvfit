@@ -9,7 +9,7 @@ export default function ClassicTemplate({ data, locale }: { data: CVData; locale
       {/* Header */}
       <div className="text-center pb-4 border-b-2 border-gray-800 mb-5">
         <h1 className="text-3xl font-bold text-gray-900 tracking-wide">
-          {p.fullName || "Ad Soyad"}
+          {p.fullName || L.fullName}
         </h1>
         {p.title && <p className="text-base text-gray-500 mt-1">{p.title}</p>}
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-0.5 text-sm text-gray-500 mt-2">
@@ -34,7 +34,7 @@ export default function ClassicTemplate({ data, locale }: { data: CVData; locale
               <div key={exp.id}>
                 <div className="flex justify-between items-baseline">
                   <div>
-                    <span className="text-sm font-bold text-gray-900">{exp.position || "Pozisyon"}</span>
+                    <span className="text-sm font-bold text-gray-900">{exp.position || L.position}</span>
                     {exp.company && <span className="text-sm text-gray-600">,  {exp.company}</span>}
                   </div>
                   <span className="text-sm text-gray-500 shrink-0 ml-4">
@@ -57,7 +57,7 @@ export default function ClassicTemplate({ data, locale }: { data: CVData; locale
               <div key={edu.id} className="flex justify-between items-baseline">
                 <div>
                   <span className="text-sm font-bold text-gray-900">
-                    {edu.degree || "Derece"}{edu.field ? `, ${edu.field}` : ""}
+                    {edu.degree || L.degree}{edu.field ? `, ${edu.field}` : ""}
                   </span>
                   {edu.school && <span className="text-sm text-gray-600"> — {edu.school}</span>}
                   {edu.gpa && <span className="text-sm text-gray-400"> (GPA: {edu.gpa})</span>}

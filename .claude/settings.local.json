@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(type:*)",
+      "Bash(find:*)",
+      "Bash(sed:*)",
+      "Bash(grep:*)",
+      "Bash(grep -n -A2 -B2 'href={`/blog/' \"C:\\\\Users\\\\pc\\\\OneDrive\\\\Desktop\\\\cvfit_final\\\\frontend-next\\\\src\\\\app\\\\[locale]\\\\blog\\\\[slug]\\\\page.tsx\")",
+      "Bash(grep -n -A2 -B2 'href={`/blog/' \"C:\\\\Users\\\\pc\\\\OneDrive\\\\Desktop\\\\cvfit_final\\\\frontend-next\\\\src\\\\app\\\\[locale]\\\\blog\\\\page.tsx\")"
+    ]
+  },
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  },
+  "effortLevel": "low"
+}

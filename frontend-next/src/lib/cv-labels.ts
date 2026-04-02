@@ -13,5 +13,8 @@ export function getCVLabels(locale?: string) {
     certificationsShort: isEN ? "Certifications" : "Sertifikalar",
     contact: isEN ? "CONTACT" : "İLETİŞİM",
     ongoing: isEN ? "Present" : "Devam Ediyor",
+    fullName: isEN ? "Full Name" : "Ad Soyad",
+    position: isEN ? "Position" : "Pozisyon",
+    degree: isEN ? "Degree" : "Derece",
   }
 }
