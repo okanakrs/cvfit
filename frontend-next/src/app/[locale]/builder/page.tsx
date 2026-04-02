@@ -65,6 +65,15 @@ import { PaymentModal } from "@/components/payment-modal"
 import { ATSModal } from "@/components/ats-modal"
 import { toast } from "sonner"
 import { useTranslations, useLocale } from "next-intl"
+import { MonthYearPicker, YearPicker, SkillTagInput, FormField } from "@/components/form-inputs"
+import {
+  formatters,
+  validators,
+  formatGPA,
+  compareMonthYears,
+  COMMON_JOB_TITLES,
+  COMMON_LANGUAGES,
+} from "@/lib/form-validation"
 
 type Template = "classic" | "modern" | "minimal" | "executive" | "creative" | "elegant" | "professional" | "tech" | "steel" | "bordeaux" | "navy" | "teal"
 const genId = () => crypto.randomUUID()
@@ -477,6 +486,23 @@ function CVBuilderPage() {
     personal: true, experience: true, education: false, skills: false, languages: false, certifications: false,
   })
 
+  // Validation errors state
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
+
+  const setFieldError = (fieldId: string, error?: string) => {
+    setValidationErrors(prev => {
+      if (error) {
+        return { ...prev, [fieldId]: error }
+      } else {
+        const next = { ...prev }
+        delete next[fieldId]
+        return next
+      }
+    })
+  }
+
+  const getFieldError = (fieldId: string): string | undefined => validationErrors[fieldId]
+
   useEffect(() => {
     async function load() {
       try {
@@ -698,7 +724,7 @@ function CVBuilderPage() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <Separator />
-                <CardContent className="p-4 space-y-3">
+                <CardContent className="p-4 space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-14 h-14 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0 border border-border">
                       {cvData.personal.photo ? (
@@ -721,18 +747,138 @@ function CVBuilderPage() {
                       <p className="text-xs text-muted-foreground">{t("photo_hint")}</p>
                     </div>
                   </div>
-                  <Input placeholder={t("placeholder_name")} className="text-base" value={cvData.personal.fullName} onChange={(e) => updatePersonal("fullName", e.target.value)} />
-                  <Input placeholder={t("placeholder_title")} value={cvData.personal.title} onChange={(e) => updatePersonal("title", e.target.value)} />
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                    <Input placeholder={t("placeholder_email")} type="email" value={cvData.personal.email} onChange={(e) => updatePersonal("email", e.target.value)} />
-                    <Input placeholder={t("placeholder_phone")} value={cvData.personal.phone} onChange={(e) => updatePersonal("phone", e.target.value)} />
-                    <Input placeholder={t("placeholder_location")} value={cvData.personal.location} onChange={(e) => updatePersonal("location", e.target.value)} />
+
+                  {/* Full Name */}
+                  <FormField label={t("fullName") || "Ad Soyad"} required error={getFieldError("fullName")}>
+                    <Input
+                      placeholder={t("placeholder_name")}
+                      className="text-base"
+                      value={cvData.personal.fullName}
+                      onChange={(e) => {
+                        const formatted = formatters.fullName(e.target.value)
+                        updatePersonal("fullName", formatted)
+                        setFieldError("fullName")
+                      }}
+                    />
+                  </FormField>
+
+                  {/* Job Title with suggestions */}
+                  <FormField label={t("title") || "Meslek / Pozisyon"} optional>
+                    <div className="relative">
+                      <Input
+                        placeholder={t("placeholder_title")}
+                        value={cvData.personal.title}
+                        onChange={(e) => updatePersonal("title", e.target.value)}
+                        list="job-titles-list"
+                      />
+                      <datalist id="job-titles-list">
+                        {COMMON_JOB_TITLES.map((title) => (
+                          <option key={title} value={title} />
+                        ))}
+                      </datalist>
+                    </div>
+                  </FormField>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    {/* Email */}
+                    <FormField label={t("email")} required error={getFieldError("email")}>
+                      <Input
+                        placeholder={t("placeholder_email")}
+                        type="email"
+                        value={cvData.personal.email}
+                        onChange={(e) => {
+                          updatePersonal("email", e.target.value)
+                          const validation = validators.email(e.target.value)
+                          setFieldError("email", validation.error)
+                        }}
+                      />
+                    </FormField>
+
+                    {/* Phone */}
+                    <FormField label={t("phone")} required hint="Örn: +90 5XX XXX XX XX" error={getFieldError("phone")}>
+                      <Input
+                        placeholder={t("placeholder_phone")}
+                        value={cvData.personal.phone}
+                        onChange={(e) => {
+                          const formatted = formatters.phone(e.target.value)
+                          updatePersonal("phone", formatted)
+                          if (e.target.value) {
+                            const validation = validators.phone(formatted)
+                            setFieldError("phone", validation.error)
+                          } else {
+                            setFieldError("phone")
+                          }
+                        }}
+                      />
+                    </FormField>
+
+                    {/* Location */}
+                    <FormField label={t("location")} required error={getFieldError("location")}>
+                      <Input
+                        placeholder={t("placeholder_location")}
+                        value={cvData.personal.location}
+                        onChange={(e) => {
+                          const formatted = formatters.city(e.target.value)
+                          updatePersonal("location", formatted)
+                          const validation = validators.textOnly(formatted)
+                          setFieldError("location", validation.error)
+                        }}
+                      />
+                    </FormField>
                   </div>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    <Input placeholder={t("placeholder_linkedin")} value={cvData.personal.linkedin} onChange={(e) => updatePersonal("linkedin", e.target.value)} />
-                    <Input placeholder={t("placeholder_website")} value={cvData.personal.website} onChange={(e) => updatePersonal("website", e.target.value)} />
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {/* LinkedIn */}
+                    <FormField label={t("linkedin")} optional hint="https://linkedin.com/..." error={getFieldError("linkedin")}>
+                      <Input
+                        placeholder={t("placeholder_linkedin")}
+                        type="url"
+                        value={cvData.personal.linkedin}
+                        onChange={(e) => {
+                          updatePersonal("linkedin", e.target.value)
+                          if (e.target.value) {
+                            const validation = validators.url(e.target.value)
+                            setFieldError("linkedin", validation.error)
+                          } else {
+                            setFieldError("linkedin")
+                          }
+                        }}
+                      />
+                    </FormField>
+
+                    {/* Website */}
+                    <FormField label={t("website")} optional hint="https://example.com" error={getFieldError("website")}>
+                      <Input
+                        placeholder={t("placeholder_website")}
+                        type="url"
+                        value={cvData.personal.website}
+                        onChange={(e) => {
+                          updatePersonal("website", e.target.value)
+                          if (e.target.value) {
+                            const validation = validators.url(e.target.value)
+                            setFieldError("website", validation.error)
+                          } else {
+                            setFieldError("website")
+                          }
+                        }}
+                      />
+                    </FormField>
                   </div>
-                  <Textarea placeholder={t("placeholder_summary")} rows={4} value={cvData.personal.summary} onChange={(e) => updatePersonal("summary", e.target.value)} />
+
+                  {/* Summary */}
+                  <FormField
+                    label={t("summary") || "Özet"}
+                    optional
+                    hint={`${cvData.personal.summary.length}/500 karakter`}
+                  >
+                    <Textarea
+                      placeholder={t("placeholder_summary")}
+                      rows={4}
+                      maxLength={500}
+                      value={cvData.personal.summary}
+                      onChange={(e) => updatePersonal("summary", e.target.value)}
+                    />
+                  </FormField>
                 </CardContent>
               </CollapsibleContent>
             </Card>
@@ -752,26 +898,93 @@ function CVBuilderPage() {
               <CollapsibleContent>
                 <Separator />
                 <CardContent className="p-4 space-y-4">
-                  {cvData.experience.map((exp) => (
-                    <div key={exp.id} className="relative space-y-2 rounded-lg border border-border p-3">
-                      <Button variant="ghost" size="icon-xs" className="absolute top-2 right-2 text-destructive hover:text-destructive" onClick={() => removeExperience(exp.id)}>
-                        <Trash2 className="size-3.5" />
-                      </Button>
-                      <div className="grid grid-cols-1 gap-2 pr-8 sm:grid-cols-2">
-                        <Input placeholder={t("placeholder_company")} value={exp.company} onChange={(e) => updateExperience(exp.id, { company: e.target.value })} />
-                        <Input placeholder={t("placeholder_position")} value={exp.position} onChange={(e) => updateExperience(exp.id, { position: e.target.value })} />
+                  {cvData.experience.map((exp) => {
+                    const dateRangeError = exp.startDate && exp.endDate && !exp.current
+                      ? compareMonthYears(exp.startDate, exp.endDate) > 0
+                        ? 'Bitiş tarihi başlangıçtan önce olamaz'
+                        : undefined
+                      : undefined
+                    const expErrorKey = `exp_${exp.id}`
+                    const errorId = `exp_dates_${exp.id}`
+                    
+                    return (
+                      <div key={exp.id} className="relative space-y-3 rounded-lg border border-border p-4">
+                        <Button variant="ghost" size="icon-xs" className="absolute top-3 right-3 text-destructive hover:text-destructive" onClick={() => removeExperience(exp.id)}>
+                          <Trash2 className="size-3.5" />
+                        </Button>
+
+                        <div className="grid grid-cols-1 gap-3 pr-10 sm:grid-cols-2">
+                          {/* Company */}
+                          <FormField label={t("company") || "Şirket"} required>
+                            <Input
+                              placeholder={t("placeholder_company")}
+                              value={exp.company}
+                              onChange={(e) => updateExperience(exp.id, { company: e.target.value })}
+                            />
+                          </FormField>
+
+                          {/* Position */}
+                          <FormField label={t("position") || "Pozisyon"} required>
+                            <Input
+                              placeholder={t("placeholder_position")}
+                              value={exp.position}
+                              onChange={(e) => updateExperience(exp.id, { position: e.target.value })}
+                            />
+                          </FormField>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          {/* Start Date */}
+                          <FormField label={t("startDate") || "Başlangıç"} required hint="MM/YYYY">
+                            <MonthYearPicker
+                              value={exp.startDate}
+                              onChange={(date) => updateExperience(exp.id, { startDate: date })}
+                              placeholder="MM/YYYY"
+                            />
+                          </FormField>
+
+                          {/* End Date or Current */}
+                          <FormField label={t("endDate") || "Bitiş"} required={!exp.current} error={dateRangeError}>
+                            <MonthYearPicker
+                              value={exp.endDate}
+                              onChange={(date) => updateExperience(exp.id, { endDate: date })}
+                              placeholder="MM/YYYY"
+                              disabled={exp.current}
+                            />
+                          </FormField>
+                        </div>
+
+                        {/* Current Job Checkbox */}
+                        <label className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/30 rounded px-2 py-1 w-fit">
+                          <Checkbox
+                            checked={exp.current}
+                            onCheckedChange={(checked) => updateExperience(exp.id, { current: !!checked, endDate: checked ? "" : exp.endDate })}
+                          />
+                          <span className="font-medium">{t("ongoing") || "Halen çalışıyorum"}</span>
+                        </label>
+
+                        {/* Description */}
+                        <FormField
+                          label={t("description") || "Açıklama"}
+                          optional
+                          hint={`${exp.description.length}/500 karakter`}
+                          error={getFieldError(`exp_desc_${exp.id}`)}
+                        >
+                          <Textarea
+                            placeholder={t("placeholder_exp_desc")}
+                            rows={3}
+                            maxLength={500}
+                            value={exp.description}
+                            onChange={(e) => {
+                              updateExperience(exp.id, { description: e.target.value })
+                              const validation = validators.description(e.target.value)
+                              setFieldError(`exp_desc_${exp.id}`, validation.error)
+                            }}
+                          />
+                        </FormField>
                       </div>
-                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        <Input placeholder={t("placeholder_start")} value={exp.startDate} onChange={(e) => updateExperience(exp.id, { startDate: e.target.value })} />
-                        <Input placeholder={t("placeholder_end")} value={exp.endDate} disabled={exp.current} onChange={(e) => updateExperience(exp.id, { endDate: e.target.value })} />
-                      </div>
-                      <label className="flex items-center gap-2 text-sm cursor-pointer">
-                        <Checkbox checked={exp.current} onCheckedChange={(checked) => updateExperience(exp.id, { current: !!checked, endDate: checked ? "" : exp.endDate })} />
-                        {t("ongoing")}
-                      </label>
-                      <Textarea placeholder={t("placeholder_exp_desc")} rows={3} value={exp.description} onChange={(e) => updateExperience(exp.id, { description: e.target.value })} />
-                    </div>
-                  ))}
+                    )
+                  })}
                   <Button variant="outline" size="sm" className="w-full" onClick={addExperience}>
                     <Plus className="size-4 mr-1" /> {t("add_experience")}
                   </Button>
@@ -794,22 +1007,109 @@ function CVBuilderPage() {
               <CollapsibleContent>
                 <Separator />
                 <CardContent className="p-4 space-y-4">
-                  {cvData.education.map((edu) => (
-                    <div key={edu.id} className="relative space-y-2 rounded-lg border border-border p-3">
-                      <Button variant="ghost" size="icon-xs" className="absolute top-2 right-2 text-destructive hover:text-destructive" onClick={() => removeEducation(edu.id)}>
-                        <Trash2 className="size-3.5" />
-                      </Button>
-                      <div className="grid grid-cols-1 gap-2 pr-8 sm:grid-cols-2">
-                        <Input placeholder={t("placeholder_school")} value={edu.school} onChange={(e) => updateEducation(edu.id, { school: e.target.value })} />
-                        <Input placeholder={t("placeholder_field")} value={edu.field} onChange={(e) => updateEducation(edu.id, { field: e.target.value })} />
+                  {cvData.education.map((edu) => {
+                    const dateRangeError = edu.startDate && edu.endDate
+                      ? parseInt(edu.startDate) > parseInt(edu.endDate)
+                        ? 'Bitiş tarihi başlangıçtan önce olamaz'
+                        : undefined
+                      : undefined
+                    
+                    return (
+                      <div key={edu.id} className="relative space-y-3 rounded-lg border border-border p-4">
+                        <Button variant="ghost" size="icon-xs" className="absolute top-3 right-3 text-destructive hover:text-destructive" onClick={() => removeEducation(edu.id)}>
+                          <Trash2 className="size-3.5" />
+                        </Button>
+
+                        <div className="grid grid-cols-1 gap-3 pr-10 sm:grid-cols-2">
+                          {/* School */}
+                          <FormField label={t("school") || "Okul / Üniversite"} required>
+                            <Input
+                              placeholder={t("placeholder_school")}
+                              value={edu.school}
+                              onChange={(e) => updateEducation(edu.id, { school: e.target.value })}
+                            />
+                          </FormField>
+
+                          {/* Field/Major */}
+                          <FormField label={t("field") || "Bölüm"} required>
+                            <Input
+                              placeholder={t("placeholder_field")}
+                              value={edu.field}
+                              onChange={(e) => updateEducation(edu.id, { field: e.target.value })}
+                            />
+                          </FormField>
+                        </div>
+
+                        {/* Degree */}
+                        <FormField label={t("degree") || "Derece"} required>
+                          <Select
+                            value={edu.degree || ""}
+                            onValueChange={(value) => updateEducation(edu.id, { degree: value || "" })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={t("placeholder_degree")} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Lise">Lise</SelectItem>
+                              <SelectItem value="Önlisans">Önlisans</SelectItem>
+                              <SelectItem value="Lisans">Lisans</SelectItem>
+                              <SelectItem value="Yüksek Lisans">Yüksek Lisans</SelectItem>
+                              <SelectItem value="Doktora">Doktora</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormField>
+
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          {/* Start Year */}
+                          <FormField label={t("startDate") || "Başlama Yılı"} required hint="YYYY">
+                            <YearPicker
+                              value={edu.startDate}
+                              onChange={(year) => updateEducation(edu.id, { startDate: year })}
+                              placeholder="YYYY"
+                            />
+                          </FormField>
+
+                          {/* End Year */}
+                          <FormField
+                            label={t("endDate") || "Bitirme Yılı"}
+                            required={false}
+                            error={dateRangeError}
+                            hint="Hala öğreniyorsanız boş bırakın"
+                          >
+                            <YearPicker
+                              value={edu.endDate}
+                              onChange={(year) => updateEducation(edu.id, { endDate: year })}
+                              placeholder="YYYY"
+                            />
+                          </FormField>
+                        </div>
+
+                        {/* GPA */}
+                        <FormField
+                          label={t("gpa") || "GPA"}
+                          optional
+                          hint=" Örn: 3.85 (0.00 - 4.00)"
+                          error={getFieldError(`edu_gpa_${edu.id}`)}
+                        >
+                          <Input
+                            placeholder="0.00"
+                            value={edu.gpa}
+                            onChange={(e) => {
+                              const formatted = formatGPA(e.target.value)
+                              updateEducation(edu.id, { gpa: formatted })
+                              if (formatted) {
+                                const validation = validators.gpa(formatted)
+                                setFieldError(`edu_gpa_${edu.id}`, validation.error)
+                              } else {
+                                setFieldError(`edu_gpa_${edu.id}`)
+                              }
+                            }}
+                            maxLength={4}
+                          />
+                        </FormField>
                       </div>
-                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                        <Input placeholder={t("placeholder_degree")} value={edu.degree} onChange={(e) => updateEducation(edu.id, { degree: e.target.value })} />
-                        <Input placeholder={t("placeholder_start")} value={edu.startDate} onChange={(e) => updateEducation(edu.id, { startDate: e.target.value })} />
-                        <Input placeholder={t("placeholder_end")} value={edu.endDate} onChange={(e) => updateEducation(edu.id, { endDate: e.target.value })} />
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                   <Button variant="outline" size="sm" className="w-full" onClick={addEducation}>
                     <Plus className="size-4 mr-1" /> {t("add_education")}
                   </Button>
@@ -831,22 +1131,17 @@ function CVBuilderPage() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <Separator />
-                <CardContent className="p-4 space-y-3">
-                  {cvData.skills.map((skill) => (
-                    <div key={skill.id} className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <Input placeholder={t("placeholder_skill")} value={skill.name} onChange={(e) => updateSkill(skill.id, { name: e.target.value })} className="flex-1" />
-                      <Select value={skill.level} onValueChange={(v) => updateSkill(skill.id, { level: v as Skill["level"] })}>
-                        <SelectTrigger className="w-full sm:w-32"><SelectValue /></SelectTrigger>
-                        <SelectContent>{SKILL_LEVELS.map((l) => (<SelectItem key={l} value={l}>{(SKILL_LEVEL_LABELS[locale] || SKILL_LEVEL_LABELS.tr)[l]}</SelectItem>))}</SelectContent>
-                      </Select>
-                      <Button variant="ghost" size="icon-xs" className="text-destructive hover:text-destructive shrink-0" onClick={() => removeSkill(skill.id)}>
-                        <Trash2 className="size-3.5" />
-                      </Button>
-                    </div>
-                  ))}
-                  <Button variant="outline" size="sm" className="w-full" onClick={addSkill}>
-                    <Plus className="size-4 mr-1" /> {t("add_skill")}
-                  </Button>
+                <CardContent className="p-4 space-y-4">
+                  <FormField label={t("skills") || "Beceriler"} optional>
+                    <SkillTagInput
+                      skills={cvData.skills}
+                      onSkillsChange={(skills) => setCvData(prev => ({ ...prev, skills }))}
+                      skillLevels={SKILL_LEVELS}
+                      skillLevelLabels={SKILL_LEVEL_LABELS[locale] || SKILL_LEVEL_LABELS.tr}
+                      maxSkills={20}
+                      locale={locale}
+                    />
+                  </FormField>
                 </CardContent>
               </CollapsibleContent>
             </Card>
@@ -865,15 +1160,44 @@ function CVBuilderPage() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <Separator />
-                <CardContent className="p-4 space-y-3">
+                <CardContent className="p-4 space-y-4">
                   {cvData.languages.map((lang) => (
-                    <div key={lang.id} className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <Input placeholder={t("placeholder_language")} value={lang.name} onChange={(e) => updateLanguage(lang.id, { name: e.target.value })} className="flex-1" />
-                      <Select value={lang.level} onValueChange={(v) => updateLanguage(lang.id, { level: v as Language["level"] })}>
-                        <SelectTrigger className="w-full sm:w-24"><SelectValue /></SelectTrigger>
-                        <SelectContent>{LANG_LEVELS.map((l) => (<SelectItem key={l} value={l}>{(LANG_LEVEL_LABELS[locale] || LANG_LEVEL_LABELS.tr)[l] || l}</SelectItem>))}</SelectContent>
-                      </Select>
-                      <Button variant="ghost" size="icon-xs" className="text-destructive hover:text-destructive shrink-0" onClick={() => removeLanguage(lang.id)}>
+                    <div key={lang.id} className="flex flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row sm:items-center">
+                      {/* Language with suggestions */}
+                      <div className="flex-1">
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block">{t("language") || "Dil"}</label>
+                        <div className="relative">
+                          <Input
+                            placeholder={t("placeholder_language")}
+                            value={lang.name}
+                            onChange={(e) => updateLanguage(lang.id, { name: e.target.value })}
+                            list="languages-list"
+                            className="w-full"
+                          />
+                          <datalist id="languages-list">
+                            {COMMON_LANGUAGES.map((name) => (
+                              <option key={name} value={name} />
+                            ))}
+                          </datalist>
+                        </div>
+                      </div>
+
+                      {/* Proficiency */}
+                      <div className="w-full sm:w-32">
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block">{t("level") || "Seviye"}</label>
+                        <Select value={lang.level} onValueChange={(v) => updateLanguage(lang.id, { level: v as Language["level"] })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>{LANG_LEVELS.map((l) => (<SelectItem key={l} value={l}>{(LANG_LEVEL_LABELS[locale] || LANG_LEVEL_LABELS.tr)[l] || l}</SelectItem>))}</SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Remove button */}
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        className="text-destructive hover:text-destructive shrink-0"
+                        onClick={() => removeLanguage(lang.id)}
+                      >
                         <Trash2 className="size-3.5" />
                       </Button>
                     </div>
@@ -901,17 +1225,63 @@ function CVBuilderPage() {
                 <Separator />
                 <CardContent className="p-4 space-y-4">
                   {cvData.certifications.map((cert) => (
-                    <div key={cert.id} className="relative space-y-2 rounded-lg border border-border p-3">
-                      <Button variant="ghost" size="icon-xs" className="absolute top-2 right-2 text-destructive hover:text-destructive" onClick={() => removeCertification(cert.id)}>
+                    <div key={cert.id} className="relative space-y-3 rounded-lg border border-border p-4">
+                      <Button variant="ghost" size="icon-xs" className="absolute top-3 right-3 text-destructive hover:text-destructive" onClick={() => removeCertification(cert.id)}>
                         <Trash2 className="size-3.5" />
                       </Button>
-                      <div className="grid grid-cols-1 gap-2 pr-8 sm:grid-cols-2">
-                        <Input placeholder={t("placeholder_cert_name")} value={cert.name} onChange={(e) => updateCertification(cert.id, { name: e.target.value })} />
-                        <Input placeholder={t("placeholder_cert_issuer")} value={cert.issuer} onChange={(e) => updateCertification(cert.id, { issuer: e.target.value })} />
+
+                      <div className="grid grid-cols-1 gap-3 pr-10 sm:grid-cols-2">
+                        {/* Certificate name */}
+                        <FormField label={t("name") || "Sertifika Adı"} required>
+                          <Input
+                            placeholder={t("placeholder_cert_name")}
+                            value={cert.name}
+                            onChange={(e) => updateCertification(cert.id, { name: e.target.value })}
+                          />
+                        </FormField>
+
+                        {/* Issuer */}
+                        <FormField label={t("issuer") || "Veriliş Kuruluşu"} required>
+                          <Input
+                            placeholder={t("placeholder_cert_issuer")}
+                            value={cert.issuer}
+                            onChange={(e) => updateCertification(cert.id, { issuer: e.target.value })}
+                          />
+                        </FormField>
                       </div>
-                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        <Input placeholder={t("placeholder_cert_date")} value={cert.date} onChange={(e) => updateCertification(cert.id, { date: e.target.value })} />
-                        <Input placeholder={t("placeholder_cert_url")} value={cert.url} onChange={(e) => updateCertification(cert.id, { url: e.target.value })} />
+
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {/* Date */}
+                        <FormField label={t("date") || "Tarih"} required hint="MM/YYYY">
+                          <MonthYearPicker
+                            value={cert.date}
+                            onChange={(date) => updateCertification(cert.id, { date })}
+                            placeholder="MM/YYYY"
+                          />
+                        </FormField>
+
+                        {/* URL */}
+                        <FormField
+                          label={t("certificateUrl") || "Sertifika Linki"}
+                          optional
+                          hint="https://..."
+                          error={getFieldError(`cert_url_${cert.id}`)}
+                        >
+                          <Input
+                            placeholder={t("placeholder_cert_url")}
+                            type="url"
+                            value={cert.url}
+                            onChange={(e) => {
+                              updateCertification(cert.id, { url: e.target.value })
+                              if (e.target.value) {
+                                const validation = validators.url(e.target.value)
+                                setFieldError(`cert_url_${cert.id}`, validation.error)
+                              } else {
+                                setFieldError(`cert_url_${cert.id}`)
+                              }
+                            }}
+                          />
+                        </FormField>
                       </div>
                     </div>
                   ))}
