@@ -13,6 +13,7 @@ interface MonthYearPickerProps {
   placeholder?: string
   disabled?: boolean
   className?: string
+  locale?: string
 }
 
 const MONTHS = [
@@ -30,12 +31,18 @@ const MONTHS = [
   { num: 12, name: 'Aralık' },
 ]
 
+const COPY = {
+  tr: { year: 'Yıl', month: 'Ay', close: 'Tamam' },
+  en: { year: 'Year', month: 'Month', close: 'Done' },
+} as const
+
 export function MonthYearPicker({
   value,
   onChange,
   placeholder = 'MM/YYYY',
   disabled = false,
   className,
+  locale = 'tr',
 }: MonthYearPickerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [displayMonth, setDisplayMonth] = useState<number>(new Date().getMonth() + 1)
@@ -75,6 +82,10 @@ export function MonthYearPicker({
   // Generate year options (last 50 years + next year)
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: 52 }, (_, i) => currentYear - 50 + i)
+  const copy = COPY[locale === 'en' ? 'en' : 'tr']
+  const monthLabels = locale === 'en'
+    ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    : MONTHS.map(({ name }) => name.slice(0, 3))
 
   return (
     <div className={cn('relative', className)}>
@@ -113,7 +124,7 @@ export function MonthYearPicker({
           <div className="space-y-3">
             {/* Year selector */}
             <div className="space-y-2">
-              <div className="text-xs font-medium text-muted-foreground">Yıl</div>
+              <div className="text-xs font-medium text-muted-foreground">{copy.year}</div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -144,7 +155,7 @@ export function MonthYearPicker({
 
             {/* Month selector */}
             <div className="space-y-2">
-              <div className="text-xs font-medium text-muted-foreground">Ay</div>
+              <div className="text-xs font-medium text-muted-foreground">{copy.month}</div>
               <div className="grid grid-cols-3 gap-1">
                 {MONTHS.map(({ num, name }) => (
                   <button
@@ -158,7 +169,7 @@ export function MonthYearPicker({
                         : 'border-border hover:bg-muted'
                     )}
                   >
-                    {name.slice(0, 3)}
+                    {monthLabels[num - 1]}
                   </button>
                 ))}
               </div>
@@ -172,7 +183,7 @@ export function MonthYearPicker({
               onClick={() => setIsOpen(false)}
               className="w-full"
             >
-              Tamam
+              {copy.close}
             </Button>
           </div>
         </div>

@@ -14,7 +14,28 @@ interface SkillTagInputProps {
   skillLevelLabels: Record<Skill['level'], string>
   maxSkills?: number
   locale?: string
+  placeholder?: string
+  helperText?: string
 }
+
+const COPY = {
+  tr: {
+    placeholder: 'Beceri adı yazın ve Enter tuşuna basın',
+    empty: 'Beceri adı boş olamaz',
+    duplicate: 'Bu beceri zaten eklenmiş',
+    max: (maxSkills: number) => `Maksimum ${maxSkills} beceri ekleyebilirsiniz`,
+    helper: 'Beceri adı yazıp Enter tuşuna basın veya virgül kullanın.',
+    remove: 'Sil',
+  },
+  en: {
+    placeholder: 'Type a skill and press Enter',
+    empty: 'Skill name cannot be empty',
+    duplicate: 'This skill has already been added',
+    max: (maxSkills: number) => `You can add up to ${maxSkills} skills`,
+    helper: 'Type a skill and press Enter or use comma.',
+    remove: 'Remove',
+  },
+} as const
 
 export function SkillTagInput({
   skills,
@@ -23,15 +44,18 @@ export function SkillTagInput({
   skillLevelLabels,
   maxSkills = 20,
   locale = 'tr',
+  placeholder,
+  helperText,
 }: SkillTagInputProps) {
   const [inputValue, setInputValue] = useState('')
   const [error, setError] = useState<string>('')
+  const copy = COPY[locale === 'en' ? 'en' : 'tr']
 
   const addSkill = (skillName: string) => {
     const trimmedName = skillName.trim()
     
     if (!trimmedName) {
-      setError('Beceri adı boş olamaz')
+      setError(copy.empty)
       return
     }
 
@@ -40,13 +64,13 @@ export function SkillTagInput({
       s => s.name.toLowerCase().trim() === trimmedName.toLowerCase()
     )
     if (isDuplicate) {
-      setError('Bu beceri zaten eklenmiş')
+      setError(copy.duplicate)
       return
     }
 
     // Check max skills
     if (skills.length >= maxSkills) {
-      setError(`Maksimum ${maxSkills} beceri ekleyebilirsiniz`)
+      setError(copy.max(maxSkills))
       return
     }
 
@@ -99,7 +123,7 @@ export function SkillTagInput({
           }}
           onKeyDown={handleKeyDown}
           onBlur={handleInputBlur}
-          placeholder="Beceri adı yazın ve Enter tuşuna basın"
+          placeholder={placeholder || copy.placeholder}
           disabled={skills.length >= maxSkills}
           className={cn(error && 'border-destructive focus-visible:ring-destructive')}
         />
@@ -128,7 +152,7 @@ export function SkillTagInput({
                   type="button"
                   onClick={() => removeSkill(skill.id)}
                   className="p-1 hover:bg-destructive/10 rounded text-destructive transition-colors shrink-0"
-                  title="Sil"
+                  title={copy.remove}
                 >
                   <X className="size-3.5" />
                 </button>
@@ -155,7 +179,7 @@ export function SkillTagInput({
       )}
 
       <p className="text-xs text-muted-foreground">
-        Beceri adı yazıp Enter tuşuna basın veya virgül kullanın.
+        {helperText || copy.helper}
       </p>
     </div>
   )

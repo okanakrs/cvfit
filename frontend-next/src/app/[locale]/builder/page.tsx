@@ -405,6 +405,130 @@ function CVBuilderPage() {
   const tt = useTranslations("templates")
   const locale = useLocale()
 
+  const fieldCopy = locale === "tr"
+    ? {
+        optional: "(opsiyonel)",
+        skillSection: "Beceriler",
+        languageSection: "Dil",
+        levelSection: "Seviye",
+        fullName: "Ad Soyad",
+        title: "Meslek / Pozisyon",
+        email: "E-posta",
+        phone: "Telefon",
+        location: "Şehir",
+        linkedin: "LinkedIn",
+        website: "Website",
+        summary: "Özet",
+        company: "Şirket",
+        position: "Pozisyon",
+        startDate: "Başlangıç Tarihi",
+        endDate: "Bitiş Tarihi",
+        description: "Açıklama",
+        school: "Okul / Üniversite",
+        field: "Bölüm",
+        degree: "Derece",
+        startYear: "Başlama Yılı",
+        endYear: "Bitirme Yılı",
+        gpa: "GPA",
+        language: "Dil",
+        level: "Seviye",
+        certificateName: "Sertifika Adı",
+        issuer: "Veriliş Kuruluşu",
+        certificateDate: "Tarih",
+        certificateUrl: "Sertifika Linki",
+        ongoing: "Halen çalışıyorum",
+        continuing: "Devam ediyor",
+        currentStudiesHint: "Hala öğreniyorsanız boş bırakın",
+        dateRangeError: "Bitiş tarihi başlangıçtan önce olamaz",
+        gpaHint: "Örn: 3.85 (0.00 - 4.00)",
+        phoneHint: "Örn: +90 5XX XXX XX XX",
+        linkedInHint: "https://linkedin.com/...",
+        websiteHint: "https://example.com",
+        namePlaceholder: "Adınız Soyadınız",
+        titlePlaceholder: "Frontend Developer",
+        emailPlaceholder: "E-posta",
+        phonePlaceholder: "Telefon",
+        locationPlaceholder: "Konum",
+        linkedinPlaceholder: "LinkedIn URL",
+        websitePlaceholder: "Website",
+        summaryPlaceholder: "Kendinizi kısaca tanıtın...",
+        companyPlaceholder: "Şirket",
+        positionPlaceholder: "Pozisyon",
+        descriptionPlaceholder: "Görev ve başarılarınızı yazın...",
+        schoolPlaceholder: "Okul / Üniversite",
+        fieldPlaceholder: "Bölüm",
+        degreePlaceholder: "Derece (Lise, Lisans...)",
+        monthYearPlaceholder: "MM/YYYY",
+        yearPlaceholder: "YYYY",
+        gpaPlaceholder: "0.00",
+        skillPlaceholder: "Beceri adı yazıp Enter tuşuna basın",
+        skillHelper: "Beceri adı yazıp Enter tuşuna basın veya virgül kullanın.",
+        certNamePlaceholder: "Sertifika Adı",
+        certIssuerPlaceholder: "Veren Kurum",
+        certUrlPlaceholder: "URL (opsiyonel)",
+      }
+    : {
+        optional: "(optional)",
+        skillSection: "Skills",
+        languageSection: "Language",
+        levelSection: "Level",
+        fullName: "Full Name",
+        title: "Job Title / Position",
+        email: "Email",
+        phone: "Phone",
+        location: "City",
+        linkedin: "LinkedIn",
+        website: "Website",
+        summary: "Summary",
+        company: "Company",
+        position: "Position",
+        startDate: "Start Date",
+        endDate: "End Date",
+        description: "Description",
+        school: "School / University",
+        field: "Department",
+        degree: "Degree",
+        startYear: "Start Year",
+        endYear: "End Year",
+        gpa: "GPA",
+        language: "Language",
+        level: "Level",
+        certificateName: "Certificate Name",
+        issuer: "Issuing Organization",
+        certificateDate: "Date",
+        certificateUrl: "Certificate URL",
+        ongoing: "Currently working",
+        continuing: "In progress",
+        currentStudiesHint: "Leave empty if you're still studying",
+        dateRangeError: "End date cannot be before start date",
+        gpaHint: "E.g. 3.85 (0.00 - 4.00)",
+        phoneHint: "E.g. +90 5XX XXX XX XX",
+        linkedInHint: "https://linkedin.com/...",
+        websiteHint: "https://example.com",
+        namePlaceholder: "Your full name",
+        titlePlaceholder: "Frontend Developer",
+        emailPlaceholder: "Email",
+        phonePlaceholder: "Phone",
+        locationPlaceholder: "City",
+        linkedinPlaceholder: "LinkedIn URL",
+        websitePlaceholder: "Website",
+        summaryPlaceholder: "Write a short summary about yourself...",
+        companyPlaceholder: "Company",
+        positionPlaceholder: "Position",
+        descriptionPlaceholder: "Write your responsibilities and achievements...",
+        schoolPlaceholder: "School / University",
+        fieldPlaceholder: "Department",
+        degreePlaceholder: "Degree (High School, Bachelor...)",
+        monthYearPlaceholder: "MM/YYYY",
+        yearPlaceholder: "YYYY",
+        gpaPlaceholder: "0.00",
+        skillPlaceholder: "Type a skill and press Enter",
+        skillHelper: "Type a skill and press Enter or use comma.",
+        certNamePlaceholder: "Certificate Name",
+        certIssuerPlaceholder: "Issuing Organization",
+        certUrlPlaceholder: "URL (optional)",
+      }
+
   const TEMPLATES: { value: Template; label: string }[] = [
     { value: "classic",      label: tt("classic") },
     { value: "modern",       label: tt("modern") },
@@ -749,7 +873,7 @@ function CVBuilderPage() {
                   </div>
 
                   {/* Full Name */}
-                  <FormField label={t("fullName") || "Ad Soyad"} required error={getFieldError("fullName")}>
+                  <FormField label={fieldCopy.fullName} required error={getFieldError("fullName")}>
                     <Input
                       placeholder={t("placeholder_name")}
                       className="text-base"
@@ -763,10 +887,10 @@ function CVBuilderPage() {
                   </FormField>
 
                   {/* Job Title with suggestions */}
-                  <FormField label={t("title") || "Meslek / Pozisyon"} optional>
+                  <FormField label={fieldCopy.title} optional optionalLabel={fieldCopy.optional}>
                     <div className="relative">
                       <Input
-                        placeholder={t("placeholder_title")}
+                        placeholder={fieldCopy.titlePlaceholder}
                         value={cvData.personal.title}
                         onChange={(e) => updatePersonal("title", e.target.value)}
                         list="job-titles-list"
@@ -781,9 +905,9 @@ function CVBuilderPage() {
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     {/* Email */}
-                    <FormField label={t("email")} required error={getFieldError("email")}>
+                    <FormField label={fieldCopy.email} required error={getFieldError("email")}>
                       <Input
-                        placeholder={t("placeholder_email")}
+                        placeholder={fieldCopy.emailPlaceholder}
                         type="email"
                         value={cvData.personal.email}
                         onChange={(e) => {
@@ -795,9 +919,9 @@ function CVBuilderPage() {
                     </FormField>
 
                     {/* Phone */}
-                    <FormField label={t("phone")} required hint="Örn: +90 5XX XXX XX XX" error={getFieldError("phone")}>
+                    <FormField label={fieldCopy.phone} required hint={fieldCopy.phoneHint} error={getFieldError("phone")}>
                       <Input
-                        placeholder={t("placeholder_phone")}
+                        placeholder={fieldCopy.phonePlaceholder}
                         value={cvData.personal.phone}
                         onChange={(e) => {
                           const formatted = formatters.phone(e.target.value)
@@ -813,9 +937,9 @@ function CVBuilderPage() {
                     </FormField>
 
                     {/* Location */}
-                    <FormField label={t("location")} required error={getFieldError("location")}>
+                    <FormField label={fieldCopy.location} required error={getFieldError("location")}>
                       <Input
-                        placeholder={t("placeholder_location")}
+                        placeholder={fieldCopy.locationPlaceholder}
                         value={cvData.personal.location}
                         onChange={(e) => {
                           const formatted = formatters.city(e.target.value)
@@ -829,9 +953,9 @@ function CVBuilderPage() {
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {/* LinkedIn */}
-                    <FormField label={t("linkedin")} optional hint="https://linkedin.com/..." error={getFieldError("linkedin")}>
+                    <FormField label={fieldCopy.linkedin} optional optionalLabel={fieldCopy.optional} hint={fieldCopy.linkedInHint} error={getFieldError("linkedin")}>
                       <Input
-                        placeholder={t("placeholder_linkedin")}
+                        placeholder={fieldCopy.linkedinPlaceholder}
                         type="url"
                         value={cvData.personal.linkedin}
                         onChange={(e) => {
@@ -847,9 +971,9 @@ function CVBuilderPage() {
                     </FormField>
 
                     {/* Website */}
-                    <FormField label={t("website")} optional hint="https://example.com" error={getFieldError("website")}>
+                    <FormField label={fieldCopy.website} optional optionalLabel={fieldCopy.optional} hint={fieldCopy.websiteHint} error={getFieldError("website")}>
                       <Input
-                        placeholder={t("placeholder_website")}
+                        placeholder={fieldCopy.websitePlaceholder}
                         type="url"
                         value={cvData.personal.website}
                         onChange={(e) => {
@@ -867,12 +991,13 @@ function CVBuilderPage() {
 
                   {/* Summary */}
                   <FormField
-                    label={t("summary") || "Özet"}
+                    label={fieldCopy.summary}
                     optional
-                    hint={`${cvData.personal.summary.length}/500 karakter`}
+                    optionalLabel={fieldCopy.optional}
+                    hint={locale === "tr" ? `${cvData.personal.summary.length}/500 karakter` : `${cvData.personal.summary.length}/500 characters`}
                   >
                     <Textarea
-                      placeholder={t("placeholder_summary")}
+                      placeholder={fieldCopy.summaryPlaceholder}
                       rows={4}
                       maxLength={500}
                       value={cvData.personal.summary}
@@ -901,7 +1026,7 @@ function CVBuilderPage() {
                   {cvData.experience.map((exp) => {
                     const dateRangeError = exp.startDate && exp.endDate && !exp.current
                       ? compareMonthYears(exp.startDate, exp.endDate) > 0
-                        ? 'Bitiş tarihi başlangıçtan önce olamaz'
+                        ? fieldCopy.dateRangeError
                         : undefined
                       : undefined
                     const expErrorKey = `exp_${exp.id}`
@@ -915,18 +1040,18 @@ function CVBuilderPage() {
 
                         <div className="grid grid-cols-1 gap-3 pr-10 sm:grid-cols-2">
                           {/* Company */}
-                          <FormField label={t("company") || "Şirket"} required>
+                          <FormField label={fieldCopy.company} required>
                             <Input
-                              placeholder={t("placeholder_company")}
+                              placeholder={fieldCopy.companyPlaceholder}
                               value={exp.company}
                               onChange={(e) => updateExperience(exp.id, { company: e.target.value })}
                             />
                           </FormField>
 
                           {/* Position */}
-                          <FormField label={t("position") || "Pozisyon"} required>
+                          <FormField label={fieldCopy.position} required>
                             <Input
-                              placeholder={t("placeholder_position")}
+                              placeholder={fieldCopy.positionPlaceholder}
                               value={exp.position}
                               onChange={(e) => updateExperience(exp.id, { position: e.target.value })}
                             />
@@ -935,21 +1060,23 @@ function CVBuilderPage() {
 
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                           {/* Start Date */}
-                          <FormField label={t("startDate") || "Başlangıç"} required hint="MM/YYYY">
+                          <FormField label={fieldCopy.startDate} required hint={fieldCopy.monthYearPlaceholder}>
                             <MonthYearPicker
                               value={exp.startDate}
                               onChange={(date) => updateExperience(exp.id, { startDate: date })}
-                              placeholder="MM/YYYY"
+                              placeholder={fieldCopy.monthYearPlaceholder}
+                              locale={locale}
                             />
                           </FormField>
 
                           {/* End Date or Current */}
-                          <FormField label={t("endDate") || "Bitiş"} required={!exp.current} error={dateRangeError}>
+                          <FormField label={fieldCopy.endDate} required={!exp.current} error={dateRangeError}>
                             <MonthYearPicker
                               value={exp.endDate}
                               onChange={(date) => updateExperience(exp.id, { endDate: date })}
-                              placeholder="MM/YYYY"
+                              placeholder={fieldCopy.monthYearPlaceholder}
                               disabled={exp.current}
+                              locale={locale}
                             />
                           </FormField>
                         </div>
@@ -960,18 +1087,19 @@ function CVBuilderPage() {
                             checked={exp.current}
                             onCheckedChange={(checked) => updateExperience(exp.id, { current: !!checked, endDate: checked ? "" : exp.endDate })}
                           />
-                          <span className="font-medium">{t("ongoing") || "Halen çalışıyorum"}</span>
+                          <span className="font-medium">{fieldCopy.ongoing}</span>
                         </label>
 
                         {/* Description */}
                         <FormField
-                          label={t("description") || "Açıklama"}
+                          label={fieldCopy.description}
                           optional
-                          hint={`${exp.description.length}/500 karakter`}
+                          optionalLabel={fieldCopy.optional}
+                          hint={locale === "tr" ? `${exp.description.length}/500 karakter` : `${exp.description.length}/500 characters`}
                           error={getFieldError(`exp_desc_${exp.id}`)}
                         >
                           <Textarea
-                            placeholder={t("placeholder_exp_desc")}
+                            placeholder={fieldCopy.descriptionPlaceholder}
                             rows={3}
                             maxLength={500}
                             value={exp.description}
@@ -1022,18 +1150,18 @@ function CVBuilderPage() {
 
                         <div className="grid grid-cols-1 gap-3 pr-10 sm:grid-cols-2">
                           {/* School */}
-                          <FormField label={t("school") || "Okul / Üniversite"} required>
+                          <FormField label={fieldCopy.school} required>
                             <Input
-                              placeholder={t("placeholder_school")}
+                              placeholder={fieldCopy.schoolPlaceholder}
                               value={edu.school}
                               onChange={(e) => updateEducation(edu.id, { school: e.target.value })}
                             />
                           </FormField>
 
                           {/* Field/Major */}
-                          <FormField label={t("field") || "Bölüm"} required>
+                          <FormField label={fieldCopy.field} required>
                             <Input
-                              placeholder={t("placeholder_field")}
+                              placeholder={fieldCopy.fieldPlaceholder}
                               value={edu.field}
                               onChange={(e) => updateEducation(edu.id, { field: e.target.value })}
                             />
@@ -1041,13 +1169,13 @@ function CVBuilderPage() {
                         </div>
 
                         {/* Degree */}
-                        <FormField label={t("degree") || "Derece"} required>
+                        <FormField label={fieldCopy.degree} required>
                           <Select
                             value={edu.degree || ""}
                             onValueChange={(value) => updateEducation(edu.id, { degree: value || "" })}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder={t("placeholder_degree")} />
+                              <SelectValue placeholder={fieldCopy.degreePlaceholder} />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="Lise">Lise</SelectItem>
@@ -1061,38 +1189,41 @@ function CVBuilderPage() {
 
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                           {/* Start Year */}
-                          <FormField label={t("startDate") || "Başlama Yılı"} required hint="YYYY">
+                          <FormField label={fieldCopy.startYear} required hint="YYYY">
                             <YearPicker
                               value={edu.startDate}
                               onChange={(year) => updateEducation(edu.id, { startDate: year })}
-                              placeholder="YYYY"
+                              placeholder={fieldCopy.yearPlaceholder}
+                              locale={locale}
                             />
                           </FormField>
 
                           {/* End Year */}
                           <FormField
-                            label={t("endDate") || "Bitirme Yılı"}
+                            label={fieldCopy.endYear}
                             required={false}
                             error={dateRangeError}
-                            hint="Hala öğreniyorsanız boş bırakın"
+                            hint={fieldCopy.currentStudiesHint}
                           >
                             <YearPicker
                               value={edu.endDate}
                               onChange={(year) => updateEducation(edu.id, { endDate: year })}
-                              placeholder="YYYY"
+                              placeholder={fieldCopy.yearPlaceholder}
+                              locale={locale}
                             />
                           </FormField>
                         </div>
 
                         {/* GPA */}
                         <FormField
-                          label={t("gpa") || "GPA"}
+                          label={fieldCopy.gpa}
                           optional
-                          hint=" Örn: 3.85 (0.00 - 4.00)"
+                          optionalLabel={fieldCopy.optional}
+                          hint={fieldCopy.gpaHint}
                           error={getFieldError(`edu_gpa_${edu.id}`)}
                         >
                           <Input
-                            placeholder="0.00"
+                            placeholder={fieldCopy.gpaPlaceholder}
                             value={edu.gpa}
                             onChange={(e) => {
                               const formatted = formatGPA(e.target.value)
@@ -1132,7 +1263,7 @@ function CVBuilderPage() {
               <CollapsibleContent>
                 <Separator />
                 <CardContent className="p-4 space-y-4">
-                  <FormField label={t("skills") || "Beceriler"} optional>
+                  <FormField label={fieldCopy.skillSection} optional optionalLabel={fieldCopy.optional}>
                     <SkillTagInput
                       skills={cvData.skills}
                       onSkillsChange={(skills) => setCvData(prev => ({ ...prev, skills }))}
@@ -1140,6 +1271,8 @@ function CVBuilderPage() {
                       skillLevelLabels={SKILL_LEVEL_LABELS[locale] || SKILL_LEVEL_LABELS.tr}
                       maxSkills={20}
                       locale={locale}
+                      placeholder={fieldCopy.skillPlaceholder}
+                      helperText={fieldCopy.skillHelper}
                     />
                   </FormField>
                 </CardContent>
@@ -1165,10 +1298,10 @@ function CVBuilderPage() {
                     <div key={lang.id} className="flex flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row sm:items-center">
                       {/* Language with suggestions */}
                       <div className="flex-1">
-                        <label className="text-xs font-medium text-muted-foreground mb-1 block">{t("language") || "Dil"}</label>
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block">{fieldCopy.languageSection}</label>
                         <div className="relative">
                           <Input
-                            placeholder={t("placeholder_language")}
+                            placeholder={locale === "tr" ? "Dil" : "Language"}
                             value={lang.name}
                             onChange={(e) => updateLanguage(lang.id, { name: e.target.value })}
                             list="languages-list"
@@ -1184,7 +1317,7 @@ function CVBuilderPage() {
 
                       {/* Proficiency */}
                       <div className="w-full sm:w-32">
-                        <label className="text-xs font-medium text-muted-foreground mb-1 block">{t("level") || "Seviye"}</label>
+                        <label className="text-xs font-medium text-muted-foreground mb-1 block">{fieldCopy.levelSection}</label>
                         <Select value={lang.level} onValueChange={(v) => updateLanguage(lang.id, { level: v as Language["level"] })}>
                           <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>{LANG_LEVELS.map((l) => (<SelectItem key={l} value={l}>{(LANG_LEVEL_LABELS[locale] || LANG_LEVEL_LABELS.tr)[l] || l}</SelectItem>))}</SelectContent>
@@ -1232,18 +1365,18 @@ function CVBuilderPage() {
 
                       <div className="grid grid-cols-1 gap-3 pr-10 sm:grid-cols-2">
                         {/* Certificate name */}
-                        <FormField label={t("name") || "Sertifika Adı"} required>
+                        <FormField label={fieldCopy.certNamePlaceholder} required>
                           <Input
-                            placeholder={t("placeholder_cert_name")}
+                            placeholder={fieldCopy.certNamePlaceholder}
                             value={cert.name}
                             onChange={(e) => updateCertification(cert.id, { name: e.target.value })}
                           />
                         </FormField>
 
                         {/* Issuer */}
-                        <FormField label={t("issuer") || "Veriliş Kuruluşu"} required>
+                        <FormField label={fieldCopy.certIssuerPlaceholder} required>
                           <Input
-                            placeholder={t("placeholder_cert_issuer")}
+                            placeholder={fieldCopy.certIssuerPlaceholder}
                             value={cert.issuer}
                             onChange={(e) => updateCertification(cert.id, { issuer: e.target.value })}
                           />
@@ -1252,23 +1385,25 @@ function CVBuilderPage() {
 
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         {/* Date */}
-                        <FormField label={t("date") || "Tarih"} required hint="MM/YYYY">
+                        <FormField label={fieldCopy.certificateDate} required hint={fieldCopy.monthYearPlaceholder}>
                           <MonthYearPicker
                             value={cert.date}
                             onChange={(date) => updateCertification(cert.id, { date })}
-                            placeholder="MM/YYYY"
+                            placeholder={fieldCopy.monthYearPlaceholder}
+                            locale={locale}
                           />
                         </FormField>
 
                         {/* URL */}
                         <FormField
-                          label={t("certificateUrl") || "Sertifika Linki"}
+                          label={fieldCopy.certificateUrl}
                           optional
-                          hint="https://..."
+                          optionalLabel={fieldCopy.optional}
+                          hint={fieldCopy.websiteHint}
                           error={getFieldError(`cert_url_${cert.id}`)}
                         >
                           <Input
-                            placeholder={t("placeholder_cert_url")}
+                            placeholder={fieldCopy.certUrlPlaceholder}
                             type="url"
                             value={cert.url}
                             onChange={(e) => {

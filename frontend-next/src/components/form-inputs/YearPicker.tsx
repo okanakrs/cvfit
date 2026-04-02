@@ -12,7 +12,13 @@ interface YearPickerProps {
   placeholder?: string
   disabled?: boolean
   className?: string
+  locale?: string
 }
+
+const COPY = {
+  tr: { close: 'Tamam' },
+  en: { close: 'Done' },
+} as const
 
 export function YearPicker({
   value,
@@ -20,6 +26,7 @@ export function YearPicker({
   placeholder = 'YYYY',
   disabled = false,
   className,
+  locale = 'tr',
 }: YearPickerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [displayYear, setDisplayYear] = useState<number>(
@@ -28,6 +35,7 @@ export function YearPicker({
 
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: 52 }, (_, i) => currentYear - 50 + i)
+  const copy = COPY[locale === 'en' ? 'en' : 'tr']
 
   const handleYearSelect = (y: number) => {
     onChange(String(y))
@@ -142,7 +150,7 @@ export function YearPicker({
               onClick={() => setIsOpen(false)}
               className="w-full"
             >
-              Tamam
+              {copy.close}
             </Button>
           </div>
         </div>

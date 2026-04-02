@@ -8,6 +8,7 @@ interface FormFieldProps {
   label: string
   required?: boolean
   optional?: boolean
+  optionalLabel?: string
   error?: string
   hint?: string
   children: ReactNode
@@ -18,6 +19,7 @@ export function FormField({
   label,
   required = false,
   optional = false,
+  optionalLabel = "(opsiyonel)",
   error,
   hint,
   children,
@@ -28,7 +30,7 @@ export function FormField({
       <label className="text-sm font-medium">
         {label}
         {required && <span className="text-destructive ml-1">*</span>}
-        {optional && <span className="text-muted-foreground text-xs ml-1">(opsiyonel)</span>}
+        {optional && <span className="text-muted-foreground text-xs ml-1">{optionalLabel}</span>}
       </label>
 
       {children}
