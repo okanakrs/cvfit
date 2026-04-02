@@ -25,6 +25,8 @@ interface AnalysisResult {
   suggestions: string[]
 }
 
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "")
+
 function cvDataToText(cv: CVData): string {
   const lines: string[] = []
   const p = cv.personal
@@ -67,16 +69,51 @@ export function ATSModal({ open, onClose, cvData, onTransfer }: ATSModalProps) {
       const fd = new FormData()
       fd.append("job_description", jobDesc)
       fd.append("cv_text", cvText)
-      const res = await fetch("/analyze", {
+      const endpoint = API_URL ? `${API_URL}/analyze` : "/analyze"
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: fd,
       })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error ?? "Analiz sırasında bir hata oluştu."); return }
-      setResult(data)
-    } catch {
-      setError("Sunucuya bağlanılamadı.")
+      const raw = await res.text()
+      let data: Record<string, unknown> = {}
+      try {
+        data = raw ? JSON.parse(raw) as Record<string, unknown> : {}
+      } catch {
+        data = {}
+      }
+
+      if (!res.ok) {
+        setError(
+          typeof data.error === "string"
+            ? data.error
+            : typeof data.detail === "string"
+              ? data.detail
+              : `Analiz sırasında bir hata oluştu. (${res.status})`
+        )
+        return
+      }
+
+      if (!raw || !data || typeof data !== "object") {
+        setError("Sunucudan geçersiz yanıt alındı.")
+        return
+      }
+
+      if (
+        typeof data.cv_data !== "object" ||
+        typeof data.original_score !== "number" ||
+        typeof data.new_score !== "number" ||
+        !Array.isArray(data.added_keywords) ||
+        typeof data.skill_match !== "object" ||
+        !Array.isArray(data.suggestions)
+      ) {
+        setError("Sunucudan beklenen analiz formatı alınamadı.")
+        return
+      }
+
+      setResult(data as unknown as AnalysisResult)
+    } catch (e) {
+      setError(e instanceof Error ? `Sunucuya bağlanılamadı: ${e.message}` : "Sunucuya bağlanılamadı.")
     } finally {
       setAnalyzing(false)
     }

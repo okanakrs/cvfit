@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/lib/auth-context"
 
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/$/, "")
+
 function DropZone({ file, onFile }: { file: File | null; onFile: (f: File) => void }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
@@ -99,19 +101,41 @@ export default function ATSPage() {
       fd.append("cv_file", file)
       fd.append("job_description", jobDesc.trim() || jobUrl.trim())
 
-      const res = await fetch("/analyze", {
+      const endpoint = API_URL ? `${API_URL}/analyze` : "/analyze"
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: fd,
       })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error ?? "Analiz sırasında bir hata oluştu."); return }
+      const raw = await res.text()
+      let data: Record<string, unknown> = {}
+      try {
+        data = raw ? JSON.parse(raw) as Record<string, unknown> : {}
+      } catch {
+        data = {}
+      }
+
+      if (!res.ok) {
+        setError(
+          typeof data.error === "string"
+            ? data.error
+            : typeof data.detail === "string"
+              ? data.detail
+              : `Analiz sırasında bir hata oluştu. (${res.status})`
+        )
+        return
+      }
+
+      if (!raw || !data || typeof data !== "object") {
+        setError("Sunucudan geçersiz yanıt alındı.")
+        return
+      }
 
       const resultId = crypto.randomUUID()
       sessionStorage.setItem(`analysis_${resultId}`, JSON.stringify(data))
       router.push(`/result/${resultId}`)
-    } catch {
-      setError("Sunucuya bağlanılamadı.")
+    } catch (e) {
+      setError(e instanceof Error ? `Sunucuya bağlanılamadı: ${e.message}` : "Sunucuya bağlanılamadı.")
     } finally {
       setAnalyzing(false)
     }
