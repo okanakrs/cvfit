@@ -99,14 +99,6 @@ export default function LandingPage() {
         />
 
         <div className="mx-auto max-w-4xl px-4 pt-24 pb-20 md:pt-32 md:pb-28 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-4 py-1.5 text-xs font-medium text-muted-foreground mb-8 backdrop-blur-sm">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
-            </span>
-            {t("badge")}
-          </div>
-
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
             {t("h1_line1")}
             <br />
