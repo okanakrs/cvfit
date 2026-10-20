@@ -3,12 +3,11 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Sun, Moon, LogOut, Sparkles, ChevronDown, Menu } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslations } from "next-intl";
-import { Link } from "@/navigation";
+import { Link, useRouter } from "@/navigation";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import {
   DropdownMenu,

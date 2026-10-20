@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/navigation"
 import { FileText, Upload, Search, Loader2, Sparkles, Link } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"

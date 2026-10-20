@@ -2,10 +2,9 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslations } from "next-intl";
-import { Link } from "@/navigation";
+import { Link, useRouter } from "@/navigation";
 import { Button } from "@/components/ui/button";
 import {
   FileDown,

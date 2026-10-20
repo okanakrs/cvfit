@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/navigation";
 import { ArrowRight, Clock, Tag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { BLOG_POSTS } from "@/app/blog/posts";

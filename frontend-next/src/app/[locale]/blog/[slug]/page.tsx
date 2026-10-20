@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/navigation";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Clock } from "lucide-react";
 import { BLOG_POSTS, getPostBySlug, type ContentBlock } from "@/app/blog/posts";
