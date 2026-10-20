@@ -12,8 +12,10 @@ SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 PADDLE_API_KEY    = os.getenv("PADDLE_API_KEY")
 PADDLE_WEBHOOK_SECRET = os.getenv("PADDLE_WEBHOOK_SECRET", "")
 
-PADDLE_TEKIL_PRICE_ID = os.getenv("PADDLE_TEKIL_PRICE_ID", "pri_01kme95qpfjbqftqg6wgcf6qrt")
-PADDLE_PRO_PRICE_ID   = os.getenv("PADDLE_PRO_PRICE_ID",   "pri_01kme9291xerp3e37wtm8z9pcx")
+# Tek seferlik 99 TL paket (Paddle'da one-time price olmalı, abonelik değil)
+PADDLE_PRO_PRICE_ID = os.getenv("PADDLE_PRO_PRICE_ID", "")
+PRO_AMOUNT = 9900  # kuruş
+PRO_ANALYSIS_CREDITS = 3  # pakete dahil AI analiz hakkı
 
 PADDLE_API_BASE = "https://api.paddle.com"
 
@@ -33,53 +35,33 @@ def get_user_profile(user_id: str):
         return None
 
 
-def is_discount_eligible_for_user(user_id: str) -> bool:
-    """Ilk satin alma disinda indirimin tekrar kullanilmasini engeller."""
-    try:
-        profile = get_user_profile(user_id)
-        if (profile or {}).get("plan") == "pro":
-            return False
-
-        paid = (
-            supabase
-            .table("payments")
-            .select("transaction_id")
-            .eq("user_id", user_id)
-            .eq("plan", "pro")
-            .eq("status", "success")
-            .limit(1)
-            .execute()
-        )
-        return not bool(paid.data)
-    except Exception:
-        # Guvenli varsayim: emin degilsek indirim uygulama.
-        return False
-
-
 @router.post("/api/payment/create-checkout")
 async def create_checkout(request: Request):
     """
     Paddle Checkout oturumu oluşturur.
     Frontend Paddle.js ile bu transaction_id'yi kullanarak checkout açar.
+    Fiyat sunucuda belirlenir; istemciden price_id/discount kabul edilmez.
     """
     body = await request.json()
-    plan  = body.get("plan", "single")   # "single" veya "pro"
+    plan  = "pro"
     token = body.get("access_token", "")
     session_token = body.get("session_token", "")
-    override_price_id = body.get("price_id")
-    discount_id = body.get("discount_id")
     customer_email = body.get("customer_email")
 
     user = get_user_from_token(token) if token else None
     if not user:
         raise HTTPException(status_code=401, detail="Giriş gerekli")
 
-    price_id = PADDLE_TEKIL_PRICE_ID if plan == "single" else PADDLE_PRO_PRICE_ID
-    if isinstance(override_price_id, str) and override_price_id.startswith("pri_"):
-        price_id = override_price_id
+    if not PADDLE_PRO_PRICE_ID:
+        logger.error("PADDLE_PRO_PRICE_ID tanımlı değil")
+        raise HTTPException(status_code=500, detail="Ödeme sistemi yapılandırılmamış")
+
+    profile = get_user_profile(user.id)
+    if (profile or {}).get("plan") == "pro":
+        raise HTTPException(status_code=409, detail="Paketiniz zaten aktif")
 
     payload = {
-        "items": [{"price_id": price_id, "quantity": 1}],
+        "items": [{"price_id": PADDLE_PRO_PRICE_ID, "quantity": 1}],
         "customer": {"email": customer_email or user.email},
         "custom_data": {
             "user_id": user.id,
@@ -87,10 +69,6 @@ async def create_checkout(request: Request):
             "session_token": session_token
         }
     }
-    if isinstance(discount_id, str) and discount_id and is_discount_eligible_for_user(user.id):
-        payload["discount_id"] = discount_id
-    elif isinstance(discount_id, str) and discount_id:
-        logger.info("Discount ignored for user=%s (not eligible)", user.id)
 
     import httpx
     try:
@@ -119,7 +97,7 @@ async def create_checkout(request: Request):
         supabase.table("payments").insert({
             "user_id": user.id,
             "plan": plan,
-            "amount": 3999 if plan == "single" else 29900,
+            "amount": PRO_AMOUNT,
             "transaction_id": transaction_id,
             "status": "pending"
         }).execute()
@@ -209,7 +187,7 @@ def _activate_plan(user_id: str, plan: str):
         if plan == "pro":
             supabase.table("profiles").update({
                 "plan": "pro",
-                "free_credits": 9999
+                "free_credits": PRO_ANALYSIS_CREDITS
             }).eq("id", user_id).execute()
         else:
             profile = get_user_profile(user_id)

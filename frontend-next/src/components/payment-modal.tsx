@@ -40,8 +40,6 @@ interface PaymentModalProps {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || ""
 const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || ""
-const PADDLE_PRO_PRICE_ID = process.env.NEXT_PUBLIC_PADDLE_PRO_PRICE_ID || ""
-const PADDLE_FIRST_MONTH_DISCOUNT_ID = process.env.NEXT_PUBLIC_PADDLE_FIRST_MONTH_DISCOUNT_ID || ""
 
 export function PaymentModal({ open, onClose, sessionToken, downloadFormat, accessToken, onPaymentSuccess }: PaymentModalProps) {
   const { refresh } = useAuth()
@@ -87,13 +85,9 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
     document.head.appendChild(script)
   }, [open, onClose, onPaymentSuccess, refresh])
 
-  async function startCheckout(priceId: string, discountId?: string) {
+  async function startCheckout() {
     const customerEmail = (typeof window !== "undefined" ? localStorage.getItem("cvfit_user_email") : "") || ""
 
-    if (!priceId) {
-      toast.error("Paddle priceId eksik. NEXT_PUBLIC_PADDLE_PRO_PRICE_ID ayarlayin.")
-      return
-    }
     if (!accessToken) {
       toast.error("Odeme icin once giris yapmaniz gerekiyor.")
       return
@@ -111,8 +105,6 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           plan: "pro",
-          price_id: priceId,
-          discount_id: discountId || null,
           customer_email: customerEmail || null,
           access_token: accessToken,
           session_token: sessionToken,
@@ -155,7 +147,7 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">CV&apos;nizi İndirin</DialogTitle>
-          <p className="text-muted-foreground text-sm">İlk ay özel fiyatla başla, sonrasında aylık abonelikle devam et</p>
+          <p className="text-muted-foreground text-sm">Tek seferlik ödeme, abonelik yok</p>
         </DialogHeader>
 
         <div className="mt-4 rounded-xl border-2 border-primary/40 bg-primary/5 p-5">
@@ -164,23 +156,23 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
             <span className="font-semibold">Pro Plan</span>
           </div>
 
-          <div className="text-3xl font-bold mb-1">₺39.99</div>
-          <p className="text-xs text-muted-foreground mb-4">Sonraki aylarda ₺299/ay olarak devam eder.</p>
+          <div className="text-3xl font-bold mb-1">₺99</div>
+          <p className="text-xs text-muted-foreground mb-4">Tek seferlik ödeme. Otomatik yenileme yok.</p>
 
           <ul className="text-sm text-muted-foreground space-y-1 mb-5">
             <li>✓ Sınırsız indirme ({downloadFormat.toUpperCase()})</li>
             <li>✓ Tüm şablonlar</li>
-            <li>✓ AI ATS optimizasyonu</li>
+            <li>✓ 3 adet AI ATS analizi</li>
             <li>✓ Öncelikli destek</li>
           </ul>
 
           <Button
             className="w-full"
             disabled={loading !== null || !paddleReady}
-            onClick={() => startCheckout(PADDLE_PRO_PRICE_ID, PADDLE_FIRST_MONTH_DISCOUNT_ID)}
+            onClick={startCheckout}
           >
             {loading === "pro" ? <Loader2 className="size-4 mr-2 animate-spin" /> : <ArrowRight className="size-4 mr-2" />}
-            {paddleReady ? "Hemen Basla" : "Odeme sistemi hazirlaniyor..."}
+            {paddleReady ? "₺99 ile Satın Al" : "Odeme sistemi hazirlaniyor..."}
           </Button>
           </div>
         

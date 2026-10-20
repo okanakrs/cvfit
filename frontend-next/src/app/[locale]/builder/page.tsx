@@ -667,6 +667,13 @@ function CVBuilderPage() {
 
   useDraftSync(cvData, template, ready)
 
+  // Hesaba sabitlenmiş isim varsa CV'deki isim her zaman o olur (taslak/yükleme ezemez).
+  useEffect(() => {
+    const locked = profile?.locked_name
+    if (!ready || !locked) return
+    setCvData((prev) => (prev.personal.fullName === locked ? prev : { ...prev, personal: { ...prev.personal, fullName: locked } }))
+  }, [ready, profile?.locked_name, cvData.personal.fullName])
+
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     if (!ready) return
@@ -718,6 +725,22 @@ function CVBuilderPage() {
   async function doDownload(format: "pdf" | "docx") {
     setDownloading(true)
     try {
+      // Sunucu ödeme + isim kilidini doğrular; ilk indirmede isim hesaba sabitlenir.
+      const authFd = new FormData()
+      authFd.append("full_name", cvData.personal.fullName || "")
+      const authRes = await fetch(`${API_URL}/api/download/authorize`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${localStorage.getItem("cvfit_access_token") || ""}` },
+        body: authFd,
+      })
+      if (!authRes.ok) {
+        const err = await authRes.json().catch(() => ({}))
+        toast.error(typeof err?.detail === "string" ? err.detail : t("toast_download_error"))
+        if (authRes.status === 402) setPaymentOpen(true)
+        return
+      }
+      await refresh()
+
       if (format === "pdf") {
         const { pdf } = await import("@react-pdf/renderer")
         const { CVDocument } = await import("@/lib/pdf-templates")
@@ -878,6 +901,8 @@ function CVBuilderPage() {
                       placeholder={t("placeholder_name")}
                       className="text-base"
                       value={cvData.personal.fullName}
+                      disabled={!!profile?.locked_name}
+                      title={profile?.locked_name ? "İsim ilk indirmede sabitlenir ve değiştirilemez" : undefined}
                       onChange={(e) => {
                         const formatted = formatters.fullName(e.target.value)
                         updatePersonal("fullName", formatted)

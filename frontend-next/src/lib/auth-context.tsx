@@ -20,6 +20,7 @@ interface Profile {
   id: string
   plan: string
   free_credits: number
+  locked_name?: string | null
 }
 
 interface AuthState {

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Form, HTTPException, BackgroundTasks, Request, Header
 from typing import Optional
 from fastapi.responses import FileResponse
-import os, json, tempfile, subprocess, shutil, platform, logging
+import os, json, tempfile, subprocess, shutil, platform, logging, unicodedata
 
 logger = logging.getLogger(__name__)
 from reportlab.lib.pagesizes import A4
@@ -59,6 +59,82 @@ def parse_theme_renk(theme: str):
     renk = parts[1] if len(parts) > 1 and parts[1] in RENKLER else "mavi"
     return tema_adi, renk
 
+def _fold_name(name: str) -> str:
+    """Büyük/küçük harf, Türkçe karakter ve boşluk farklarını yok sayarak isim karşılaştırması için normalize eder."""
+    name = (name or "").replace("İ", "i").replace("I", "i").replace("ı", "i")
+    name = unicodedata.normalize("NFKD", name.lower())
+    name = "".join(ch for ch in name if not unicodedata.combining(ch))
+    return " ".join(name.split())
+
+
+def _service_client():
+    from supabase import create_client
+    return create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_ANON_KEY"))
+
+
+def _has_paid_access(user, profile) -> bool:
+    if (profile or {}).get("plan") == "pro":
+        return True
+    paid = _service_client().table("cv_downloads").select("id").eq("user_id", user.id).limit(1).execute()
+    return bool(paid.data)
+
+
+def _enforce_name_lock(user, profile, full_name: str):
+    """
+    İlk indirmede hesabın CV ismini sabitler (profiles.locked_name).
+    Sonraki indirmelerde farklı isim gelirse 403 döner.
+    """
+    display = " ".join((full_name or "").split())
+    if not _fold_name(display):
+        raise HTTPException(status_code=400, detail="CV'de ad soyad boş olamaz")
+
+    locked = (profile or {}).get("locked_name")
+    if locked:
+        if _fold_name(locked) != _fold_name(display):
+            raise HTTPException(
+                status_code=403,
+                detail=f"Bu hesapta CV ismi '{locked}' olarak sabitlenmiştir ve değiştirilemez.",
+            )
+        return locked
+
+    try:
+        # locked_name hala boşsa yaz: eşzamanlı iki istekte ilk yazan kazanır.
+        res = (
+            _service_client().table("profiles")
+            .update({"locked_name": display})
+            .eq("id", user.id)
+            .is_("locked_name", "null")
+            .execute()
+        )
+        if not res.data:
+            fresh = (
+                _service_client().table("profiles").select("locked_name").eq("id", user.id).single().execute().data
+            ) or {}
+            if _fold_name(fresh.get("locked_name") or "") != _fold_name(display):
+                raise HTTPException(status_code=403, detail="Bu hesapta CV ismi sabitlenmiştir ve değiştirilemez.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Name lock write failed: %s", e)
+        raise HTTPException(status_code=500, detail="İsim doğrulanamadı, lütfen tekrar deneyin")
+    return display
+
+
+@router.post("/api/download/authorize")
+async def authorize_download(request: Request, full_name: str = Form(...), authorization: Optional[str] = Header(None)):
+    """Tarayıcıda yapılan indirmeden önce çağrılır: ödeme + isim kilidi kontrolü."""
+    from routers.auth import get_user_from_token, get_user_profile
+    token = (authorization or "").replace("Bearer ", "").strip()
+    user = get_user_from_token(token) if token else None
+    if not user:
+        raise HTTPException(status_code=401, detail="İndirmek için giriş yapmanız gerekiyor")
+    profile = get_user_profile(user.id)
+    if not _has_paid_access(user, profile):
+        raise HTTPException(status_code=402, detail="İndirmek için ödeme yapmanız gerekiyor")
+    locked = _enforce_name_lock(user, profile, full_name)
+    return {"ok": True, "locked_name": locked}
+
+
 def _cleanup_file(path: str):
     try:
         os.unlink(path)
@@ -74,18 +150,13 @@ async def download_pdf(background_tasks: BackgroundTasks, request: Request, cv_t
     if not user:
         raise HTTPException(status_code=401, detail="İndirmek için giriş yapmanız gerekiyor")
     profile = get_user_profile(user.id)
-    plan = profile.get("plan", "free") if profile else "free"
-    if plan != "pro":
-        from supabase import create_client
-        import os
-        sb = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_ANON_KEY"))
-        paid = sb.table("cv_downloads").select("id").eq("user_id", user.id).limit(1).execute()
-        if not paid.data:
-            raise HTTPException(status_code=402, detail="İndirmek için ödeme yapmanız gerekiyor")
+    if not _has_paid_access(user, profile):
+        raise HTTPException(status_code=402, detail="İndirmek için ödeme yapmanız gerekiyor")
     try:
         cv = json.loads(cv_text)
     except Exception:
         cv = {"name": "CV", "summary": cv_text}
+    _enforce_name_lock(user, profile, cv.get("name", ""))
 
     register_fonts()
     tema_adi, renk = parse_theme_renk(theme)
@@ -113,18 +184,13 @@ async def download_docx(background_tasks: BackgroundTasks, request: Request, cv_
     if not user:
         raise HTTPException(status_code=401, detail="İndirmek için giriş yapmanız gerekiyor")
     profile = get_user_profile(user.id)
-    plan = profile.get("plan", "free") if profile else "free"
-    if plan != "pro":
-        from supabase import create_client
-        import os
-        sb = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_ANON_KEY"))
-        paid = sb.table("cv_downloads").select("id").eq("user_id", user.id).limit(1).execute()
-        if not paid.data:
-            raise HTTPException(status_code=402, detail="İndirmek için ödeme yapmanız gerekiyor")
+    if not _has_paid_access(user, profile):
+        raise HTTPException(status_code=402, detail="İndirmek için ödeme yapmanız gerekiyor")
     try:
         cv = json.loads(cv_text)
     except Exception:
         cv = {"name": "CV", "summary": cv_text}
+    _enforce_name_lock(user, profile, cv.get("name", ""))
 
     tema_adi, renk = parse_theme_renk(theme)
     cv_json = json.dumps(cv, ensure_ascii=False)

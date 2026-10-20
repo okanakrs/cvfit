@@ -57,13 +57,13 @@ export default function PricingPage() {
               <div className="rounded-xl border border-border bg-background px-4 md:px-5 py-4">
                 <div className="grid grid-cols-[1fr_auto] items-center gap-4">
                   <div className="min-w-0">
-                    <p className="font-semibold text-sm md:text-base">{t("first_month")}</p>
+                    <p className="font-semibold text-sm md:text-base">{t("one_time")}</p>
                     <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
                       {t("starting_price")}
                     </p>
                   </div>
                   <div className="text-right whitespace-nowrap tabular-nums">
-                    <span className="text-2xl md:text-3xl font-bold leading-none">₺39.99</span>
+                    <span className="text-2xl md:text-3xl font-bold leading-none">₺99</span>
                   </div>
                 </div>
               </div>
@@ -102,7 +102,7 @@ export default function PricingPage() {
       <section className="max-w-5xl mx-auto px-4 pb-20">
         <div className="rounded-2xl border border-border bg-card p-5 md:p-7 text-center">
           <p className="text-sm text-muted-foreground mb-4">
-            CVFit ile CV oluşturma, düzenleme, ATS analizi ve bulut kayıt tek abonelikte birleşir.
+            CVFit ile CV oluşturma, düzenleme, ATS analizi ve bulut kayıt tek seferlik ödemede birleşir.
           </p>
           <div className="flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
             {features.map((f) => (

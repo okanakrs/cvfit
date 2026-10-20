@@ -245,8 +245,8 @@ async def analyze_cv(
         plan = profile.get("plan", "free") if profile else "free"
         credits = profile.get("free_credits", 0) if profile else 0
 
-        if plan != "pro" and credits <= 0:
-            return JSONResponse({"error": "Kredi yetersiz"}, status_code=402)
+        if credits <= 0:
+            return JSONResponse({"error": "Analiz hakkınız bitti"}, status_code=402)
     else:
         return JSONResponse({"error": "Giriş yapılmamış"}, status_code=401)
 
@@ -337,9 +337,8 @@ JSON formatı:
     if new_score < original_score:
         new_score = original_score
 
-    # Kredi düş (pro değilse)
-    if plan != "pro":
-        supabase.table("profiles").update({"free_credits": credits - 1}).eq("id", user.id).execute()
+    # Kredi düş (pro dahil herkes için; paket 3 analiz hakkı verir)
+    supabase.table("profiles").update({"free_credits": credits - 1}).eq("id", user.id).execute()
 
     # Analizi kaydet
     try:
@@ -362,7 +361,7 @@ JSON formatı:
         "skill_match": cv_data.get("skill_match", {"matched": [], "missing": [], "bonus": []}),
         "section_scores": cv_data.get("section_scores", {}),
         "suggestions": cv_data.get("suggestions", []),
-        "remaining_credits": credits - 1 if plan != "pro" else 9999
+        "remaining_credits": credits - 1
     })
 
 
