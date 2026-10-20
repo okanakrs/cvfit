@@ -185,5 +185,18 @@
   },
   "language_switcher": {
     "label": "Language"
+  },
+  "ats_section": {
+    "eyebrow": "Before you apply",
+    "title": "Software may read your CV first",
+    "subtitle": "Many companies collect applications with an ATS (applicant tracking system) at the first stage. So your CV should not only look good, it should be read correctly.",
+    "card1_title": "It is turned into text first",
+    "card1_body": "ATS software parses your CV into text. Recruiters often see that parsed result rather than your original design.",
+    "card2_title": "Keywords stand out",
+    "card2_body": "Many systems rank or filter applications by matching skills and keywords from the job posting.",
+    "card3_title": "Complex layouts can cause trouble",
+    "card3_body": "Tables, multi-column layouts and text inside images may be misread by some systems. A simple structure is usually safer.",
+    "note": "The analysis helps you spot possible issues and missing keywords in your CV; it does not guarantee interviews or outcomes.",
+    "cta": "Run your first analysis free"
   }
 }

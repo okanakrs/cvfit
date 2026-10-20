@@ -185,5 +185,18 @@
   },
   "language_switcher": {
     "label": "Dil"
+  },
+  "ats_section": {
+    "eyebrow": "Başvurmadan önce",
+    "title": "CV'ni önce bir yazılım okuyabilir",
+    "subtitle": "Birçok şirket başvuruları ilk aşamada bir ATS (başvuru takip sistemi) ile toplar. Bu yüzden CV'nin yalnızca güzel görünmesi değil, doğru okunması da önemli.",
+    "card1_title": "Önce metne çevrilir",
+    "card1_body": "ATS yazılımları CV'ni metne ayrıştırır. İşe alım uzmanları çoğu zaman özgün tasarımını değil, bu ayrıştırılmış sonucu görür.",
+    "card2_title": "Anahtar kelimeler öne çıkar",
+    "card2_body": "Birçok sistem başvuruları ilandaki beceri ve anahtar kelimelerle eşleştirerek sıralar veya filtreler.",
+    "card3_title": "Karmaşık düzen sorun çıkarabilir",
+    "card3_body": "Tablolar, çok sütunlu yerleşimler ve görsel içindeki yazılar bazı sistemlerde yanlış okunabilir. Sade bir yapı genellikle daha güvenlidir.",
+    "note": "Analiz, CV'ndeki olası sorunları ve eksik anahtar kelimeleri görmene yardımcı olur; görüşme veya sonuç garantisi vermez.",
+    "cta": "İlk analizini ücretsiz yap"
   }
 }

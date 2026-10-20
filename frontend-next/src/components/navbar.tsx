@@ -3,7 +3,7 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Sun, Moon, LogOut, Sparkles, ChevronDown, Menu } from "lucide-react";
+import { Sun, Moon, LogOut, ChevronDown, Menu } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslations } from "next-intl";
@@ -69,15 +69,10 @@ export function Navbar() {
         {/* Nav links */}
         <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
           <Link href="/builder" className="nav-link">{t("build_cv")}</Link>
+          <Link href="/ats" className="nav-link">{t("ats_analysis")}</Link>
           <Link href="/how-it-works" className="nav-link">{t("how_it_works")}</Link>
           <Link href="/pricing" className="nav-link">{t("pricing")}</Link>
           <Link href="/blog" className="nav-link">{t("blog")}</Link>
-          {isPro && (
-            <Link href="/ats" className="nav-link flex items-center gap-1.5">
-              <Sparkles className="size-3.5 text-purple-500" />
-              {t("ats_analysis")}
-            </Link>
-          )}
         </nav>
 
         {/* Right side */}
@@ -93,6 +88,9 @@ export function Navbar() {
               <DropdownMenuItem onClick={() => router.push("/builder")}>
                 {t("build_cv")}
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/ats")}>
+                {t("ats_analysis")}
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push("/how-it-works")}>
                 {t("how_it_works")}
               </DropdownMenuItem>
@@ -102,14 +100,6 @@ export function Navbar() {
               <DropdownMenuItem onClick={() => router.push("/blog")}>
                 {t("blog")}
               </DropdownMenuItem>
-              {isPro && (
-                <DropdownMenuItem onClick={() => router.push("/ats")}>
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="size-3.5 text-purple-500" />
-                    {t("ats_analysis")}
-                  </span>
-                </DropdownMenuItem>
-              )}
             </DropdownMenuContent>
           </DropdownMenu>
 

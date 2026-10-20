@@ -49,6 +49,7 @@ export default function LandingPage() {
   const router = useRouter();
   const t = useTranslations("home");
   const tt = useTranslations("templates");
+  const ta = useTranslations("ats_section");
   useAuth();
 
   const TEMPLATES_PREVIEW = [
@@ -224,6 +225,72 @@ export default function LandingPage() {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── ATS Awareness ─────────────────────────────────────────── */}
+      <section className="relative overflow-hidden py-20 px-4 border-t border-border">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
+        <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-primary/10 blur-[110px]" />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.04] dark:opacity-[0.06]"
+          style={{
+            backgroundImage:
+              "linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+            maskImage:
+              "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+          }}
+        />
+        <div className="relative z-10 mx-auto max-w-4xl">
+          <div className="text-center mb-12">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">
+              {ta("eyebrow")}
+            </p>
+            <h2 className="text-2xl md:text-4xl font-bold tracking-tight mb-4">
+              {ta("title")}
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              {ta("subtitle")}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              { title: ta("card1_title"), body: ta("card1_body") },
+              { title: ta("card2_title"), body: ta("card2_body") },
+              { title: ta("card3_title"), body: ta("card3_body") },
+            ].map((c, i) => (
+              <div
+                key={c.title}
+                className="rounded-xl border border-border bg-background/80 backdrop-blur-sm p-5"
+              >
+                <div className="text-xs font-bold text-primary mb-2">
+                  {String(i + 1).padStart(2, "0")}
+                </div>
+                <h3 className="font-semibold mb-1.5">{c.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {c.body}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center">
+            <Button
+              size="lg"
+              className="h-12 px-8 gap-2 rounded-full shadow-lg shadow-primary/20"
+              onClick={() => router.push("/ats")}
+            >
+              {ta("cta")}
+              <ArrowRight className="size-4" />
+            </Button>
+            <p className="mt-4 text-xs text-muted-foreground max-w-md mx-auto">
+              {ta("note")}
+            </p>
           </div>
         </div>
       </section>

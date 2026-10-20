@@ -829,7 +829,7 @@ function CVBuilderPage() {
               <ZoomIn className="size-3.5 text-muted-foreground" />
             </button>
           </div>
-          {profile?.plan === "pro" && (
+          {user && (profile?.plan === "pro" || (profile?.free_credits ?? 0) > 0) && (
             <Button variant="outline" size="sm" onClick={() => setAtsOpen(true)}>
               <Sparkles className="size-4 mr-1.5 text-primary" />
               {t("ats_analysis")}

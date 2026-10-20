@@ -58,7 +58,7 @@ function DropZone({ file, onFile }: { file: File | null; onFile: (f: File) => vo
 
 export default function ATSPage() {
   const router = useRouter()
-  const { user, profile, loading } = useAuth()
+  const { user, profile, loading, login, refresh } = useAuth()
 
   const [file, setFile] = useState<File | null>(null)
   const [jobDesc, setJobDesc] = useState("")
@@ -72,7 +72,7 @@ export default function ATSPage() {
     </div>
   )
 
-  if (!user || profile?.plan !== "pro") return (
+  if (!user) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 p-8 text-center">
       <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center">
         <Sparkles className="size-8 text-primary" />
@@ -80,7 +80,23 @@ export default function ATSPage() {
       <div>
         <h1 className="text-2xl font-bold mb-2">ATS Optimizasyonu</h1>
         <p className="text-muted-foreground max-w-md">
-          Bu özellik yalnızca Pro kullanıcılara açıktır. CV&apos;nizi yapay zeka ile analiz edin.
+          ATS analizi için giriş yap, ilk analiz ücretsiz. CV&apos;nizi yapay zeka ile analiz edin.
+        </p>
+      </div>
+      <Button onClick={() => login()}>Giriş Yap</Button>
+    </div>
+  )
+
+  const credits = profile?.free_credits ?? 0
+  if (credits <= 0 && !analyzing) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 p-8 text-center">
+      <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+        <Sparkles className="size-8 text-primary" />
+      </div>
+      <div>
+        <h1 className="text-2xl font-bold mb-2">Analiz hakkın bitti</h1>
+        <p className="text-muted-foreground max-w-md">
+          Ücretsiz analiz hakkını kullandın. Yeni analizler için bir paket seçebilirsin.
         </p>
       </div>
       <Button onClick={() => router.push("/pricing")}>Planı Gör</Button>
@@ -133,6 +149,7 @@ export default function ATSPage() {
 
       const resultId = crypto.randomUUID()
       sessionStorage.setItem(`analysis_${resultId}`, JSON.stringify(data))
+      void refresh()
       router.push(`/result/${resultId}`)
     } catch (e) {
       setError(e instanceof Error ? `Sunucuya bağlanılamadı: ${e.message}` : "Sunucuya bağlanılamadı.")
@@ -149,6 +166,7 @@ export default function ATSPage() {
         </div>
         <h1 className="text-3xl font-bold tracking-tight">ATS Analizi</h1>
         <p className="mt-2 text-muted-foreground">CV&apos;nizi yükleyin, iş ilanıyla karşılaştırın</p>
+        <p className="mt-1 text-sm font-medium text-primary">Kalan analiz hakkın: {credits}</p>
       </div>
 
       <div className="space-y-5">

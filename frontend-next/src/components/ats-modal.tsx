@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Loader2, Sparkles, AlertCircle, Check, X, Star, ArrowRight, RotateCcw } from "lucide-react"
 import type { CVData } from "@/types/cv"
+import { Link } from "@/navigation"
+import { useAuth } from "@/lib/auth-context"
 
 interface ATSModalProps {
   open: boolean
@@ -55,9 +57,12 @@ export function ATSModal({ open, onClose, cvData, onTransfer }: ATSModalProps) {
   const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState("")
   const [result, setResult] = useState<AnalysisResult | null>(null)
+  const [noCredits, setNoCredits] = useState(false)
+  const { refresh } = useAuth()
 
   async function handleAnalyze() {
     setError("")
+    setNoCredits(false)
     if (!jobDesc.trim()) { setError("Lütfen iş ilanını girin."); return }
     const token = localStorage.getItem("cvfit_access_token")
     if (!token) { setError("Analiz için giriş yapmanız gerekiyor."); return }
@@ -84,6 +89,7 @@ export function ATSModal({ open, onClose, cvData, onTransfer }: ATSModalProps) {
       }
 
       if (!res.ok) {
+        if (res.status === 402) setNoCredits(true)
         setError(
           typeof data.error === "string"
             ? data.error
@@ -112,6 +118,7 @@ export function ATSModal({ open, onClose, cvData, onTransfer }: ATSModalProps) {
       }
 
       setResult(data as unknown as AnalysisResult)
+      void refresh()
     } catch (e) {
       setError(e instanceof Error ? `Sunucuya bağlanılamadı: ${e.message}` : "Sunucuya bağlanılamadı.")
     } finally {
@@ -175,7 +182,14 @@ export function ATSModal({ open, onClose, cvData, onTransfer }: ATSModalProps) {
             {error && (
               <div className="flex items-start gap-2 rounded-lg bg-destructive/10 border border-destructive/20 p-3">
                 <AlertCircle className="size-4 text-destructive shrink-0 mt-0.5" />
-                <p className="text-sm text-destructive">{error}</p>
+                <div className="space-y-2">
+                  <p className="text-sm text-destructive">{error}</p>
+                  {noCredits && (
+                    <Link href="/pricing" className="inline-block text-sm font-medium text-primary underline">
+                      Paketleri gör
+                    </Link>
+                  )}
+                </div>
               </div>
             )}
 
