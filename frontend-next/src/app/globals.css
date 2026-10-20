@@ -134,16 +134,34 @@
   }
 }
 
-/* ATS page: one-time scan over the sample CV */
+/* ATS page: one-time scan over the sample CV, colours follow light/dark theme */
+:root {
+  --ats-scan: #16a34a;
+  --ats-hit-bg: rgba(22, 163, 74, 0.18);
+  --ats-miss-fg: #b45309;
+  --ats-miss-bg: rgba(217, 119, 6, 0.12);
+  --ats-miss-border: rgba(217, 119, 6, 0.55);
+}
+.dark {
+  --ats-scan: #4ade80;
+  --ats-hit-bg: rgba(74, 222, 128, 0.22);
+  --ats-miss-fg: #fbbf24;
+  --ats-miss-bg: rgba(251, 191, 36, 0.12);
+  --ats-miss-border: rgba(251, 191, 36, 0.5);
+}
 @keyframes ats-scan {
   0% { top: 0; opacity: 0; }
-  8% { opacity: 1; }
-  92% { opacity: 1; }
+  6% { opacity: 1; }
+  94% { opacity: 1; }
   100% { top: 100%; opacity: 0; }
 }
-@keyframes ats-reveal {
-  from { opacity: 0.3; filter: grayscale(1); }
-  to { opacity: 1; filter: none; }
+@keyframes ats-mark {
+  from { background-color: transparent; }
+  to { background-color: var(--ats-hit-bg); }
+}
+@keyframes ats-miss {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: none; }
 }
 .ats-scanline {
   position: absolute;
@@ -151,16 +169,30 @@
   right: 0;
   top: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #16a34a, transparent);
-  box-shadow: 0 0 12px 2px rgba(22, 163, 74, 0.35);
-  animation: ats-scan 2.4s ease-in-out 0.4s 1 both;
+  background: linear-gradient(90deg, transparent, var(--ats-scan), transparent);
+  box-shadow: 0 0 14px 2px var(--ats-scan);
+  animation: ats-scan 3.2s ease-in-out 0.5s 1 both;
   pointer-events: none;
 }
-.ats-chip {
-  animation: ats-reveal 0.4s ease-out both;
-  animation-delay: calc(0.4s + var(--i, 0) * 0.35s);
+.ats-mark {
+  color: inherit;
+  border-radius: 4px;
+  padding: 0 3px;
+  margin: 0 -3px;
+  background-color: transparent;
+  animation: ats-mark 0.5s ease-out forwards;
+  animation-delay: calc(0.5s + var(--d, 0s));
+}
+.ats-miss {
+  color: var(--ats-miss-fg);
+  background-color: var(--ats-miss-bg);
+  border-color: var(--ats-miss-border);
+  opacity: 0;
+  animation: ats-miss 0.4s ease-out forwards;
+  animation-delay: calc(0.5s + var(--d, 0s));
 }
 @media (prefers-reduced-motion: reduce) {
   .ats-scanline { display: none; }
-  .ats-chip { animation: none; }
+  .ats-mark { animation: none; background-color: var(--ats-hit-bg); }
+  .ats-miss { animation: none; opacity: 1; }
 }
