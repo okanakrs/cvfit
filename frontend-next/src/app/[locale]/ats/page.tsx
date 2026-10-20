@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import { useRouter } from "@/navigation"
-import { FileText, Upload, Search, Loader2, Sparkles, Link } from "lucide-react"
+import { FileText, Upload, Search, Loader2, Sparkles, Link, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -56,6 +56,46 @@ function DropZone({ file, onFile }: { file: File | null; onFile: (f: File) => vo
   )
 }
 
+function ReaderPreview() {
+  const hits = ["Excel", "Raporlama", "Takım çalışması"]
+  const misses = ["SQL", "Power BI"]
+  let i = 0
+  return (
+    <figure className="m-0">
+      <div className="relative overflow-hidden rounded-xl border border-border bg-white p-5 text-neutral-900 shadow-sm" aria-hidden="true">
+        <div className="ats-scanline" />
+        <div className="h-3 w-36 rounded bg-neutral-800" />
+        <div className="mt-2 h-2 w-24 rounded bg-neutral-300" />
+        <div className="mt-5 space-y-2">
+          <div className="h-2 w-full rounded bg-neutral-200" />
+          <div className="h-2 w-11/12 rounded bg-neutral-200" />
+          <div className="h-2 w-4/5 rounded bg-neutral-200" />
+        </div>
+        <div className="mt-6 h-2 w-20 rounded bg-neutral-400" />
+        <div className="mt-3 flex flex-wrap gap-2">
+          {hits.map((k) => (
+            <span key={k} style={{ ["--i" as string]: i++ }} className="ats-chip inline-flex items-center gap-1 rounded-md border border-green-600/30 bg-green-50 px-2 py-1 text-xs font-medium text-green-800">
+              <Check className="size-3" />{k}
+            </span>
+          ))}
+          {misses.map((k) => (
+            <span key={k} style={{ ["--i" as string]: i++ }} className="ats-chip inline-flex items-center gap-1 rounded-md border border-dashed border-amber-600/50 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">
+              <X className="size-3" />{k}
+            </span>
+          ))}
+        </div>
+        <div className="mt-6 space-y-2">
+          <div className="h-2 w-full rounded bg-neutral-200" />
+          <div className="h-2 w-10/12 rounded bg-neutral-200" />
+        </div>
+      </div>
+      <figcaption className="mt-3 text-xs leading-relaxed text-muted-foreground">
+        ATS bir CV&apos;yi böyle okur: ilandaki anahtar kelimeleri arar, bulamadıklarını eksik sayar. Örnek gösterim, gerçek bir sonuç değildir.
+      </figcaption>
+    </figure>
+  )
+}
+
 export default function ATSPage() {
   const router = useRouter()
   const { user, profile, loading, login, refresh } = useAuth()
@@ -66,24 +106,19 @@ export default function ATSPage() {
   const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState("")
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <Loader2 className="size-8 animate-spin text-muted-foreground" />
-    </div>
-  )
+  // Giriş yapmadan kullanılamaz: doğrudan giriş sayfasına yönlendir, sonra buraya dön.
+  useEffect(() => {
+    if (loading || user) return
+    try { sessionStorage.setItem("cvfit_post_login_redirect", "/ats") } catch { /* ignore */ }
+    login()
+  }, [loading, user, login])
 
-  if (!user) return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 p-8 text-center">
-      <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-        <Sparkles className="size-8 text-primary" />
-      </div>
-      <div>
-        <h1 className="text-2xl font-bold mb-2">ATS Optimizasyonu</h1>
-        <p className="text-muted-foreground max-w-md">
-          ATS analizi için giriş yap, ilk analiz ücretsiz. CV&apos;nizi yapay zeka ile analiz edin.
-        </p>
-      </div>
-      <Button onClick={() => login()}>Giriş Yap</Button>
+  if (loading || !user) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center">
+      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      {!loading && !user && (
+        <p className="text-sm text-muted-foreground">Giriş sayfasına yönlendiriliyorsun...</p>
+      )}
     </div>
   )
 
@@ -158,62 +193,80 @@ export default function ATSPage() {
     }
   }
 
+  const isFirstFree = profile?.plan !== "pro" && credits === 1
+
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <div className="mb-10 text-center">
-        <div className="inline-flex items-center justify-center size-12 rounded-2xl bg-primary/10 mb-4">
-          <Sparkles className="size-6 text-primary" />
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight">ATS Analizi</h1>
-        <p className="mt-2 text-muted-foreground">CV&apos;nizi yükleyin, iş ilanıyla karşılaştırın</p>
-        <p className="mt-1 text-sm font-medium text-primary">Kalan analiz hakkın: {credits}</p>
-      </div>
-
-      <div className="space-y-5">
-        {/* PDF Upload */}
+    <main className="mx-auto max-w-6xl px-4 py-10 md:py-16">
+      <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-16">
         <div>
-          <label className="text-sm font-medium mb-2 block">CV Dosyası</label>
-          <DropZone file={file} onFile={setFile} />
+          <p className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium">
+            <Sparkles className="size-3.5" />
+            {isFirstFree ? "İlk analizin ücretsiz" : `Kalan analiz hakkın: ${credits}`}
+          </p>
+          <h1 className="mt-4 max-w-xl text-3xl font-semibold tracking-tight text-balance md:text-5xl md:leading-[1.08]">
+            CV&apos;n ATS filtresini geçiyor mu?
+          </h1>
+          <p className="mt-4 max-w-lg text-base leading-relaxed text-muted-foreground">
+            CV&apos;ni ve başvurmak istediğin ilanı ver. Uyum puanını, eksik anahtar kelimeleri ve ilana göre düzenlenmiş CV&apos;ni alırsın.
+          </p>
+
+          <div className="mt-8 max-w-xl space-y-7">
+            <div>
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium">
+                <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-[11px] font-semibold text-background">1</span>
+                CV dosyanı yükle
+              </label>
+              <DropZone file={file} onFile={setFile} />
+            </div>
+
+            <div>
+              <label className="mb-2 flex items-center gap-2 text-sm font-medium">
+                <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-[11px] font-semibold text-background">2</span>
+                İş ilanını yapıştır
+              </label>
+              <Textarea
+                placeholder="İş ilanını buraya yapıştırın. Ne kadar detaylı olursa analiz o kadar isabetli olur."
+                className="min-h-[160px] resize-none bg-card"
+                value={jobDesc}
+                onChange={(e) => setJobDesc(e.target.value)}
+              />
+              <label className="mb-1.5 mt-4 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <Link className="size-3.5" />
+                veya ilan linki (opsiyonel)
+              </label>
+              <Input
+                placeholder="https://kariyer.net/is-ilani/..."
+                className="bg-card"
+                value={jobUrl}
+                onChange={(e) => setJobUrl(e.target.value)}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">Metin ve link varsa metin öncelikli kullanılır.</p>
+            </div>
+
+            {error && <p className="text-sm text-destructive">{error}</p>}
+
+            <div>
+              <Button
+                className="h-12 w-full text-base"
+                disabled={!file || (!jobDesc.trim() && !jobUrl.trim()) || analyzing}
+                onClick={handleAnalyze}
+              >
+                {analyzing ? (
+                  <><Loader2 className="mr-2 size-4 animate-spin" />Analiz ediliyor, birkaç saniye sürebilir</>
+                ) : (
+                  <><Search className="mr-2 size-4" />{isFirstFree ? "İlk analizimi ücretsiz yap" : "Analiz et"}</>
+                )}
+              </Button>
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                Analiz olası sorunları görmene yardımcı olur; görüşme veya sonuç garantisi vermez.
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Job description */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">İş İlanı Metni</label>
-          <Textarea
-            placeholder="İş ilanını buraya yapıştırın — ne kadar detaylı olursa analiz o kadar isabetli olur..."
-            className="min-h-[160px] resize-none"
-            value={jobDesc}
-            onChange={(e) => setJobDesc(e.target.value)}
-          />
-        </div>
-
-        {/* Job URL */}
-        <div>
-          <label className="text-sm font-medium mb-2 flex items-center gap-1.5">
-            <Link className="size-3.5" />
-            İş İlanı Linki (opsiyonel)
-          </label>
-          <Input
-            placeholder="https://kariyer.net/is-ilani/..."
-            value={jobUrl}
-            onChange={(e) => setJobUrl(e.target.value)}
-          />
-          <p className="text-xs text-muted-foreground mt-1">Metin ve link varsa metin öncelikli kullanılır.</p>
-        </div>
-
-        {error && <p className="text-sm text-destructive">{error}</p>}
-
-        <Button
-          className="w-full h-12"
-          disabled={!file || (!jobDesc.trim() && !jobUrl.trim()) || analyzing}
-          onClick={handleAnalyze}
-        >
-          {analyzing ? (
-            <><Loader2 className="mr-2 size-4 animate-spin" />Analiz Ediliyor...</>
-          ) : (
-            <><Search className="mr-2 size-4" />Analiz Et</>
-          )}
-        </Button>
+        <aside className="lg:sticky lg:top-24">
+          <ReaderPreview />
+        </aside>
       </div>
     </main>
   )
