@@ -276,8 +276,7 @@
   if (accessToken) {
     localStorage.setItem("cvfit_access_token", accessToken);
     localStorage.setItem("cvfit_refresh_token", refreshToken || "");
-    setSuccess();
-    setTimeout(() => { window.location.href = getRedirect(); }, 1000);
+    window.location.replace(getRedirect());
   } else if (serverError && serverError !== "None") {
     setError(serverError);
     setTimeout(() => { window.location.href = "/"; }, 3000);
@@ -287,8 +286,7 @@
       if (token) {
         localStorage.setItem("cvfit_access_token", token);
         localStorage.setItem("cvfit_refresh_token", getFragmentParam("refresh_token") || "");
-        setSuccess();
-        setTimeout(() => { window.location.href = getRedirect(); }, 1000);
+        window.location.replace(getRedirect());
       } else {
         setError("Token bulunamadı. Tekrar deneyin.");
         setTimeout(() => { window.location.href = "/"; }, 3000);
