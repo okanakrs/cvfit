@@ -12,9 +12,9 @@ SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 PADDLE_API_KEY    = os.getenv("PADDLE_API_KEY")
 PADDLE_WEBHOOK_SECRET = os.getenv("PADDLE_WEBHOOK_SECRET", "")
 
-# Tek seferlik 99 TL paket (Paddle'da one-time price olmalı, abonelik değil)
+# Tek seferlik 99,99 TL paket (Paddle'da one-time price olmalı, abonelik değil)
 PADDLE_PRO_PRICE_ID = os.getenv("PADDLE_PRO_PRICE_ID", "")
-PRO_AMOUNT = 9900  # kuruş
+PRO_AMOUNT = 9999  # kuruş
 PRO_ANALYSIS_CREDITS = 3  # pakete dahil AI analiz hakkı
 
 PADDLE_API_BASE = "https://api.paddle.com"

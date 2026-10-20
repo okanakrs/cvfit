@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Loader2, CheckCircle2, FileDown, ArrowRight } from "lucide-react"
+import { Loader2, CheckCircle2, Check, Lock } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "@/lib/auth-context"
 
@@ -142,40 +142,62 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
     )
   }
 
+  const perks = [
+    `PDF ve DOCX olarak sınırsız indirme`,
+    "12 şablonun hepsi",
+    "3 AI ATS analizi, ilana göre eksik anahtar kelimeler",
+  ]
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">CV&apos;nizi İndirin</DialogTitle>
-          <p className="text-muted-foreground text-sm">Tek seferlik ödeme, abonelik yok</p>
-        </DialogHeader>
+      <DialogContent className="max-w-md gap-0 overflow-hidden p-0">
+        <div className="px-6 pb-5 pt-6">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold tracking-tight">
+              {downloadFormat.toUpperCase()} indirmek için paketi al
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              CV&apos;n hazır. Tek ödemeyle indir, abonelik yok.
+            </p>
+          </DialogHeader>
 
-        <div className="mt-4 rounded-xl border-2 border-primary/40 bg-primary/5 p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <FileDown className="size-5 text-primary" />
-            <span className="font-semibold">Pro Plan</span>
+          <div className="mt-5 flex items-end justify-between gap-4 rounded-xl border border-border bg-muted/40 px-5 py-4">
+            <div>
+              <p className="text-sm font-medium">CVFit Paketi</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Tek seferlik, otomatik yenileme yok</p>
+            </div>
+            <p className="text-3xl font-semibold leading-none tracking-tight tabular-nums">₺99,99</p>
           </div>
 
-          <div className="text-3xl font-bold mb-1">₺99</div>
-          <p className="text-xs text-muted-foreground mb-4">Tek seferlik ödeme. Otomatik yenileme yok.</p>
-
-          <ul className="text-sm text-muted-foreground space-y-1 mb-5">
-            <li>✓ Sınırsız indirme ({downloadFormat.toUpperCase()})</li>
-            <li>✓ Tüm şablonlar</li>
-            <li>✓ 3 adet AI ATS analizi</li>
-            <li>✓ Öncelikli destek</li>
+          <ul className="mt-5 space-y-2.5">
+            {perks.map((perk) => (
+              <li key={perk} className="flex items-start gap-2.5 text-sm">
+                <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
+                  <Check className="size-2.5" strokeWidth={3} />
+                </span>
+                <span>{perk}</span>
+              </li>
+            ))}
           </ul>
+        </div>
 
+        <div className="border-t border-border bg-muted/30 px-6 py-4">
           <Button
-            className="w-full"
+            className="h-11 w-full text-sm font-medium"
             disabled={loading !== null || !paddleReady}
             onClick={startCheckout}
           >
-            {loading === "pro" ? <Loader2 className="size-4 mr-2 animate-spin" /> : <ArrowRight className="size-4 mr-2" />}
-            {paddleReady ? "₺99 ile Satın Al" : "Odeme sistemi hazirlaniyor..."}
+            {loading === "pro" ? (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            ) : (
+              <Lock className="mr-2 size-3.5" />
+            )}
+            {paddleReady ? "₺99,99 öde ve indir" : "Ödeme sistemi hazırlanıyor..."}
           </Button>
-          </div>
-        
+          <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
+            Ödeme Paddle ile güvenle alınır, kart bilgilerin bize ulaşmaz. CV&apos;ndeki isim ilk indirmede hesabına sabitlenir.
+          </p>
+        </div>
       </DialogContent>
     </Dialog>
   )

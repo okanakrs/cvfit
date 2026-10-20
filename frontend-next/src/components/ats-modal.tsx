@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress"
 import { Loader2, Sparkles, AlertCircle, Check, X, Star, ArrowRight, RotateCcw } from "lucide-react"
 import type { CVData } from "@/types/cv"
 import { Link } from "@/navigation"
+import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth-context"
 
 interface ATSModalProps {
@@ -58,7 +59,7 @@ export function ATSModal({ open, onClose, cvData, onTransfer }: ATSModalProps) {
   const [error, setError] = useState("")
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [noCredits, setNoCredits] = useState(false)
-  const { refresh } = useAuth()
+  const { refresh, profile } = useAuth()
 
   async function handleAnalyze() {
     setError("")
@@ -141,139 +142,151 @@ export function ATSModal({ open, onClose, cvData, onTransfer }: ATSModalProps) {
     onClose()
   }
 
-  const scoreColor = result
-    ? result.new_score >= 70 ? "text-green-500" : result.new_score >= 40 ? "text-yellow-500" : "text-red-500"
+  const scoreTone = result
+    ? result.new_score >= 70 ? "text-green-600 dark:text-green-400" : result.new_score >= 40 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"
     : ""
 
   const scoreLabel = result
-    ? result.new_score >= 70 ? "ATS'yi geçme ihtimali yüksek ✓" : result.new_score >= 40 ? "Orta uyumluluk" : "Düşük uyumluluk"
+    ? result.new_score >= 70 ? "ATS'yi geçme ihtimali yüksek" : result.new_score >= 40 ? "Orta uyumluluk, birkaç eksik var" : "Düşük uyumluluk, eksikleri tamamla"
     : ""
+
+  const credits = profile?.free_credits ?? 0
+  const gain = result ? result.new_score - result.original_score : 0
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="p-0 overflow-hidden" style={{ width: "92vw", maxWidth: "1100px", maxHeight: "90vh", display: "flex", flexDirection: "column" }}>
-        {/* Header */}
-        <div className="border-b border-border px-6 py-4 shrink-0">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base font-semibold">
-              <Sparkles className="size-4 text-primary" />
-              ATS Analizi
-            </DialogTitle>
-          </DialogHeader>
-        </div>
-
+      <DialogContent
+        className={cn(
+          "cv-form flex max-h-[90vh] w-[92vw] flex-col gap-0 overflow-hidden p-0",
+          result ? "sm:max-w-[960px]" : "sm:max-w-lg"
+        )}
+      >
         {!result ? (
-          /* ── Input view ── */
-          <div className="px-6 py-5 space-y-4">
-            <p className="text-sm text-muted-foreground">
-              CV&apos;niz otomatik olarak kullanılacak. Hedef iş ilanını yapıştırın.
-            </p>
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">İş İlanı</label>
-              <Textarea
-                placeholder="İş ilanının metnini buraya yapıştırın — ne kadar detaylı olursa analiz o kadar isabetli olur..."
-                rows={12}
-                value={jobDesc}
-                onChange={(e) => setJobDesc(e.target.value)}
-                className="resize-none text-sm"
-              />
+          <>
+            <div className="px-6 pb-5 pt-6">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-semibold tracking-tight">
+                  CV&apos;ni ilana göre analiz et
+                </DialogTitle>
+                <p className="text-sm text-muted-foreground">
+                  Mevcut CV&apos;n otomatik kullanılır. Başvuracağın ilanı yapıştır.
+                </p>
+              </DialogHeader>
+
+              <div className="mt-5">
+                <label htmlFor="ats-job" className="mb-1.5 block text-[13px] font-medium text-foreground/80">
+                  İş ilanı
+                </label>
+                <Textarea
+                  id="ats-job"
+                  placeholder="İlanın metnini buraya yapıştır. Ne kadar ayrıntılı olursa analiz o kadar isabetli olur."
+                  rows={10}
+                  value={jobDesc}
+                  onChange={(e) => setJobDesc(e.target.value)}
+                />
+              </div>
+
+              {error && (
+                <div className="mt-4 flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3">
+                  <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
+                  <div className="space-y-1.5">
+                    <p className="text-sm text-destructive">{error}</p>
+                    {noCredits && (
+                      <Link href="/pricing" className="inline-block text-sm font-medium underline underline-offset-4">
+                        Paketleri gör
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {error && (
-              <div className="flex items-start gap-2 rounded-lg bg-destructive/10 border border-destructive/20 p-3">
-                <AlertCircle className="size-4 text-destructive shrink-0 mt-0.5" />
-                <div className="space-y-2">
-                  <p className="text-sm text-destructive">{error}</p>
-                  {noCredits && (
-                    <Link href="/pricing" className="inline-block text-sm font-medium text-primary underline">
-                      Paketleri gör
-                    </Link>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <Button className="w-full h-11" disabled={analyzing || !jobDesc.trim()} onClick={handleAnalyze}>
-              {analyzing
-                ? <><Loader2 className="size-4 mr-2 animate-spin" />Analiz Ediliyor...</>
-                : <><Sparkles className="size-4 mr-2" />Analiz Et</>}
-            </Button>
-          </div>
+            <div className="border-t border-border bg-muted/30 px-6 py-4">
+              <Button className="h-11 w-full text-sm font-medium" disabled={analyzing || !jobDesc.trim()} onClick={handleAnalyze}>
+                {analyzing ? (
+                  <><Loader2 className="mr-2 size-4 animate-spin" />Analiz ediliyor, birkaç saniye sürebilir</>
+                ) : (
+                  <><Sparkles className="mr-2 size-3.5" />Analiz et</>
+                )}
+              </Button>
+              <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
+                Kalan analiz hakkın: {credits}. Analiz olası sorunları görmene yardımcı olur, sonuç garantisi vermez.
+              </p>
+            </div>
+          </>
         ) : (
-          /* ── Result view — two columns, no scroll ── */
-          <div className="flex flex-col flex-1 min-h-0">
-            {/* Score bar — full width */}
-            <div className="px-8 py-5 border-b border-border shrink-0 bg-muted/20">
-              <div className="flex items-center gap-10">
+          <>
+            <div className="shrink-0 px-6 pb-5 pt-6">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-semibold tracking-tight">Analiz sonucu</DialogTitle>
+                <p className="text-sm text-muted-foreground">{scoreLabel}</p>
+              </DialogHeader>
+
+              <div className="mt-5 flex items-center gap-5 rounded-xl border border-border bg-muted/40 px-5 py-4">
                 <div className="shrink-0">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-1">Önceki Skor</p>
-                  <p className="text-4xl font-bold text-muted-foreground">{result.original_score}<span className="text-2xl">%</span></p>
+                  <p className="text-xs text-muted-foreground">Önceki</p>
+                  <p className="text-2xl font-semibold leading-tight tabular-nums text-muted-foreground">%{result.original_score}</p>
                 </div>
-                <ArrowRight className="size-5 text-muted-foreground shrink-0" />
+                <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
                 <div className="shrink-0">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-1">Yeni Skor</p>
-                  <p className={`text-4xl font-bold ${scoreColor}`}>{result.new_score}<span className="text-2xl">%</span></p>
+                  <p className="text-xs text-muted-foreground">Yeni</p>
+                  <p className={cn("text-4xl font-semibold leading-none tracking-tight tabular-nums", scoreTone)}>%{result.new_score}</p>
                 </div>
-                <div className="flex-1">
-                  <Progress value={result.new_score} className="h-3 mb-2" />
-                  <p className="text-xs text-muted-foreground">{scoreLabel}</p>
+                <div className="min-w-0 flex-1">
+                  <Progress value={result.new_score} className="h-2" />
+                  {gain > 0 && <p className="mt-2 text-xs text-muted-foreground">+{gain} puan artış</p>}
                 </div>
               </div>
             </div>
 
-            {/* Two-column body */}
-            <div className="grid grid-cols-2 gap-0 divide-x divide-border flex-1 overflow-hidden" style={{ minHeight: 0 }}>
-              {/* Left column */}
-              <div className="px-5 py-4 space-y-5 overflow-y-auto">
-                {/* Added keywords */}
+            <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto border-t border-border md:grid-cols-2 md:divide-x md:divide-border">
+              <div className="space-y-6 px-6 py-5">
                 {result.added_keywords.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">Eklenen Anahtar Kelimeler</p>
+                  <section>
+                    <h3 className="mb-2.5 text-sm font-semibold">CV&apos;ne eklenen anahtar kelimeler</h3>
                     <div className="flex flex-wrap gap-1.5">
                       {result.added_keywords.map((kw) => (
                         <Badge key={kw} variant="secondary" className="gap-1.5 text-xs">
-                          <span className="size-1.5 rounded-full bg-green-500 shrink-0" />{kw}
+                          <span className="size-1.5 shrink-0 rounded-full bg-green-500" />{kw}
                         </Badge>
                       ))}
                     </div>
-                  </div>
+                  </section>
                 )}
 
-                {/* Suggestions */}
                 {result.suggestions.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">Öneriler</p>
-                    <ul className="space-y-2">
-                      {result.suggestions.map((s, i) => (
-                        <li key={i} className="flex gap-2.5 text-sm text-muted-foreground leading-relaxed">
-                          <span className="mt-2 size-1.5 rounded-full bg-primary shrink-0" />
-                          {s}
+                  <section>
+                    <h3 className="mb-2.5 text-sm font-semibold">Öneriler</h3>
+                    <ul className="space-y-2.5">
+                      {result.suggestions.map((sug, idx) => (
+                        <li key={idx} className="flex gap-2.5 text-sm leading-relaxed text-muted-foreground">
+                          <span className="mt-2 size-1.5 shrink-0 rounded-full bg-foreground/60" />
+                          {sug}
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </section>
                 )}
               </div>
 
-              {/* Right column — Skill map */}
-              <div className="px-5 py-4 overflow-y-auto">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Beceri Haritası</p>
-                <div className="space-y-4">
+              <div className="px-6 py-5">
+                <h3 className="mb-2.5 text-sm font-semibold">Beceri haritası</h3>
+                <div className="space-y-3">
                   {([
-                    { label: "Eşleşen", items: result.skill_match.matched, icon: <Check className="size-3.5 text-green-500" />, badgeCls: "border-green-500/30 text-green-700 dark:text-green-400 bg-green-500/10" },
-                    { label: "Eksik",   items: result.skill_match.missing, icon: <X    className="size-3.5 text-red-500"   />, badgeCls: "border-red-500/30 text-red-700 dark:text-red-400 bg-red-500/10" },
-                    { label: "Bonus",   items: result.skill_match.bonus,   icon: <Star className="size-3.5 text-blue-500"  />, badgeCls: "border-blue-500/30 text-blue-700 dark:text-blue-400 bg-blue-500/10" },
+                    { label: "Eşleşen", items: result.skill_match.matched, icon: <Check className="size-3.5 text-green-600 dark:text-green-400" />, badgeCls: "border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400" },
+                    { label: "İlanda var, CV'de yok", items: result.skill_match.missing, icon: <X className="size-3.5 text-red-600 dark:text-red-400" />, badgeCls: "border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400" },
+                    { label: "Ekstra becerilerin", items: result.skill_match.bonus, icon: <Star className="size-3.5 text-muted-foreground" />, badgeCls: "border-border bg-muted/50 text-muted-foreground" },
                   ] as const).map(({ label, items, icon, badgeCls }) => (
-                    <div key={label} className="rounded-xl border border-border bg-muted/20 p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-1.5 text-sm font-medium">{icon}{label}</div>
-                        <span className="text-xs text-muted-foreground font-semibold">{items.length}</span>
+                    <div key={label} className="rounded-xl border border-border/70 bg-muted/20 p-3.5">
+                      <div className="mb-2 flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-[13px] font-medium">{icon}{label}</div>
+                        <span className="text-xs tabular-nums text-muted-foreground">{items.length}</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
                         {items.map((item) => (
-                          <Badge key={item} variant="outline" className={`text-xs ${badgeCls}`}>{item}</Badge>
+                          <Badge key={item} variant="outline" className={cn("text-xs", badgeCls)}>{item}</Badge>
                         ))}
-                        {items.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
+                        {items.length === 0 && <span className="text-xs text-muted-foreground">Yok</span>}
                       </div>
                     </div>
                   ))}
@@ -281,17 +294,20 @@ export function ATSModal({ open, onClose, cvData, onTransfer }: ATSModalProps) {
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-2 px-6 py-4 border-t border-border shrink-0">
-              <Button className="flex-1 h-10" onClick={handleTransfer} disabled={!result.cv_data}>
-                <ArrowRight className="size-4 mr-2" />
-                Editöre Aktar
+            <div className="flex shrink-0 gap-2 border-t border-border bg-muted/30 px-6 py-4">
+              <Button className="h-11 flex-1 text-sm font-medium" onClick={handleTransfer} disabled={!result.cv_data}>
+                Düzenlenen CV&apos;yi editöre aktar
               </Button>
-              <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => { setResult(null); setJobDesc(""); setError("") }} title="Yeni analiz">
-                <RotateCcw className="size-4" />
+              <Button
+                variant="outline"
+                className="h-11 shrink-0 gap-2 text-sm"
+                onClick={() => { setResult(null); setJobDesc(""); setError("") }}
+              >
+                <RotateCcw className="size-3.5" />
+                Yeni analiz
               </Button>
             </div>
-          </div>
+          </>
         )}
       </DialogContent>
     </Dialog>

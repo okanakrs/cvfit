@@ -63,7 +63,7 @@ export default function PricingPage() {
                     </p>
                   </div>
                   <div className="text-right whitespace-nowrap tabular-nums">
-                    <span className="text-2xl md:text-3xl font-bold leading-none">₺99</span>
+                    <span className="text-2xl md:text-3xl font-bold leading-none">{t("price")}</span>
                   </div>
                 </div>
               </div>
