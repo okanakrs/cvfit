@@ -60,8 +60,7 @@
     "steel": "Steel Blue",
     "bordeaux": "Bordeaux",
     "navy": "Navy",
-    "teal": "Teal",
-    "amber": "Amber"
+    "teal": "Teal"
   },
   "pricing": {
     "title": "Pricing",
@@ -173,7 +172,6 @@
     "template_bordeaux_desc": "Dark red sidebar, photo",
     "template_navy_desc": "Dark navy sidebar, photo",
     "template_teal_desc": "Teal header, two-column",
-    "template_amber_desc": "Amber accent, two-column",
     "toast_upload_success": "Resume uploaded successfully!",
     "toast_upload_error": "Error uploading resume:",
     "toast_upload_pdf_only": "Please select a PDF file",
