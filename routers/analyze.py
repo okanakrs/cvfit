@@ -27,7 +27,7 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
 
 def get_match_score(cv: str, job: str) -> int:
     message = anthropic_client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-5-5",
         max_tokens=10,
         messages=[{
             "role": "user",
@@ -313,7 +313,7 @@ JSON formatı:
 }}"""
 
     message = anthropic_client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-5-5",
         max_tokens=4000,
         messages=[{"role": "user", "content": prompt}]
     )
