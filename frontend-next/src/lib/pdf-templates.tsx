@@ -43,6 +43,7 @@ export type TemplateKey =
   | "bordeaux"
   | "navy"
   | "teal"
+  | "amber"
 
 interface TemplateConfig {
   layout: "single" | "sidebar"
@@ -174,6 +175,14 @@ const CONFIGS: Record<TemplateKey, TemplateConfig> = {
     bodyColor: "#374151",
     mutedColor: "#6b7280",
     sectionBorderColor: "#99e6e6",
+  },
+  amber: {
+    layout: "single",
+    accentColor: "#d97706",
+    fontFamily: "Roboto",
+    bodyColor: "#44403c",
+    mutedColor: "#78716c",
+    sectionBorderColor: "#fde68a",
   },
 }
 
@@ -1584,6 +1593,118 @@ function TealPDF({ data, cfg }: { data: CVData; cfg: TemplateConfig }) {
   )
 }
 
+function AmberPDF({ data, cfg }: { data: CVData; cfg: TemplateConfig }) {
+  const p = data.personal
+  const s = StyleSheet.create({
+    page: { fontFamily: cfg.fontFamily, fontSize: 9, color: cfg.bodyColor },
+    header: { flexDirection: "row", paddingHorizontal: 28, paddingTop: 28, paddingBottom: 14, borderBottomWidth: 3, borderBottomColor: cfg.accentColor },
+    bar: { width: 5, backgroundColor: cfg.accentColor, marginRight: 12, borderRadius: 2 },
+    name: { fontSize: 24, fontWeight: 700, color: "#1c1917" },
+    title: { fontSize: 10, fontWeight: 700, color: cfg.accentColor, letterSpacing: 1.5, marginTop: 3 },
+    contact: { fontSize: 8, color: cfg.mutedColor, marginTop: 6 },
+    cols: { flexDirection: "row", flex: 1 },
+    main: { width: "64%", paddingHorizontal: 28, paddingVertical: 14 },
+    side: { flex: 1, backgroundColor: "#fffbeb", paddingHorizontal: 16, paddingVertical: 14 },
+    sHead: { fontSize: 9, fontWeight: 700, color: cfg.accentColor, letterSpacing: 1.5, marginTop: 4, marginBottom: 6 },
+    row: { flexDirection: "row", justifyContent: "space-between" },
+    pos: { fontSize: 10, fontWeight: 700, color: "#1c1917" },
+    company: { fontSize: 8.5, fontWeight: 700, color: cfg.accentColor },
+    muted: { fontSize: 8, color: cfg.mutedColor },
+    desc: { fontSize: 8.5, color: cfg.bodyColor, lineHeight: 1.5, marginTop: 2 },
+    barBg: { height: 3, borderRadius: 2, backgroundColor: "#fde68a", marginTop: 2, marginBottom: 5 },
+  })
+  const contacts = [p.email, p.phone, p.location, p.linkedin, p.website].filter(Boolean).join("   •   ")
+  return (
+    <Page size="A4" style={s.page}>
+      <View style={s.header}>
+        <View style={s.bar} />
+        <View style={{ flex: 1 }}>
+          <Text style={s.name}>{p.fullName || "Ad Soyad"}</Text>
+          {p.title ? <Text style={s.title}>{p.title.toUpperCase()}</Text> : null}
+          {contacts ? <Text style={s.contact}>{contacts}</Text> : null}
+        </View>
+      </View>
+      <View style={s.cols}>
+        <View style={s.main}>
+          {data.experience.length > 0 && (
+            <>
+              <Text style={s.sHead}>DENEYİM</Text>
+              {data.experience.map((exp) => (
+                <View key={exp.id} style={{ marginBottom: 9 }} wrap={false}>
+                  <View style={s.row}>
+                    <Text style={s.pos}>{exp.position}</Text>
+                    <Text style={s.muted}>{dateRange(exp.startDate, exp.endDate, exp.current)}</Text>
+                  </View>
+                  {exp.company ? <Text style={s.company}>{exp.company}</Text> : null}
+                  {exp.description ? <Text style={s.desc}>{exp.description}</Text> : null}
+                </View>
+              ))}
+            </>
+          )}
+          {data.education.length > 0 && (
+            <>
+              <Text style={[s.sHead, { marginTop: 10 }]}>EĞİTİM</Text>
+              {data.education.map((edu) => (
+                <View key={edu.id} style={{ marginBottom: 6 }} wrap={false}>
+                  <View style={s.row}>
+                    <Text style={s.pos}>{[edu.degree, edu.field].filter(Boolean).join(", ")}</Text>
+                    <Text style={s.muted}>{dateRange(edu.startDate, edu.endDate)}</Text>
+                  </View>
+                  {edu.school ? <Text style={s.muted}>{edu.school}</Text> : null}
+                  {edu.gpa ? <Text style={s.muted}>GPA: {edu.gpa}</Text> : null}
+                </View>
+              ))}
+            </>
+          )}
+        </View>
+        <View style={s.side}>
+          {p.summary ? (
+            <>
+              <Text style={s.sHead}>ÖZET</Text>
+              <Text style={[s.desc, { marginTop: 0, marginBottom: 8 }]}>{p.summary}</Text>
+            </>
+          ) : null}
+          {data.skills.length > 0 && (
+            <>
+              <Text style={s.sHead}>BECERİLER</Text>
+              {data.skills.map((sk) => (
+                <View key={sk.id}>
+                  <Text style={{ fontSize: 8.5, fontWeight: 700, color: "#1c1917" }}>{sk.name}</Text>
+                  <View style={s.barBg}>
+                    <View style={{ height: 3, borderRadius: 2, backgroundColor: cfg.accentColor, width: `${skillPct(sk.level)}%` }} />
+                  </View>
+                </View>
+              ))}
+            </>
+          )}
+          {data.languages.length > 0 && (
+            <>
+              <Text style={[s.sHead, { marginTop: 8 }]}>DİLLER</Text>
+              {data.languages.map((l) => (
+                <View key={l.id} style={[s.row, { marginBottom: 2 }]}>
+                  <Text style={{ fontSize: 8.5, fontWeight: 700, color: "#1c1917" }}>{l.name}</Text>
+                  <Text style={s.muted}>{l.level}</Text>
+                </View>
+              ))}
+            </>
+          )}
+          {data.certifications.length > 0 && (
+            <>
+              <Text style={[s.sHead, { marginTop: 8 }]}>SERTİFİKALAR</Text>
+              {data.certifications.map((c) => (
+                <View key={c.id} style={{ marginBottom: 4 }}>
+                  <Text style={{ fontSize: 8.5, fontWeight: 700, color: "#1c1917" }}>{c.name}</Text>
+                  <Text style={s.muted}>{[c.issuer, c.date].filter(Boolean).join(" · ")}</Text>
+                </View>
+              ))}
+            </>
+          )}
+        </View>
+      </View>
+    </Page>
+  )
+}
+
 /* ──────────────────────────────────────────────────────────────
    Public Document Generator
    ────────────────────────────────────────────────────────────── */
@@ -1604,6 +1725,7 @@ export function CVDocument({ data, template }: { data: CVData; template: Templat
       {template === "bordeaux" && <BordeauxPDF data={data} cfg={cfg} />}
       {template === "navy" && <NavyPDF data={data} cfg={cfg} />}
       {template === "teal" && <TealPDF data={data} cfg={cfg} />}
+      {template === "amber" && <AmberPDF data={data} cfg={cfg} />}
     </Document>
   )
 }

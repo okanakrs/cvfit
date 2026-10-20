@@ -39,6 +39,7 @@ import {
   BordeauxTemplate,
   NavyTemplate,
   TealTemplate,
+  AmberTemplate,
 } from "@/components/cv-templates"
 import {
   Plus,
@@ -75,11 +76,11 @@ import {
   COMMON_LANGUAGES,
 } from "@/lib/form-validation"
 
-type Template = "classic" | "modern" | "minimal" | "executive" | "creative" | "elegant" | "professional" | "tech" | "steel" | "bordeaux" | "navy" | "teal"
+type Template = "classic" | "modern" | "minimal" | "executive" | "creative" | "elegant" | "professional" | "tech" | "steel" | "bordeaux" | "navy" | "teal" | "amber"
 const genId = () => crypto.randomUUID()
 const TEMPLATE_VALUES = new Set<Template>([
   "classic", "modern", "minimal", "executive", "creative", "elegant",
-  "professional", "tech", "steel", "bordeaux", "navy", "teal",
+  "professional", "tech", "steel", "bordeaux", "navy", "teal", "amber",
 ])
 
 function parseTemplateParam(value: string | null): Template | null {
@@ -122,6 +123,30 @@ function MiniPreview({ template }: { template: Template }) {
             <div className="h-0.5 w-full bg-gray-200 rounded" />
             <div className="h-0.5 w-4/5 bg-gray-200 rounded" />
             <div className="h-0.5 w-full bg-gray-200 rounded" />
+          </div>
+        </div>
+      </div>
+    )
+  if (template === "amber")
+    return (
+      <div className="h-full">
+        <div className="flex px-1 pt-1.5 pb-1 border-b-2 border-[#d97706]">
+          <div className="w-0.5 mr-1 bg-[#d97706] rounded" />
+          <div>
+            <div className="h-1 w-8 bg-gray-700 rounded mb-0.5" />
+            <div className="h-0.5 w-5 bg-[#d97706]/60 rounded" />
+          </div>
+        </div>
+        <div className="flex h-full">
+          <div className="w-[64%] p-1 space-y-0.5">
+            <div className="h-0.5 w-full bg-gray-200 rounded" />
+            <div className="h-0.5 w-4/5 bg-gray-200 rounded" />
+            <div className="h-0.5 w-full bg-gray-200 rounded" />
+          </div>
+          <div className="flex-1 p-1 space-y-0.5 bg-amber-50">
+            <div className="h-0.5 w-4 bg-[#d97706]/50 rounded" />
+            <div className="h-0.5 w-full bg-amber-200 rounded" />
+            <div className="h-0.5 w-3/4 bg-amber-200 rounded" />
           </div>
         </div>
       </div>
@@ -366,6 +391,7 @@ function CVPreview({ data, template, zoom, previewRef, locale }: { data: CVData;
           {template === "bordeaux" && <BordeauxTemplate data={data} locale={locale} />}
           {template === "navy" && <NavyTemplate data={data} locale={locale} />}
           {template === "teal" && <TealTemplate data={data} locale={locale} />}
+          {template === "amber" && <AmberTemplate data={data} locale={locale} />}
         </div>
       </div>
     </div>
@@ -542,6 +568,7 @@ function CVBuilderPage() {
     { value: "bordeaux",     label: tt("bordeaux") },
     { value: "navy",         label: tt("navy") },
     { value: "teal",         label: tt("teal") },
+    { value: "amber",        label: tt("amber") },
   ]
 
   const [cvData, setCvData] = useState<CVData>(emptyCVData)

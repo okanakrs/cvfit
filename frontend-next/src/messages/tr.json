@@ -60,7 +60,8 @@
     "steel": "Çelik Mavi",
     "bordeaux": "Bordo",
     "navy": "Lacivert",
-    "teal": "Turkuaz"
+    "teal": "Turkuaz",
+    "amber": "Kehribar"
   },
   "pricing": {
     "title": "Fiyatlandırma",
@@ -172,6 +173,7 @@
     "template_bordeaux_desc": "Koyu kırmızı sidebar, fotoğraflı",
     "template_navy_desc": "Koyu lacivert sidebar, fotoğraflı",
     "template_teal_desc": "Teal header, iki kolon",
+    "template_amber_desc": "Kehribar aksan, iki kolon",
     "toast_upload_success": "CV başarıyla yüklendi!",
     "toast_upload_error": "CV yüklenirken hata:",
     "toast_upload_pdf_only": "Lütfen bir PDF dosyası seçin",
