@@ -166,7 +166,7 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
               <p className="text-sm font-medium">CVFit Paketi</p>
               <p className="mt-0.5 text-xs text-muted-foreground">Tek seferlik, otomatik yenileme yok</p>
             </div>
-            <p className="text-3xl font-semibold leading-none tracking-tight tabular-nums">₺99,99</p>
+            <p className="text-3xl font-semibold leading-none tracking-tight tabular-nums">₺139,99</p>
           </div>
 
           <ul className="mt-5 space-y-2.5">
@@ -192,7 +192,7 @@ export function PaymentModal({ open, onClose, sessionToken, downloadFormat, acce
             ) : (
               <Lock className="mr-2 size-3.5" />
             )}
-            {paddleReady ? "₺99,99 öde ve indir" : "Ödeme sistemi hazırlanıyor..."}
+            {paddleReady ? "₺139,99 öde ve indir" : "Ödeme sistemi hazırlanıyor..."}
           </Button>
           <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
             Ödeme Paddle ile güvenle alınır, kart bilgilerin bize ulaşmaz. CV&apos;ndeki isim ilk indirmede hesabına sabitlenir.
