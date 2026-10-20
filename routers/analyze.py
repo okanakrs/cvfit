@@ -25,10 +25,15 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
     return text
 
 
+def response_text(message) -> str:
+    """Join the text blocks of a reply; newer models may put a thinking block first."""
+    return "".join(b.text for b in message.content if getattr(b, "type", "") == "text").strip()
+
+
 def get_match_score(cv: str, job: str) -> int:
     message = anthropic_client.messages.create(
         model="claude-sonnet-5-5",
-        max_tokens=10,
+        max_tokens=256,
         messages=[{
             "role": "user",
             "content": f"""Bu CV ile is ilani arasindaki anahtar kelime esleme yuzdesini hesapla.
@@ -42,7 +47,7 @@ Is Ilani:
         }]
     )
     try:
-        return int(''.join(filter(str.isdigit, message.content[0].text.strip()))[:3])
+        return int(''.join(filter(str.isdigit, response_text(message)))[:3])
     except Exception:
         return 0
 
@@ -314,11 +319,11 @@ JSON formatı:
 
     message = anthropic_client.messages.create(
         model="claude-sonnet-5-5",
-        max_tokens=4000,
+        max_tokens=8000,
         messages=[{"role": "user", "content": prompt}]
     )
 
-    raw = message.content[0].text.strip()
+    raw = response_text(message)
     # JSON bloğunu temizle
     raw = re.sub(r'^```json\s*', '', raw)
     raw = re.sub(r'^```\s*', '', raw)
