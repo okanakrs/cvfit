@@ -27,10 +27,10 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div className={cn('space-y-1.5', className)}>
-      <label className="text-sm font-medium">
+      <label className="text-[13px] font-medium text-foreground/80">
         {label}
-        {required && <span className="text-destructive ml-1">*</span>}
-        {optional && <span className="text-muted-foreground text-xs ml-1">{optionalLabel}</span>}
+        {required && <span className="text-destructive ml-0.5">*</span>}
+        {optional && <span className="text-muted-foreground/70 text-xs font-normal ml-1.5">{optionalLabel}</span>}
       </label>
 
       {children}

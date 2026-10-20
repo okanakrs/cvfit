@@ -849,7 +849,7 @@ function CVBuilderPage() {
       {/* Content */}
       <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
         {/* Left Panel */}
-        <div className="w-full overflow-y-auto p-4 space-y-4 lg:w-[52%] lg:p-6">
+        <div className="cv-form w-full overflow-y-auto p-4 space-y-3 lg:w-[52%] lg:p-6">
           <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCVUpload(f); e.target.value = "" }} />
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -862,8 +862,8 @@ function CVBuilderPage() {
           {/* Kişisel Bilgiler */}
           <Collapsible open={openSections.personal} onOpenChange={toggle("personal")}>
             <Card>
-              <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg">
-                <div className="flex items-center gap-2 text-sm font-medium">
+              <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-3.5 text-left hover:bg-muted/40 transition-colors rounded-t-xl">
+                <div className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight">
                   <User className="size-4 text-muted-foreground" />
                   {t("personal_info")}
                 </div>
@@ -871,7 +871,7 @@ function CVBuilderPage() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <Separator />
-                <CardContent className="p-4 space-y-4">
+                <CardContent className="px-5 py-5 space-y-5">
                   <div className="flex items-center gap-3">
                     <div className="w-14 h-14 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0 border border-border">
                       {cvData.personal.photo ? (
@@ -1037,8 +1037,8 @@ function CVBuilderPage() {
           {/* Deneyim */}
           <Collapsible open={openSections.experience} onOpenChange={toggle("experience")}>
             <Card>
-              <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg">
-                <div className="flex items-center gap-2 text-sm font-medium">
+              <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-3.5 text-left hover:bg-muted/40 transition-colors rounded-t-xl">
+                <div className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight">
                   <Briefcase className="size-4 text-muted-foreground" />
                   {t("experience")}
                   {cvData.experience.length > 0 && <span className="text-xs text-muted-foreground">({cvData.experience.length})</span>}
@@ -1047,7 +1047,7 @@ function CVBuilderPage() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <Separator />
-                <CardContent className="p-4 space-y-4">
+                <CardContent className="px-5 py-5 space-y-5">
                   {cvData.experience.map((exp) => {
                     const dateRangeError = exp.startDate && exp.endDate && !exp.current
                       ? compareMonthYears(exp.startDate, exp.endDate) > 0
@@ -1058,7 +1058,7 @@ function CVBuilderPage() {
                     const errorId = `exp_dates_${exp.id}`
                     
                     return (
-                      <div key={exp.id} className="relative space-y-3 rounded-lg border border-border p-4">
+                      <div key={exp.id} className="relative space-y-4 rounded-xl border border-border/70 bg-muted/20 p-4">
                         <Button variant="ghost" size="icon-xs" className="absolute top-3 right-3 text-destructive hover:text-destructive" onClick={() => removeExperience(exp.id)}>
                           <Trash2 className="size-3.5" />
                         </Button>
@@ -1149,8 +1149,8 @@ function CVBuilderPage() {
           {/* Eğitim */}
           <Collapsible open={openSections.education} onOpenChange={toggle("education")}>
             <Card>
-              <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg">
-                <div className="flex items-center gap-2 text-sm font-medium">
+              <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-3.5 text-left hover:bg-muted/40 transition-colors rounded-t-xl">
+                <div className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight">
                   <GraduationCap className="size-4 text-muted-foreground" />
                   {t("education")}
                   {cvData.education.length > 0 && <span className="text-xs text-muted-foreground">({cvData.education.length})</span>}
@@ -1159,7 +1159,7 @@ function CVBuilderPage() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <Separator />
-                <CardContent className="p-4 space-y-4">
+                <CardContent className="px-5 py-5 space-y-5">
                   {cvData.education.map((edu) => {
                     const dateRangeError = edu.startDate && edu.endDate
                       ? parseInt(edu.startDate) > parseInt(edu.endDate)
@@ -1168,7 +1168,7 @@ function CVBuilderPage() {
                       : undefined
                     
                     return (
-                      <div key={edu.id} className="relative space-y-3 rounded-lg border border-border p-4">
+                      <div key={edu.id} className="relative space-y-4 rounded-xl border border-border/70 bg-muted/20 p-4">
                         <Button variant="ghost" size="icon-xs" className="absolute top-3 right-3 text-destructive hover:text-destructive" onClick={() => removeEducation(edu.id)}>
                           <Trash2 className="size-3.5" />
                         </Button>
@@ -1277,8 +1277,8 @@ function CVBuilderPage() {
           {/* Beceriler */}
           <Collapsible open={openSections.skills} onOpenChange={toggle("skills")}>
             <Card>
-              <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg">
-                <div className="flex items-center gap-2 text-sm font-medium">
+              <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-3.5 text-left hover:bg-muted/40 transition-colors rounded-t-xl">
+                <div className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight">
                   <Wrench className="size-4 text-muted-foreground" />
                   {t("skills")}
                   {cvData.skills.length > 0 && <span className="text-xs text-muted-foreground">({cvData.skills.length})</span>}
@@ -1287,7 +1287,7 @@ function CVBuilderPage() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <Separator />
-                <CardContent className="p-4 space-y-4">
+                <CardContent className="px-5 py-5 space-y-5">
                   <FormField label={fieldCopy.skillSection} optional optionalLabel={fieldCopy.optional}>
                     <SkillTagInput
                       skills={cvData.skills}
@@ -1308,8 +1308,8 @@ function CVBuilderPage() {
           {/* Diller */}
           <Collapsible open={openSections.languages} onOpenChange={toggle("languages")}>
             <Card>
-              <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg">
-                <div className="flex items-center gap-2 text-sm font-medium">
+              <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-3.5 text-left hover:bg-muted/40 transition-colors rounded-t-xl">
+                <div className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight">
                   <Globe className="size-4 text-muted-foreground" />
                   {t("languages")}
                   {cvData.languages.length > 0 && <span className="text-xs text-muted-foreground">({cvData.languages.length})</span>}
@@ -1318,7 +1318,7 @@ function CVBuilderPage() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <Separator />
-                <CardContent className="p-4 space-y-4">
+                <CardContent className="px-5 py-5 space-y-5">
                   {cvData.languages.map((lang) => (
                     <div key={lang.id} className="flex flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row sm:items-center">
                       {/* Language with suggestions */}
@@ -1371,8 +1371,8 @@ function CVBuilderPage() {
           {/* Sertifikalar */}
           <Collapsible open={openSections.certifications} onOpenChange={toggle("certifications")}>
             <Card>
-              <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg">
-                <div className="flex items-center gap-2 text-sm font-medium">
+              <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-3.5 text-left hover:bg-muted/40 transition-colors rounded-t-xl">
+                <div className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight">
                   <Award className="size-4 text-muted-foreground" />
                   {t("certifications")}
                   {cvData.certifications.length > 0 && <span className="text-xs text-muted-foreground">({cvData.certifications.length})</span>}
@@ -1381,9 +1381,9 @@ function CVBuilderPage() {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <Separator />
-                <CardContent className="p-4 space-y-4">
+                <CardContent className="px-5 py-5 space-y-5">
                   {cvData.certifications.map((cert) => (
-                    <div key={cert.id} className="relative space-y-3 rounded-lg border border-border p-4">
+                    <div key={cert.id} className="relative space-y-4 rounded-xl border border-border/70 bg-muted/20 p-4">
                       <Button variant="ghost" size="icon-xs" className="absolute top-3 right-3 text-destructive hover:text-destructive" onClick={() => removeCertification(cert.id)}>
                         <Trash2 className="size-3.5" />
                       </Button>

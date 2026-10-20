@@ -156,10 +156,16 @@ export default function ATSPage() {
       <div>
         <h1 className="text-2xl font-bold mb-2">Analiz hakkın bitti</h1>
         <p className="text-muted-foreground max-w-md">
-          Ücretsiz analiz hakkını kullandın. Yeni analizler için bir paket seçebilirsin.
+          {profile?.plan === "pro"
+            ? "Paketine dahil analiz haklarının hepsini kullandın."
+            : "Ücretsiz analiz hakkını kullandın. Yeni analizler için bir paket seçebilirsin."}
         </p>
       </div>
-      <Button onClick={() => router.push("/pricing")}>Planı Gör</Button>
+      {profile?.plan === "pro" ? (
+        <Button onClick={() => router.push("/builder")}>CV Düzenleyiciye Dön</Button>
+      ) : (
+        <Button onClick={() => router.push("/pricing")}>Planı Gör</Button>
+      )}
     </div>
   )
 

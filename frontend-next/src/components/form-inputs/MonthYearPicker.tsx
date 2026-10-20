@@ -90,9 +90,6 @@ export function MonthYearPicker({
   return (
     <div className={cn('relative', className)}>
       <div className="relative">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-          <Calendar className="size-4" />
-        </div>
         <input
           type="text"
           value={value}
@@ -105,7 +102,7 @@ export function MonthYearPicker({
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            'flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 pl-9 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+            'flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 pr-10 text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
           )}
           maxLength={7}
         />

@@ -196,3 +196,49 @@
   .ats-mark { animation: none; background-color: var(--ats-hit-bg); }
   .ats-miss { animation: none; opacity: 1; }
 }
+
+/* Builder form panel: quiet, filled fields with a clear focus state (scoped, shared Input is untouched) */
+.cv-form input:not([type="file"]):not([type="checkbox"]):not([type="hidden"]),
+.cv-form textarea,
+.cv-form select {
+  background-color: color-mix(in oklab, var(--muted) 70%, transparent);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.cv-form input:not([type="file"]):not([type="checkbox"]):not([type="hidden"]) {
+  height: 42px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.cv-form textarea {
+  padding: 10px 12px;
+  line-height: 1.55;
+  resize: none;
+}
+.cv-form input::placeholder,
+.cv-form textarea::placeholder {
+  color: color-mix(in oklab, var(--muted-foreground) 70%, transparent);
+}
+.cv-form input:not([type="file"]):not([type="checkbox"]):hover,
+.cv-form textarea:hover {
+  border-color: var(--border);
+}
+.cv-form input:not([type="file"]):not([type="checkbox"]):focus-visible,
+.cv-form textarea:focus-visible,
+.cv-form select:focus-visible {
+  background-color: var(--background);
+  border-color: color-mix(in oklab, var(--foreground) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--foreground) 8%, transparent);
+  outline: none;
+}
+.cv-form input[aria-invalid="true"],
+.cv-form input:user-invalid {
+  border-color: var(--destructive);
+}
+.cv-form input:disabled,
+.cv-form textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
